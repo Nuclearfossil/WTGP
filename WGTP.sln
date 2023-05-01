@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "01_WindowsApp", "01_Windows
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "02_D3D11App", "02_D3D11App\02_D3D11App.vcxproj", "{5AF65130-924F-452F-BC80-6671E342584F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "03_BackBufferApp", "03_BackBufferApp\03_BackBufferApp.vcxproj", "{EA3DACB6-A16E-4C9D-8E35-8F53DC0E6F03}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{5AF65130-924F-452F-BC80-6671E342584F}.Release|x64.Build.0 = Release|x64
 		{5AF65130-924F-452F-BC80-6671E342584F}.Release|x86.ActiveCfg = Release|Win32
 		{5AF65130-924F-452F-BC80-6671E342584F}.Release|x86.Build.0 = Release|Win32
+		{EA3DACB6-A16E-4C9D-8E35-8F53DC0E6F03}.Debug|x64.ActiveCfg = Debug|x64
+		{EA3DACB6-A16E-4C9D-8E35-8F53DC0E6F03}.Debug|x64.Build.0 = Debug|x64
+		{EA3DACB6-A16E-4C9D-8E35-8F53DC0E6F03}.Debug|x86.ActiveCfg = Debug|Win32
+		{EA3DACB6-A16E-4C9D-8E35-8F53DC0E6F03}.Debug|x86.Build.0 = Debug|Win32
+		{EA3DACB6-A16E-4C9D-8E35-8F53DC0E6F03}.Release|x64.ActiveCfg = Release|x64
+		{EA3DACB6-A16E-4C9D-8E35-8F53DC0E6F03}.Release|x64.Build.0 = Release|x64
+		{EA3DACB6-A16E-4C9D-8E35-8F53DC0E6F03}.Release|x86.ActiveCfg = Release|Win32
+		{EA3DACB6-A16E-4C9D-8E35-8F53DC0E6F03}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
