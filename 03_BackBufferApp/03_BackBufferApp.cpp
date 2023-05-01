@@ -21,6 +21,7 @@ ID3D11Device* g_D3DDevice;
 ID3D11DeviceContext* g_D3DContext;
 ID3D11RenderTargetView* g_D3DRenderTargetView;
 float g_clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+double g_delta;
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -31,6 +32,7 @@ HRESULT CreateD3D11Context(ID3D11Device* device, ID3D11DeviceContext** context);
 HRESULT CreateD3D11DeviceAndContext(HWND hWnd, UINT width, UINT height, ID3D11Device** ppDevice, ID3D11DeviceContext** ppContext, IDXGISwapChain** ppSwapChain);
 HRESULT CreateRenderTargetView(ID3D11Device* device, ID3D11Texture2D* backBuffer, ID3D11RenderTargetView** renderTargetView);
 ID3D11Texture2D* GetBackBuffer(IDXGISwapChain* swapChain);
+void Update(double deltaInSeconds);
 void Render(ID3D11Device* device, ID3D11DeviceContext* context, IDXGISwapChain* swapChain, ID3D11RenderTargetView* renderTargetView);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
@@ -67,8 +69,19 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // Main message loop:
     MSG msg = { 0 };
 
+    LARGE_INTEGER current = { 0 };
+    LARGE_INTEGER lastStart = { 0 };
+	LARGE_INTEGER frequency = { 0 };
+	
+    ::QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&lastStart);
+
     while (msg.message != WM_QUIT)
     {
+        QueryPerformanceCounter(&current);
+
+		double deltaSeconds = static_cast<double>(current.QuadPart - lastStart.QuadPart) / frequency.QuadPart;
+
         if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
         {
             if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
@@ -78,7 +91,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             }
         }
 
+        // Let's throttle the application so that we render at a constant 
+        // speed, regardless of processor speed.
+        Update(deltaSeconds);
         Render(g_D3DDevice, g_D3DContext, g_SwapChain, g_D3DRenderTargetView);
+        lastStart = current;
     }
 
     g_D3DRenderTargetView->Release();
@@ -263,22 +280,26 @@ HRESULT CreateD3D11Context(ID3D11Device* device, ID3D11DeviceContext** context)
 	return S_OK;
 }
 
+void Update(double deltaInSeconds)
+{
+    static double desiredTime = 1.0f / 4.0f;
+	static double incrementor = desiredTime;
+	if (g_clearColor[2] > 1.0f)
+		incrementor = -1 * desiredTime;
+
+	if (g_clearColor[2] < 0.0f)
+		incrementor = desiredTime;
+
+	g_clearColor[2] += static_cast<float>(incrementor * deltaInSeconds);
+}
+
 void Render(
     ID3D11Device* device, 
     ID3D11DeviceContext* context, 
     IDXGISwapChain* swapChain, 
     ID3D11RenderTargetView* renderTargetView)
 {
-    static float incrementor = 0.01f;
-	if (g_clearColor[2] > 1.0f)
-        incrementor = -0.01f;
-
-    if (g_clearColor[2] < 0.0f)
-        incrementor = 0.01f;
-
-    g_clearColor[2] += incrementor;
-    
-	// Clear the back buffer to the clear color
+    // Clear the back buffer to the clear color
 	context->ClearRenderTargetView(renderTargetView, g_clearColor);
 
 	// Present the back buffer to the screen
