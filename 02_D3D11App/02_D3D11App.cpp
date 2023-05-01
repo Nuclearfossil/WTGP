@@ -82,8 +82,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     //{
     //    if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
     //    {
-    //        TranslateMessage(&msg);
-    //        DispatchMessage(&msg);
+    //        if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+    //        {
+				//TranslateMessage(&msg);
+				//DispatchMessage(&msg);
+    //        }
     //    }
 
     //    Render(g_D3DDevice, g_D3DContext, g_SwapChain, g_D3DRenderTargetView);
@@ -204,7 +207,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 
-HRESULT CreateD3D11DeviceAndContext(HWND hWnd, UINT width, UINT height, ID3D11Device** ppDevice, ID3D11DeviceContext** ppContext, IDXGISwapChain** ppSwapChain)
+HRESULT CreateD3D11DeviceAndContext(HWND hWnd, 
+    UINT width, 
+    UINT height, 
+    ID3D11Device** ppDevice, 
+    ID3D11DeviceContext** ppContext, 
+    IDXGISwapChain** ppSwapChain)
 {
 	HRESULT hr = S_OK;
 
@@ -221,14 +229,30 @@ HRESULT CreateD3D11DeviceAndContext(HWND hWnd, UINT width, UINT height, ID3D11De
 	swapChainDesc.SampleDesc.Count = 1;
 	swapChainDesc.SampleDesc.Quality = 0;
 	swapChainDesc.Windowed = TRUE;
-    swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+    swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
     swapChainDesc.Flags = 0;
 
 	// Create device, context, and swap chain
-	D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_11_0;
-	hr = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, &featureLevel, 1, D3D11_SDK_VERSION, &swapChainDesc, ppSwapChain, ppDevice, nullptr, ppContext);
+	D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_11_1;
+	hr = D3D11CreateDeviceAndSwapChain(
+        nullptr,                    // First Parameter
+        D3D_DRIVER_TYPE_HARDWARE,   // Second Parameter
+        nullptr,                    // Third Parameter
+        0,                          // Fourth Parameter - use D3D11_CREATE_DEVICE_DEBUG 
+                                    //                   if you want additional debug 
+                                    //                   spew in the console.
+        &featureLevel,              // Fifth Parameter
+        1,                          // Sixth Parameter
+        D3D11_SDK_VERSION,          // Seventh Parameter
+        &swapChainDesc,             // Eighth Parameter
+        ppSwapChain,                // Ninth Parameter
+        ppDevice,                   // Tenth Parameter
+        nullptr,                    // Eleventh Parameter
+        ppContext);                 // Twelfth Parameter
+
 	if (FAILED(hr))
 	{
+        // TODO: Add logging as to why this failed.
 		return hr;
 	}
 
@@ -250,7 +274,11 @@ HRESULT CreateD3D11Context(ID3D11Device* device, ID3D11DeviceContext** context)
 	return S_OK;
 }
 
-void Render(ID3D11Device* device, ID3D11DeviceContext* context, IDXGISwapChain* swapChain, ID3D11RenderTargetView* renderTargetView)
+void Render(
+    ID3D11Device* device, 
+    ID3D11DeviceContext* context, 
+    IDXGISwapChain* swapChain, 
+    ID3D11RenderTargetView* renderTargetView)
 {
     static float incrementor = 0.01f;
 	if (g_clearColor[2] > 1.0f)
