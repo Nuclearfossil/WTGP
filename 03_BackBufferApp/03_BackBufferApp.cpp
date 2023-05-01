@@ -67,30 +67,19 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // Main message loop:
     MSG msg = { 0 };
 
-    while (GetMessage(&msg, nullptr, 0, 0))
+    while (msg.message != WM_QUIT)
     {
-        if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+        if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
         {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
+            if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+            {
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+            }
         }
 
         Render(g_D3DDevice, g_D3DContext, g_SwapChain, g_D3DRenderTargetView);
     }
-
-    //while (msg.message != WM_QUIT)
-    //{
-    //    if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-    //    {
-    //        if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-    //        {
-				//TranslateMessage(&msg);
-				//DispatchMessage(&msg);
-    //        }
-    //    }
-
-    //    Render(g_D3DDevice, g_D3DContext, g_SwapChain, g_D3DRenderTargetView);
-    //}
 
     g_D3DRenderTargetView->Release();
     g_D3DContext->Release();
