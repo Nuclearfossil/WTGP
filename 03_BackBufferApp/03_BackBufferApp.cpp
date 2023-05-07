@@ -282,7 +282,7 @@ HRESULT CreateD3D11Context(ID3D11Device* device, ID3D11DeviceContext** context)
 
 void Update(double deltaInSeconds)
 {
-    static double desiredTime = 1.0f / 4.0f;
+    static double desiredTime = 1.0f / 4.0f; // 1 second / desired number of seconds
 	static double incrementor = desiredTime;
 	if (g_clearColor[2] > 1.0f)
 		incrementor = -1 * desiredTime;
@@ -290,6 +290,13 @@ void Update(double deltaInSeconds)
 	if (g_clearColor[2] < 0.0f)
 		incrementor = desiredTime;
 
+    // we want the range from 0 to 1 (and 1 to zero) to last for the desired number of seconds
+    // in order to do this, the deltaInSeconds tell us how long the last frame took to process
+    // we need to take that value and break it up based on our incrementor.
+    // so, if we want to measure how much of that 'time' to use in each second, we need to take
+    // the reciprocal of the desired number of seconds.
+    // eg: 1/4 means that in 1 second, we will have traveled .25 of the desired 'unit' of travel.
+    // in this case, we want that 'desired' unit of travel to be time.
 	g_clearColor[2] += static_cast<float>(incrementor * deltaInSeconds);
 }
 
