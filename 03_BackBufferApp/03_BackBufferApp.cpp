@@ -5,8 +5,10 @@
 #include "framework.h"
 #include "01_WindowsApp.h"
 #include <d3d11.h>
+#include <d3dcompiler.h>
 
 #pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "d3dcompiler.lib")
 
 #define MAX_LOADSTRING 100
 
@@ -21,7 +23,50 @@ ID3D11Device* g_D3DDevice;
 ID3D11DeviceContext* g_D3DContext;
 ID3D11RenderTargetView* g_D3DRenderTargetView;
 float g_clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+
 double g_delta;
+
+ID3D11VertexShader* g_vertexShader = nullptr;
+ID3D11PixelShader* g_pixelShader = nullptr;
+ID3D11InputLayout* g_inputLayout = nullptr;
+ID3D11Buffer* g_vertexBuffer = nullptr;
+UINT g_numVerts = 0;
+UINT g_stride = 0;
+UINT g_offset = 0;
+
+const char* vertexShaderSource =
+"struct VS_Input \
+{ \
+	float2 pos : POS; \
+	float4 color : COL; \
+}; \
+\
+struct VS_Output \
+{ \
+	float4 position : SV_POSITION; \
+	float4 color : COL; \
+}; \
+ \
+VS_Output vs_main(VS_Input input) \
+{ \
+	VS_Output output; \
+	output.position = float4(input.pos, 0.0f, 1.0f); \
+	output.color = input.color; \
+ \
+	return output; \
+}";
+
+const char* pixelShaderSource =
+"struct VS_Output \
+{ \
+	float4 position : SV_POSITION; \
+	float4 color : COL; \
+}; \
+ \
+float4 ps_main(VS_Output input) : SV_TARGET \
+{ \
+	return input.color; \
+}";
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -32,6 +77,9 @@ HRESULT CreateD3D11Context(ID3D11Device* device, ID3D11DeviceContext** context);
 HRESULT CreateD3D11DeviceAndContext(HWND hWnd, UINT width, UINT height, ID3D11Device** ppDevice, ID3D11DeviceContext** ppContext, IDXGISwapChain** ppSwapChain);
 HRESULT CreateRenderTargetView(ID3D11Device* device, ID3D11Texture2D* backBuffer, ID3D11RenderTargetView** renderTargetView);
 ID3D11Texture2D* GetBackBuffer(IDXGISwapChain* swapChain);
+
+HRESULT CreateD3DResources();
+
 void Update(double deltaInSeconds);
 void Render(ID3D11Device* device, ID3D11DeviceContext* context, IDXGISwapChain* swapChain, ID3D11RenderTargetView* renderTargetView);
 
@@ -65,6 +113,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		return -2;
 
     backBuffer->Release();
+
+    if (!SUCCEEDED(CreateD3DResources()))
+    {
+        return -3;
+    }
 
     // Main message loop:
     MSG msg = { 0 };
@@ -280,6 +333,112 @@ HRESULT CreateD3D11Context(ID3D11Device* device, ID3D11DeviceContext** context)
 	return S_OK;
 }
 
+HRESULT CreateD3DResources()
+{
+    // compile and load the Vertex Shader
+    ID3DBlob* vsBlob;
+    {
+        ID3DBlob* shaderCompileErrorBlob;
+        if (!SUCCEEDED(D3DCompile(vertexShaderSource, strlen(vertexShaderSource), "vertexShader", nullptr, nullptr, "vs_main", "vs_5_0", 0, 0, &vsBlob, &shaderCompileErrorBlob)))
+        {
+            OutputDebugStringA(static_cast<const char*>(shaderCompileErrorBlob->GetBufferPointer()));
+            shaderCompileErrorBlob->Release();
+            return S_FALSE;
+        }
+    }
+
+    if (!SUCCEEDED(g_D3DDevice->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &g_vertexShader)))
+    {
+        OutputDebugStringA("Failed to create the Vertex Shader!\n");
+        return S_FALSE;
+    }
+
+    // compile and load the Pixel Shader
+	ID3DBlob* psBlob;
+    {
+        ID3DBlob* shaderCompileErrorBlob;
+        if (!SUCCEEDED(D3DCompile(pixelShaderSource, strlen(pixelShaderSource), "pixelShader", nullptr, nullptr, "ps_main", "ps_5_0", 0, 0, &psBlob, &shaderCompileErrorBlob)))
+        {
+            OutputDebugStringA(static_cast<const char*>(shaderCompileErrorBlob->GetBufferPointer()));
+            shaderCompileErrorBlob->Release();
+            return S_FALSE;
+        }
+    }
+
+    if (!SUCCEEDED(g_D3DDevice->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &g_pixelShader)))
+    {
+        OutputDebugStringA("Failed to create the Pixel Shader\n");
+        return S_FALSE;
+    }
+	psBlob->Release();
+
+	// Create Input Layout
+	{
+		D3D11_INPUT_ELEMENT_DESC inputElementDesc[] =
+		{
+			{ "POS", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "COL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		};
+
+        if (!SUCCEEDED(g_D3DDevice->CreateInputLayout(inputElementDesc, ARRAYSIZE(inputElementDesc), vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), &g_inputLayout)))
+        {
+            OutputDebugStringA("Failed to create the Input Layout");
+            return S_FALSE;
+        }
+	}
+
+	vsBlob->Release();
+
+	// Create Vertex Buffer
+	{
+		float vertexData[] = 
+        { // x, y, r, g, b, a
+			0.0f,  0.5f, 0.f, 1.f, 0.f, 1.f,
+			0.5f, -0.5f, 1.f, 0.f, 0.f, 1.f,
+			-0.5f, -0.5f, 0.f, 0.f, 1.f, 1.f
+		};
+
+		//float vertexData[] =
+		//{
+		//	-.90f, .90f, 0.0f, 1.0f, 0.0f, 1.0f,
+		//	.90f, .90f, 0.0f, 1.0f, 0.0f, 1.0f,
+		//	.90f, -.90f, 0.0f, 1.0f, 0.0f, 1.0f,
+		//	-.90f, .90f, 1.0f, 0.0f, 0.0f, 1.0f,
+		//	.90f, -.90f, 1.0f, 0.0f, 0.0f, 1.0f,
+		//	-.90f, -.90f, 1.0f, 0.0f, 0.0f, 1.0f,
+		//};
+		
+   //     float vertexData[] =
+   //     {
+   //         -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+			//1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+			//1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+			//-1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+			//1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+			//-1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+   //     };
+
+		g_stride = 6 * sizeof(float);
+		g_numVerts = sizeof(vertexData) / g_stride;
+		g_offset = 0;
+
+		D3D11_BUFFER_DESC vertexBufferDesc = {};
+		vertexBufferDesc.ByteWidth = sizeof(vertexData);
+		vertexBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
+		vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+		D3D11_SUBRESOURCE_DATA vertexSubresourceData = { vertexData };
+
+        if (!SUCCEEDED(g_D3DDevice->CreateBuffer(&vertexBufferDesc, &vertexSubresourceData, &g_vertexBuffer)))
+        {
+            OutputDebugStringA("Failed to create the vertex buffer!");
+            return S_FALSE;
+        }
+	}
+
+    return S_OK;
+}
+
 void Update(double deltaInSeconds)
 {
     static double desiredTime = 1.0f / 4.0f; // 1 second / desired number of seconds
@@ -308,6 +467,28 @@ void Render(
 {
     // Clear the back buffer to the clear color
 	context->ClearRenderTargetView(renderTargetView, g_clearColor);
+
+    RECT winRect;
+    GetClientRect(g_hWnd, &winRect);
+    D3D11_VIEWPORT viewport =
+    {
+        0.0f, 0.0f,
+        static_cast<float>(winRect.right - winRect.left),
+        static_cast<float>(winRect.bottom - winRect.top),
+        0.0f, 1.0f
+    };
+
+    g_D3DContext->RSSetViewports(1, &viewport);
+    g_D3DContext->OMSetRenderTargets(1, &g_D3DRenderTargetView, nullptr);
+    g_D3DContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    g_D3DContext->IASetInputLayout(g_inputLayout);
+
+    g_D3DContext->VSSetShader(g_vertexShader, nullptr, 0);
+    g_D3DContext->PSSetShader(g_pixelShader, nullptr, 0);
+
+    g_D3DContext->IASetVertexBuffers(0, 1, &g_vertexBuffer, &g_stride, &g_offset);
+
+    g_D3DContext->Draw(g_numVerts, 0);
 
 	// Present the back buffer to the screen
 	swapChain->Present(1, 0);
