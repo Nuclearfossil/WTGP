@@ -1,4 +1,4 @@
-// 03_BackBufferApp.cpp : Defines the entry point for the application.
+// 04_3DBasicApp.cpp : Defines the entry point for the application.
 //
 
 #include "pch.h"

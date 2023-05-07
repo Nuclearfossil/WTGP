@@ -1,4 +1,4 @@
-// 01_WindowsApp.cpp : Defines the entry point for the application.
+// 02_D3D11App.cpp : Defines the entry point for the application.
 //
 
 #include "pch.h"
