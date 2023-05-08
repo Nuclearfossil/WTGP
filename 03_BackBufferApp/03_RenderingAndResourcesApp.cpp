@@ -1,4 +1,4 @@
-// 03_BackBufferApp.cpp : Defines the entry point for the application.
+// 03_RenderingAndResourcesApp.cpp : Defines the entry point for the application.
 //
 
 #include "pch.h"
@@ -26,7 +26,7 @@ ID3D11RenderTargetView* g_D3DRenderTargetView;  // The Render Target View
 ID3D11VertexShader* g_vertexShader = nullptr;   // The Vertex Shader resource used in this example
 ID3D11PixelShader* g_pixelShader = nullptr;     // The Pixel Shader resource used in this example
 ID3D11InputLayout* g_inputLayout = nullptr;     // The Input layout resource used for the vertex shader
-ID3D11Buffer* g_vertexBuffer = nullptr;         // The D3D11 Buffer used to hold the verex data.
+ID3D11Buffer* g_vertexBuffer = nullptr;         // The D3D11 Buffer used to hold the vertex data.
 
 float g_clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 double g_delta;
