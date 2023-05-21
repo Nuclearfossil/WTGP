@@ -38,7 +38,7 @@ UINT g_offset = 0;
 const char* g_vertexShaderSource =
 "struct VS_Input \
 { \
-	float2 pos : POS; \
+	float3 pos : POS; \
 	float4 color : COL; \
 }; \
 \
@@ -51,7 +51,7 @@ struct VS_Output \
 VS_Output vs_main(VS_Input input) \
 { \
 	VS_Output output; \
-	output.position = float4(input.pos, 0.0f, 1.0f); \
+	output.position = float4(input.pos, 1.0f); \
 	output.color = input.color; \
  \
 	return output; \
@@ -159,8 +159,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     return (int) msg.wParam;
 }
 
-
-
 //
 //  FUNCTION: MyRegisterClass()
 //
@@ -266,7 +264,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-
 HRESULT CreateD3D11DeviceAndContext(HWND hWnd, 
     UINT width, 
     UINT height, 
@@ -298,7 +295,8 @@ HRESULT CreateD3D11DeviceAndContext(HWND hWnd,
         nullptr,                    // First Parameter
         D3D_DRIVER_TYPE_HARDWARE,   // Second Parameter
         nullptr,                    // Third Parameter
-        0,                          // Fourth Parameter - use D3D11_CREATE_DEVICE_DEBUG 
+		0,                          // Fourth Parameter - use D3D11_CREATE_DEVICE_DEBUG 
+ //     D3D11_CREATE_DEVICE_DEBUG,  // Fourth Parameter - use D3D11_CREATE_DEVICE_DEBUG 
                                     //                   if you want additional debug 
                                     //                   spew in the console.
         &featureLevel,              // Fifth Parameter
@@ -342,7 +340,18 @@ HRESULT CreateD3DResources()
     ID3DBlob* shaderCompileErrorBlob;
 
     // We compile the Vertex shader from the `vertexShaderSource` source string and check for validity
-    if (!SUCCEEDED(D3DCompile(g_vertexShaderSource, strlen(g_vertexShaderSource), "vertexShader", nullptr, nullptr, "vs_main", "vs_5_0", 0, 0, &vsBlob, &shaderCompileErrorBlob)))
+    if (!SUCCEEDED(D3DCompile(
+        g_vertexShaderSource,           // String representing the shader source
+        strlen(g_vertexShaderSource),   // how big that buffer is containing the shader source code
+        "vertexShader",                 // source name. This can be null.
+        nullptr,                        // Optional array of D3D_SHADER_MARCO defining macros used in compilation
+        nullptr,                        // optional pointer to an ID3DInclude that defines how the compiler handles include files
+        "vs_main",                      // Entry-point of the shader
+        "vs_5_0",                       // String that specifies what the shader target is.
+        0,                              // Any flags that drive D3D compile constants. Things like `D3DCOMPILE_DEBUG`
+        0,                              // Any flags for compiler effect constants. For now we can ignore
+        &vsBlob,                        // An interface to the compiled shader
+        &shaderCompileErrorBlob)))      // An interface to any errors from the compile process.
     {
         OutputDebugStringA(static_cast<const char*>(shaderCompileErrorBlob->GetBufferPointer()));
         shaderCompileErrorBlob->Release();
@@ -350,14 +359,29 @@ HRESULT CreateD3DResources()
     }
 
     // We then create the appropriate Vertex Shader resource: `g_vertexShader`.
-    if (!SUCCEEDED(g_D3DDevice->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &g_vertexShader)))
+    if (!SUCCEEDED(g_D3DDevice->CreateVertexShader(
+        vsBlob->GetBufferPointer(),     // A pointer to the compiled shader.
+        vsBlob->GetBufferSize(),        // And the size of the compiled shader.
+        nullptr,                        // A pointer to the Class Linkage (for now, let's use null).
+        &g_vertexShader)))              // Address of the ID3D11VertexShader interface.
     {
         OutputDebugStringA("Failed to create the Vertex Shader!\n");
         return S_FALSE;
     }
 
 	// We compile the Pixel shader from the `pixelShaderSource` source string and check for validity
-	if (!SUCCEEDED(D3DCompile(g_pixelShaderSource, strlen(g_pixelShaderSource), "pixelShader", nullptr, nullptr, "ps_main", "ps_5_0", 0, 0, &psBlob, &shaderCompileErrorBlob)))
+	if (!SUCCEEDED(D3DCompile(
+        g_pixelShaderSource, 
+        strlen(g_pixelShaderSource), 
+        "pixelShader", 
+        nullptr, 
+        nullptr, 
+        "ps_main", 
+        "ps_5_0", 
+        0, 
+        0, 
+        &psBlob, 
+        &shaderCompileErrorBlob)))
     {
         OutputDebugStringA(static_cast<const char*>(shaderCompileErrorBlob->GetBufferPointer()));
         shaderCompileErrorBlob->Release();
@@ -365,7 +389,11 @@ HRESULT CreateD3DResources()
     }
 
     // We then create the appropriate Pixel Shader resource: `g_pixelShader`
-    if (!SUCCEEDED(g_D3DDevice->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &g_pixelShader)))
+    if (!SUCCEEDED(g_D3DDevice->CreatePixelShader(
+        psBlob->GetBufferPointer(), 
+        psBlob->GetBufferSize(), 
+        nullptr, 
+        &g_pixelShader)))
     {
         OutputDebugStringA("Failed to create the Pixel Shader\n");
         return S_FALSE;
@@ -376,11 +404,16 @@ HRESULT CreateD3DResources()
 	// Create Input Layout - this describes the format of the vertex data we will use.
 	D3D11_INPUT_ELEMENT_DESC inputElementDesc[] =
 	{
-		{ "POS", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "POS", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
-    if (!SUCCEEDED(g_D3DDevice->CreateInputLayout(inputElementDesc, ARRAYSIZE(inputElementDesc), vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), &g_inputLayout)))
+    if (!SUCCEEDED(g_D3DDevice->CreateInputLayout(
+        inputElementDesc,               // An array of D3D11_INPUT_ELEMENT_DESC describing the vertex data
+        ARRAYSIZE(inputElementDesc),    // How big the array is
+        vsBlob->GetBufferPointer(),     // The compiled Vertex Shader
+        vsBlob->GetBufferSize(),        // And the size of the Vertex Shader
+        &g_inputLayout)))               // The resultant input layout
     {
         OutputDebugStringA("Failed to create the Input Layout");
         return S_FALSE;
@@ -390,38 +423,18 @@ HRESULT CreateD3DResources()
 
 	// Populate the array representing the vertex data. In this case, we are going
     // to have 6 elements per vertex:
-    // X and Y co-ordinates
-    // Colours for each vertex representing the Red, Green, Blue and Alpha channels.
+    // - X and Y co-ordinates
+    // - Colours for each vertex representing the Red, Green, Blue and Alpha channels.
 	float vertexData[] = 
-    { //   x,     y,   r,   g,   b,   a
-		0.0f,  0.5f, 0.f, 1.f, 0.f, 1.f,
-		0.5f, -0.5f, 1.f, 0.f, 0.f, 1.f,
-	   -0.5f, -0.5f, 0.f, 0.f, 1.f, 1.f
+    { //   x,     y,   z,    r,   g,   b,   a
+		0.0f,  1.0f, 0.0f, 0.f, 1.f, 0.f, 1.f,
+		1.0f, -1.0f, 0.0f, 1.f, 0.f, 0.f, 1.f,
+	   -1.0f, -1.0f, 0.0f, 0.f, 0.f, 1.f, 1.f
 	};
 
-	//float vertexData[] =
-	//{
-	//	-.90f, .90f, 0.0f, 1.0f, 0.0f, 1.0f,
-	//	.90f, .90f, 0.0f, 1.0f, 0.0f, 1.0f,
-	//	.90f, -.90f, 0.0f, 1.0f, 0.0f, 1.0f,
-	//	-.90f, .90f, 1.0f, 0.0f, 0.0f, 1.0f,
-	//	.90f, -.90f, 1.0f, 0.0f, 0.0f, 1.0f,
-	//	-.90f, -.90f, 1.0f, 0.0f, 0.0f, 1.0f,
-	//};
-		
-    //float vertexData[] =
-    //{
-    //    -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-    //    1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-    //    1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-    //    -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-    //    1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-    //    -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-    //};
-
     // The stride represents the _actual_ width of the data for each vertex.
-    // In this case, we have 6 elements per vertex.
-	g_stride = 6 * sizeof(float);
+    // In this case, we now have 7 elements per vertex. Three for the position, four for the colour.
+	g_stride = 3 * sizeof(float) + 4 * sizeof(float);
 	g_offset = 0;
 	g_numVerts = sizeof(vertexData) / g_stride;
 
@@ -435,7 +448,10 @@ HRESULT CreateD3DResources()
     vertexSubresourceData.SysMemPitch = 0;
     vertexSubresourceData.SysMemSlicePitch = 0;
 
-    if (!SUCCEEDED(g_D3DDevice->CreateBuffer(&vertexBufferDesc, &vertexSubresourceData, &g_vertexBuffer)))
+    if (!SUCCEEDED(g_D3DDevice->CreateBuffer(
+        &vertexBufferDesc,          // The Vertex buffer description
+        &vertexSubresourceData,     // And then the sub-resource data
+        &g_vertexBuffer)))          // Finally, the interface that is the vertex buffer
     {
         OutputDebugStringA("Failed to create the vertex buffer!");
         return S_FALSE;
@@ -470,9 +486,6 @@ void Render(
     IDXGISwapChain* swapChain, 
     ID3D11RenderTargetView* renderTargetView)
 {
-    // Clear the back buffer to the clear color
-	context->ClearRenderTargetView(renderTargetView, g_clearColor);
-
     // This could be cached, as we don't intend to resize the window.
     RECT winRect;
     GetClientRect(g_hWnd, &winRect);
@@ -483,6 +496,9 @@ void Render(
         static_cast<float>(winRect.bottom - winRect.top),
         0.0f, 1.0f
     };
+
+	// Clear the back buffer to the clear color
+	context->ClearRenderTargetView(renderTargetView, g_clearColor);
 
     g_D3DContext->RSSetViewports(1, &viewport);
     g_D3DContext->OMSetRenderTargets(1, &g_D3DRenderTargetView, nullptr);
