@@ -131,7 +131,7 @@
       <Command>xcopy $(MSBuildProjectDirectory)\CombinedShader.hlsl $(TargetDir) /s /i /q /y</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy Shader to build folder</Message>
+      <Message>Copy Shader to deployment folder</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -151,6 +151,12 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy $(MSBuildProjectDirectory)\CombinedShader.hlsl $(TargetDir) /s /i /q /y</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy Shader to deployment folder</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="01_WindowsApp.h" />

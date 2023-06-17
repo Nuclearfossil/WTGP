@@ -75,7 +75,7 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 
 HRESULT CreateD3D11Context(ID3D11Device* device, ID3D11DeviceContext** context);
-HRESULT CreateD3D11DeviceAndContext(HWND hWnd, UINT width, UINT height, ID3D11Device** ppDevice, ID3D11DeviceContext** ppContext, IDXGISwapChain** ppSwapChain);
+HRESULT CreateD3D11DeviceAndContext(HWND hWnd, UINT width, UINT height);
 HRESULT CreateRenderTargetView(ID3D11Device* device, ID3D11Texture2D* backBuffer, ID3D11RenderTargetView** renderTargetView);
 ID3D11Texture2D* GetBackBuffer(IDXGISwapChain* swapChain);
 
@@ -105,7 +105,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY01WINDOWSAPP));
 
-    if (!SUCCEEDED(CreateD3D11DeviceAndContext(g_hWnd, 1024, 768, &g_D3DDevice, &g_D3DContext, &g_SwapChain)))
+    if (!SUCCEEDED(CreateD3D11DeviceAndContext(g_hWnd, 1024, 768)))
         return -1;
 
     auto backBuffer = GetBackBuffer(g_SwapChain);
@@ -274,10 +274,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 HRESULT CreateD3D11DeviceAndContext(HWND hWnd,
     UINT width,
-    UINT height,
-    ID3D11Device** ppDevice,
-    ID3D11DeviceContext** ppContext,
-    IDXGISwapChain** ppSwapChain)
+    UINT height)
 {
 	HRESULT hr = S_OK;
 
@@ -310,10 +307,10 @@ HRESULT CreateD3D11DeviceAndContext(HWND hWnd,
         1,                          // Sixth Parameter
         D3D11_SDK_VERSION,          // Seventh Parameter
         &swapChainDesc,             // Eighth Parameter
-        ppSwapChain,                // Ninth Parameter
-        ppDevice,                   // Tenth Parameter
+        &g_SwapChain,                // Ninth Parameter
+        &g_D3DDevice,                   // Tenth Parameter
         nullptr,                    // Eleventh Parameter
-        ppContext);                 // Twelfth Parameter
+        &g_D3DContext);                 // Twelfth Parameter
 
 	if (FAILED(hr))
 	{

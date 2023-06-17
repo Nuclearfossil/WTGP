@@ -47,6 +47,7 @@ DirectX::XMMATRIX g_mView;						// The View (Camera) matrix
 DirectX::XMMATRIX g_mProjection;				// the Perspecitve projection matrix
 
 // Debug names for some of the D3D11 resources we'll be creating
+#ifdef DEBUG
 const char c_vertexShaderID[] = "vertexShader";
 const char c_pixelShaderID[] = "pixelShader";
 const char c_inputLayoutID[] = "inputLayout";
@@ -54,16 +55,22 @@ const char c_vertexBufferID[] = "vertexBuffer";
 const char c_constantBufferID[] = "constantBuffer";
 const char c_indexBufferID[] = "indexBuffer";
 const char c_depthStencilBufferID[] = "depthStencilBuffer";
-const char c_rasterizerStateID[] = "rasterizerState";
+const char c_rasterizerStateID[] = "rasterizerState"
+#endif // DEBUG
+
 
 float g_clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 double g_delta;
 
+
+// Input Assembler and Vertex Buffer globals
+UINT g_stride = 0;
+UINT g_offset = 0;
 UINT g_numVerts = 0;
 uint16_t g_numIndices = 0;
 
-UINT g_stride = 0;
-UINT g_offset = 0;
+
+float g_increment = 0;
 
 // This buffer will be used to pass data into the shader
 struct ConstantBuffer
@@ -80,12 +87,17 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 
 // D3D11 related functions ---------------------------------------------------
 HRESULT CreateD3D11Context(ID3D11Device* device, ID3D11DeviceContext** context);
-HRESULT CreateD3D11DeviceAndContext(HWND hWnd, UINT width, UINT height, ID3D11Device** ppDevice, ID3D11DeviceContext** ppContext, IDXGISwapChain** ppSwapChain);
+HRESULT CreateD3D11DeviceAndContext(HWND hWnd, UINT width, UINT height);
 HRESULT CreateRenderTargetView(ID3D11Device* device, ID3D11RenderTargetView** renderTargetView);
 ID3D11Texture2D* GetBackBuffer(IDXGISwapChain* swapChain);
 HRESULT CreateD3DResources();
-void Update(double deltaInSeconds);
+HRESULT LoadAndCompileShaders();
+HRESULT CreateVertexAndIndexBuffers();
+HRESULT CreateDepthStencilAndRasterizerState();
 void Render(ID3D11Device* device, ID3D11DeviceContext* context, IDXGISwapChain* swapChain, ID3D11RenderTargetView* renderTargetView);
+
+// Additional functions
+void Update(double deltaInSeconds);
 
 /// @brief Utility function to convert units in degrees to radians
 /// @param degs
@@ -120,7 +132,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY01WINDOWSAPP));
 
-	if (!SUCCEEDED(CreateD3D11DeviceAndContext(g_hWnd, 1024, 768, &g_D3DDevice, &g_D3DContext, &g_SwapChain)))
+	if (!SUCCEEDED(CreateD3D11DeviceAndContext(g_hWnd, 1024, 768)))
 		return -2;
 
 	if (!SUCCEEDED(CreateRenderTargetView(g_D3DDevice, &g_D3DRenderTargetView)))
@@ -177,6 +189,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_D3DContext->Release();
 	g_D3DDevice->Release();
 
+#ifdef DEBUG
 	// Check to see if we've cleaned up all the D3D 11 resources.
 	{
 		IDXGIDebug1* debug = { 0 };
@@ -184,6 +197,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
 		debug->Release();
 	}
+#endif // DEBUG
 
 	return (int)msg.wParam;
 }
@@ -294,10 +308,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 /// @return S_OK if we're successfully created the context and device
 HRESULT CreateD3D11DeviceAndContext(HWND hWnd,
 	UINT width,
-	UINT height,
-	ID3D11Device** ppDevice,
-	ID3D11DeviceContext** ppContext,
-	IDXGISwapChain** ppSwapChain)
+	UINT height)
 {
 	HRESULT hr = S_OK;
 
@@ -323,18 +334,20 @@ HRESULT CreateD3D11DeviceAndContext(HWND hWnd,
 		nullptr,                    // First Parameter
 		D3D_DRIVER_TYPE_HARDWARE,   // Second Parameter
 		nullptr,                    // Third Parameter
-		// 0,                          // Fourth Parameter - use D3D11_CREATE_DEVICE_DEBUG
+#ifdef DEBUG
 		D3D11_CREATE_DEVICE_DEBUG,  // Fourth Parameter - use D3D11_CREATE_DEVICE_DEBUG
-									// if you want additional debug
-									// spew in the console.
+									// if you want additional debug spew in the console.
+#else
+		0,                          // Fourth Parameter
+#endif // DEBUG
 		&featureLevel,              // Fifth Parameter
 		1,                          // Sixth Parameter
 		D3D11_SDK_VERSION,          // Seventh Parameter
 		&swapChainDesc,             // Eighth Parameter
-		ppSwapChain,                // Ninth Parameter
-		ppDevice,                   // Tenth Parameter
+		&g_SwapChain,                // Ninth Parameter
+		&g_D3DDevice,                   // Tenth Parameter
 		nullptr,                    // Eleventh Parameter
-		ppContext);                 // Twelfth Parameter
+		&g_D3DContext);                 // Twelfth Parameter
 
 	if (FAILED(hr))
 	{
@@ -364,9 +377,9 @@ HRESULT CreateD3D11Context(ID3D11Device* device, ID3D11DeviceContext** context)
 	return S_OK;
 }
 
-/// @brief Create all D3D11 resources we will need for this application
-/// @return S_OK if successful
-HRESULT CreateD3DResources()
+/// @brief Load the Shader from file and compile the Vertex and Pixel shaders
+/// @return S_OK if we were able to compile the shaders
+HRESULT LoadAndCompileShaders()
 {
 	// creation of Shader Resources
 	ID3DBlob* vsBlob;
@@ -412,7 +425,10 @@ HRESULT CreateD3DResources()
 		return S_FALSE;
 	}
 
+#ifdef DEBUG
 	g_vertexShader->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_vertexShaderID) - 1, c_vertexShaderID);
+#endif // DEBUG
+
 
 	// We compile the Pixel shader from the `pixelShaderSource` source string and check for validity
 	if (!SUCCEEDED(D3DCompileFromFile(L"CombinedShader.hlsl",
@@ -442,7 +458,10 @@ HRESULT CreateD3DResources()
 	}
 
 	psBlob->Release();
+
+#ifdef DEBUG
 	g_pixelShader->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_pixelShaderID) - 1, c_pixelShaderID);
+#endif // DEBUG
 
 	// Create Input Layout - this describes the format of the vertex data we will use.
 	D3D11_INPUT_ELEMENT_DESC inputElementDesc[] =
@@ -463,8 +482,16 @@ HRESULT CreateD3DResources()
 	}
 
 	vsBlob->Release();
-	g_inputLayout->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_inputLayoutID) - 1, c_inputLayoutID);
 
+#ifdef DEBUG
+	g_inputLayout->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_inputLayoutID) - 1, c_inputLayoutID);
+#endif // DEBUG
+}
+
+/// @brief Create the Vertex and Index buffers, as well as the input layout
+/// @return S_OK if we are able to create the buffers and input layout
+HRESULT CreateVertexAndIndexBuffers()
+{
 	// Populate the array representing the vertex data. In this case, we are going to have
 	// 6 elements per vertex:
 	//   - X and Y co-ordinates
@@ -532,7 +559,9 @@ HRESULT CreateD3DResources()
 		return S_FALSE;
 	}
 
+#ifdef DEBUG
 	g_vertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_vertexBufferID) - 1, c_vertexBufferID);
+#endif // DEBUG
 
 	D3D11_BUFFER_DESC constantBufferDesc = {};
 	constantBufferDesc.ByteWidth = sizeof(ConstantBuffer);
@@ -546,7 +575,10 @@ HRESULT CreateD3DResources()
 		return S_FALSE;
 	}
 
+#ifdef DEBUG
 	g_mvpConstantBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_constantBufferID) - 1, c_constantBufferID);
+#endif // DEBUG
+
 
 	D3D11_BUFFER_DESC indexBufferDesc = {};
 	indexBufferDesc.ByteWidth = sizeof(indices);
@@ -564,25 +596,57 @@ HRESULT CreateD3DResources()
 		OutputDebugStringA("Failed to create a new index buffer.");
 		return S_FALSE;
 	}
-	g_indexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_indexBufferID) - 1, c_indexBufferID);
 
+#ifdef DEBUG
+	g_indexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_indexBufferID) - 1, c_indexBufferID);
+#endif // DEBUG
+	return S_OK;
+}
+
+/// @brief Create the depth/stencil buffer as well as the rasterizer state objects
+/// @return S_OK if we are able to create these objects
+HRESULT CreateDepthStencilAndRasterizerState()
+{
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
 	depthStencilDesc.DepthEnable = TRUE;
 	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
 
 	g_D3DDevice->CreateDepthStencilState(&depthStencilDesc, &g_depthStencilState);
+
+#ifdef DEBUG
 	g_depthStencilState->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_depthStencilBufferID) - 1, c_depthStencilBufferID);
+#endif // DEBUG
 
 	D3D11_RASTERIZER_DESC rasterizerDesc = {};
+
+	rasterizerDesc.FrontCounterClockwise = FALSE;
+
 	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
-	// rasterizerDesc.CullMode = D3D11_CULL_BACK;
-	rasterizerDesc.CullMode = D3D11_CULL_FRONT;
-	rasterizerDesc.FrontCounterClockwise = TRUE;
+	// rasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
+
+	rasterizerDesc.CullMode = D3D11_CULL_BACK;
+	// rasterizerDesc.CullMode = D3D11_CULL_FRONT;
+	//rasterizerDesc.CullMode = D3D11_CULL_NONE;
 
 	g_D3DDevice->CreateRasterizerState(&rasterizerDesc, &g_rasterizerState);
-	g_rasterizerState->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_rasterizerStateID) - 1, c_rasterizerStateID);
 
+#ifdef DEBUG
+	g_rasterizerState->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_rasterizerStateID) - 1, c_rasterizerStateID);
+#endif // DEBUG
+
+	return S_OK;
+}
+
+/// @brief Create all D3D11 resources we will need for this application
+/// @return S_OK if successful
+HRESULT CreateD3DResources()
+{
+	if (!SUCCEEDED(LoadAndCompileShaders())) return S_FALSE;
+
+	if (!SUCCEEDED(CreateVertexAndIndexBuffers())) return S_FALSE;
+
+	if (!SUCCEEDED(CreateDepthStencilAndRasterizerState())) return S_FALSE;
 
 	return S_OK;
 }
@@ -607,6 +671,10 @@ void Update(double deltaInSeconds)
 	// eg: 1/4 means that in 1 second, we will have traveled .25 of the desired 'unit' of travel.
 	// in this case, we want that 'desired' unit of travel to be time.
 	g_clearColor[2] += static_cast<float>(incrementor * deltaInSeconds);
+
+	/// smoothly rotate our object
+	g_increment += 0.1f * static_cast<float>(deltaInSeconds);
+	if (g_increment > 360.0f) g_increment -= 360.0f;
 }
 
 /// @brief Render off a frame
@@ -630,8 +698,7 @@ void Render(
 		0.0f, 1.0f
 	};
 
-	static float increment = 0;
-	g_mModel = DirectX::XMMatrixRotationY(increment) * DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+	g_mModel = DirectX::XMMatrixRotationY(g_increment) * DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 	g_mView = DirectX::XMMatrixIdentity();
 	g_mProjection = DirectX::XMMatrixIdentity();
 
@@ -640,13 +707,11 @@ void Render(
 	DirectX::XMVECTOR Up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
 	g_mView = DirectX::XMMatrixLookAtLH(Eye, At, Up);
 
-	increment += 0.001f;
-
 	// Initialize the projection matrix
-	float width = (float)(g_winRect.right - g_winRect.left);
-	float height = (float)(g_winRect.bottom - g_winRect.top);
+	float width = static_cast<float>(g_winRect.right - g_winRect.left);
+	float height = static_cast<float>(g_winRect.bottom - g_winRect.top);
 	float aspect = width / height;
-	g_mProjection = DirectX::XMMatrixPerspectiveFovLH(degreesToRadians(84), aspect, 0.01f, 100.0f);
+	g_mProjection = DirectX::XMMatrixPerspectiveFovLH(degreesToRadians(78), aspect, 0.01f, 100.0f);
 
 	DirectX::XMMATRIX mvp = g_mModel * g_mView * g_mProjection;
 
@@ -713,7 +778,10 @@ HRESULT CreateRenderTargetView(ID3D11Device* device, ID3D11RenderTargetView** re
 	depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 
 	ID3D11Texture2D* depthBuffer;
-	device->CreateTexture2D(&depthBufferDesc, nullptr, &depthBuffer);
+	if (!SUCCEEDED(device->CreateTexture2D(&depthBufferDesc, nullptr, &depthBuffer)))
+		return S_FALSE;
+	if (depthBuffer == nullptr)
+		return S_FALSE;
 
 	device->CreateDepthStencilView(depthBuffer, nullptr, &g_depthBufferView);
 
