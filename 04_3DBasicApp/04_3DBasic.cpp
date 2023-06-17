@@ -58,17 +58,14 @@ const char c_depthStencilBufferID[] = "depthStencilBuffer";
 const char c_rasterizerStateID[] = "rasterizerState"
 #endif // DEBUG
 
-
 float g_clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 double g_delta;
-
 
 // Input Assembler and Vertex Buffer globals
 UINT g_stride = 0;
 UINT g_offset = 0;
 UINT g_numVerts = 0;
 uint16_t g_numIndices = 0;
-
 
 float g_increment = 0;
 
@@ -166,8 +163,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			}
 		}
 
-		// Let's throttle the application so that we render at a constant
-		// speed, regardless of processor speed.
+		// Let's throttle the application so that we render at a constant speed, regardless of processor speed.
 		Update(deltaSeconds);
 		Render(g_D3DDevice, g_D3DContext, g_SwapChain, g_D3DRenderTargetView);
 		lastStart = current;
