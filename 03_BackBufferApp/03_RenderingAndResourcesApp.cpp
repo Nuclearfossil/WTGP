@@ -126,7 +126,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     LARGE_INTEGER current = { 0 };
     LARGE_INTEGER lastStart = { 0 };
 	LARGE_INTEGER frequency = { 0 };
-	
+
     ::QueryPerformanceFrequency(&frequency);
     QueryPerformanceCounter(&lastStart);
 
@@ -145,7 +145,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             }
         }
 
-        // Let's throttle the application so that we render at a constant 
+        // Let's throttle the application so that we render at a constant
         // speed, regardless of processor speed.
         Update(deltaSeconds);
         Render(g_D3DDevice, g_D3DContext, g_SwapChain, g_D3DRenderTargetView);
@@ -204,9 +204,14 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    RECT windowSize = { 0, 0, 1024, 768 };
    AdjustWindowRect(&windowSize, WS_OVERLAPPEDWINDOW, FALSE);
 
-   HWND hWnd = CreateWindowW(g_szWindowClass, g_szTitle, WS_OVERLAPPEDWINDOW,
-       0, 0, windowSize.right - windowSize.left, windowSize.bottom - windowSize.top, 
-       nullptr, nullptr, hInstance, nullptr);
+   HWND hWnd = CreateWindowW(g_szWindowClass,
+       g_szTitle,
+       WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX,
+       0, 0, windowSize.right - windowSize.left, windowSize.bottom - windowSize.top,
+       nullptr,
+       nullptr,
+       hInstance,
+       nullptr);
 
    if (!hWnd)
    {
@@ -267,11 +272,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 
-HRESULT CreateD3D11DeviceAndContext(HWND hWnd, 
-    UINT width, 
-    UINT height, 
-    ID3D11Device** ppDevice, 
-    ID3D11DeviceContext** ppContext, 
+HRESULT CreateD3D11DeviceAndContext(HWND hWnd,
+    UINT width,
+    UINT height,
+    ID3D11Device** ppDevice,
+    ID3D11DeviceContext** ppContext,
     IDXGISwapChain** ppSwapChain)
 {
 	HRESULT hr = S_OK;
@@ -298,8 +303,8 @@ HRESULT CreateD3D11DeviceAndContext(HWND hWnd,
         nullptr,                    // First Parameter
         D3D_DRIVER_TYPE_HARDWARE,   // Second Parameter
         nullptr,                    // Third Parameter
-        0,                          // Fourth Parameter - use D3D11_CREATE_DEVICE_DEBUG 
-                                    //                   if you want additional debug 
+        0,                          // Fourth Parameter - use D3D11_CREATE_DEVICE_DEBUG
+                                    //                   if you want additional debug
                                     //                   spew in the console.
         &featureLevel,              // Fifth Parameter
         1,                          // Sixth Parameter
@@ -392,7 +397,7 @@ HRESULT CreateD3DResources()
     // to have 6 elements per vertex:
     // X and Y co-ordinates
     // Colours for each vertex representing the Red, Green, Blue and Alpha channels.
-	float vertexData[] = 
+	float vertexData[] =
     { //   x,     y,   r,   g,   b,   a
 		0.0f,  0.5f, 0.f, 1.f, 0.f, 1.f,
 		0.5f, -0.5f, 1.f, 0.f, 0.f, 1.f,
@@ -408,7 +413,7 @@ HRESULT CreateD3DResources()
 	//	 .90f, -.90f, 1.0f, 0.0f, 0.0f, 1.0f,
 	//	-.90f, -.90f, 1.0f, 0.0f, 0.0f, 1.0f,
 	//};
-		
+
     //float vertexData[] =
     //{
     //   -1.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
@@ -465,9 +470,9 @@ void Update(double deltaInSeconds)
 }
 
 void Render(
-    ID3D11Device* device, 
-    ID3D11DeviceContext* context, 
-    IDXGISwapChain* swapChain, 
+    ID3D11Device* device,
+    ID3D11DeviceContext* context,
+    IDXGISwapChain* swapChain,
     ID3D11RenderTargetView* renderTargetView)
 {
     // Clear the back buffer to the clear color
