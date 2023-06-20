@@ -42,12 +42,12 @@ ID3D11DepthStencilView* g_depthBufferView;		// The Depth/Stencil view buffer
 ID3D11DepthStencilState* g_depthStencilState;	// The Depth/Stencil State
 ID3D11RasterizerState* g_rasterizerState;		// The Rasterizer State
 
-DirectX::XMMATRIX g_mModel;						// The Model transform matrix
+DirectX::XMMATRIX g_mWorld;						// The Model transform matrix
 DirectX::XMMATRIX g_mView;						// The View (Camera) matrix
 DirectX::XMMATRIX g_mProjection;				// the Perspecitve projection matrix
 
 // Debug names for some of the D3D11 resources we'll be creating
-#ifdef DEBUG
+#ifdef _DEBUG
 const char c_vertexShaderID[] = "vertexShader";
 const char c_pixelShaderID[] = "pixelShader";
 const char c_inputLayoutID[] = "inputLayout";
@@ -55,7 +55,7 @@ const char c_vertexBufferID[] = "vertexBuffer";
 const char c_constantBufferID[] = "constantBuffer";
 const char c_indexBufferID[] = "indexBuffer";
 const char c_depthStencilBufferID[] = "depthStencilBuffer";
-const char c_rasterizerStateID[] = "rasterizerState"
+const char c_rasterizerStateID[] = "rasterizerState";
 #endif // DEBUG
 
 float g_clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -69,13 +69,13 @@ uint16_t g_numIndices = 0;
 
 float g_increment = 0;
 
-// This buffer will be used to pass data into the shader
+/// @brief Structure defining the Constant buffer. This buffer will be used to pass data into the shader
 struct ConstantBuffer
 {
 	DirectX::XMMATRIX mModelViewProjection;
 };
 
-// Forward declarations of functions included in this code module:
+// [BEGIN] - Forward declarations of functions: ==============================================================================================
 
 // Windows specific functions ------------------------------------------------
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -95,13 +95,30 @@ void Render(ID3D11Device* device, ID3D11DeviceContext* context, IDXGISwapChain* 
 
 // Additional functions
 void Update(double deltaInSeconds);
+// [END] - Forward declarations of functions: =============================================================================================
 
 /// @brief Utility function to convert units in degrees to radians
-/// @param degs
-/// @return
+/// @param degs Degrees to convert to radians
+/// @return radians
 inline float degreesToRadians(float degs)
 {
 	return degs * (DirectX::XM_PI / 180.0f);
+}
+
+/// @brief Utility function for getting the Texture that represents the backbuffer
+/// @param swapChain DXGI Swapchain to work from
+/// @return a D3D11 Texture 2D to work with
+ID3D11Texture2D* GetBackBuffer(IDXGISwapChain* swapChain)
+{
+    ID3D11Texture2D* backBuffer = nullptr;
+    HRESULT hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backBuffer));
+    if (FAILED(hr)) {
+        // Handle error
+        OutputDebugStringA("Failed to get the Back buffer from the swapchain. Aborting.\n");
+        return nullptr;
+    }
+
+    return backBuffer;
 }
 
 /// @brief Windows Main entry point
@@ -185,7 +202,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_D3DContext->Release();
 	g_D3DDevice->Release();
 
-#ifdef DEBUG
+#ifdef _DEBUG
 	// Check to see if we've cleaned up all the D3D 11 resources.
 	{
 		IDXGIDebug1* debug = { 0 };
@@ -330,7 +347,7 @@ HRESULT CreateD3D11DeviceAndContext(HWND hWnd,
 		nullptr,                    // First Parameter
 		D3D_DRIVER_TYPE_HARDWARE,   // Second Parameter
 		nullptr,                    // Third Parameter
-#ifdef DEBUG
+#ifdef _DEBUG
 		D3D11_CREATE_DEVICE_DEBUG,  // Fourth Parameter - use D3D11_CREATE_DEVICE_DEBUG
 									// if you want additional debug spew in the console.
 #else
@@ -421,7 +438,7 @@ HRESULT LoadAndCompileShaders()
 		return S_FALSE;
 	}
 
-#ifdef DEBUG
+#ifdef _DEBUG
 	g_vertexShader->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_vertexShaderID) - 1, c_vertexShaderID);
 #endif // DEBUG
 
@@ -455,7 +472,7 @@ HRESULT LoadAndCompileShaders()
 
 	psBlob->Release();
 
-#ifdef DEBUG
+#ifdef _DEBUG
 	g_pixelShader->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_pixelShaderID) - 1, c_pixelShaderID);
 #endif // DEBUG
 
@@ -479,9 +496,10 @@ HRESULT LoadAndCompileShaders()
 
 	vsBlob->Release();
 
-#ifdef DEBUG
+#ifdef _DEBUG
 	g_inputLayout->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_inputLayoutID) - 1, c_inputLayoutID);
 #endif // DEBUG
+    return S_OK;
 }
 
 /// @brief Create the Vertex and Index buffers, as well as the input layout
@@ -555,7 +573,7 @@ HRESULT CreateVertexAndIndexBuffers()
 		return S_FALSE;
 	}
 
-#ifdef DEBUG
+#ifdef _DEBUG
 	g_vertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_vertexBufferID) - 1, c_vertexBufferID);
 #endif // DEBUG
 
@@ -571,7 +589,7 @@ HRESULT CreateVertexAndIndexBuffers()
 		return S_FALSE;
 	}
 
-#ifdef DEBUG
+#ifdef _DEBUG
 	g_mvpConstantBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_constantBufferID) - 1, c_constantBufferID);
 #endif // DEBUG
 
@@ -593,7 +611,7 @@ HRESULT CreateVertexAndIndexBuffers()
 		return S_FALSE;
 	}
 
-#ifdef DEBUG
+#ifdef _DEBUG
 	g_indexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_indexBufferID) - 1, c_indexBufferID);
 #endif // DEBUG
 	return S_OK;
@@ -610,7 +628,7 @@ HRESULT CreateDepthStencilAndRasterizerState()
 
 	g_D3DDevice->CreateDepthStencilState(&depthStencilDesc, &g_depthStencilState);
 
-#ifdef DEBUG
+#ifdef _DEBUG
 	g_depthStencilState->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_depthStencilBufferID) - 1, c_depthStencilBufferID);
 #endif // DEBUG
 
@@ -627,7 +645,7 @@ HRESULT CreateDepthStencilAndRasterizerState()
 
 	g_D3DDevice->CreateRasterizerState(&rasterizerDesc, &g_rasterizerState);
 
-#ifdef DEBUG
+#ifdef _DEBUG
 	g_rasterizerState->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_rasterizerStateID) - 1, c_rasterizerStateID);
 #endif // DEBUG
 
@@ -694,7 +712,7 @@ void Render(
 		0.0f, 1.0f
 	};
 
-	g_mModel = DirectX::XMMatrixRotationY(g_increment) * DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+	g_mWorld = DirectX::XMMatrixRotationY(g_increment) * DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 	g_mView = DirectX::XMMatrixIdentity();
 	g_mProjection = DirectX::XMMatrixIdentity();
 
@@ -709,7 +727,7 @@ void Render(
 	float aspect = width / height;
 	g_mProjection = DirectX::XMMatrixPerspectiveFovLH(degreesToRadians(78), aspect, 0.01f, 100.0f);
 
-	DirectX::XMMATRIX mvp = g_mModel * g_mView * g_mProjection;
+	DirectX::XMMATRIX mvp = g_mWorld * g_mView * g_mProjection;
 
 	// Update constant buffer
 	D3D11_MAPPED_SUBRESOURCE mappedSubresource;
@@ -784,21 +802,4 @@ HRESULT CreateRenderTargetView(ID3D11Device* device, ID3D11RenderTargetView** re
 	depthBuffer->Release();
 
 	return S_OK;
-}
-
-/// @brief Utility function for getting the Texture that represents the backbuffer
-/// @param swapChain DXGI Swapchain to work from
-/// @return a D3D11 Texture 2D to work with
-ID3D11Texture2D* GetBackBuffer(IDXGISwapChain* swapChain)
-{
-	ID3D11Texture2D* backBuffer = nullptr;
-	HRESULT hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backBuffer));
-	if (FAILED(hr))
-	{
-		// Handle error
-		OutputDebugStringA("Failed to get the Back buffer from the swapchain. Aborting.\n");
-		return nullptr;
-	}
-
-	return backBuffer;
 }
