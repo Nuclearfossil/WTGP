@@ -12,13 +12,14 @@
 #include <dxgidebug.h>
 #include <dxgi1_3.h>
 
+#include <windowsx.h>
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment( lib, "dxguid.lib")
 #pragma comment( lib, "dxgi.lib")
 
-#define MAX_LOADSTRING 100
+#define MAX_LOADSTRING 1000
 
 // Global Variables:
 HINSTANCE hInst;                                // current instance
@@ -35,8 +36,13 @@ ID3D11RenderTargetView* g_D3DRenderTargetView;  // The Render Target View
 ID3D11VertexShader* g_vertexShader = nullptr;   // The Vertex Shader resource used in this example
 ID3D11PixelShader* g_pixelShader = nullptr;     // The Pixel Shader resource used in this example
 ID3D11InputLayout* g_inputLayout = nullptr;     // The Input layout resource used for the vertex shader
-ID3D11Buffer* g_cubeVertexBuffer = nullptr;         // The D3D11 Buffer used to hold the vertex data.
-ID3D11Buffer* g_cubeIndexBuffer = nullptr;          // The D3D11 Index Buffer
+
+ID3D11Buffer* g_cubeVertexBuffer = nullptr;     // The D3D11 Buffer used to hold the vertex data for the cube.
+ID3D11Buffer* g_cubeIndexBuffer = nullptr;      // The D3D11 Index Buffer for the cube
+
+ID3D11Buffer* g_gridVertexBuffer = nullptr;		// The D3D11 Buffer used to hold the vertex data for the grid
+ID3D11Buffer* g_gridIndexBuffer = nullptr;		// The D3D11 Index Buffer for the grid
+
 ID3D11Buffer* g_mvpConstantBuffer = nullptr;    // The constant buffer for the WVP matrices
 ID3D11DepthStencilView* g_depthBufferView;		// The Depth/Stencil view buffer
 ID3D11DepthStencilState* g_depthStencilState;	// The Depth/Stencil State
@@ -46,12 +52,23 @@ DirectX::XMMATRIX g_mWorld;						// The Model transform matrix
 DirectX::XMMATRIX g_mView;						// The View (Camera) matrix
 DirectX::XMMATRIX g_mProjection;				// the Perspecitve projection matrix
 
+float g_cameraRadius = 2.0f;						// the radius of the orbit camera
+
+int g_lastX = 0;
+int g_lastY = 0;
+
+int g_deltaMouseX = 0;
+int g_deltaMouseY = 0;
+
+
 // Debug names for some of the D3D11 resources we'll be creating
 #ifdef _DEBUG
 const char c_vertexShaderID[] = "vertexShader";
 const char c_pixelShaderID[] = "pixelShader";
 const char c_inputLayoutID[] = "inputLayout";
 const char c_vertexBufferID[] = "vertexBuffer";
+const char c_gridVertexBufferID[] = "gridVertexBuffer";
+const char c_gridIndexBufferID[] = "gridIndexBuffer";
 const char c_constantBufferID[] = "constantBuffer";
 const char c_indexBufferID[] = "indexBuffer";
 const char c_depthStencilBufferID[] = "depthStencilBuffer";
@@ -66,6 +83,10 @@ UINT g_stride = 0;
 UINT g_offset = 0;
 UINT g_numCubeVerts = 0;
 uint16_t g_numCubeIndices = 0;
+UINT g_numGridVerts = 0;
+
+
+uint16_t g_numGridIndices = 0;
 
 float g_increment = 0;
 
@@ -100,9 +121,21 @@ void Update(double deltaInSeconds);
 /// @brief Utility function to convert units in degrees to radians
 /// @param degs Degrees to convert to radians
 /// @return radians
-inline float degreesToRadians(float degs)
+constexpr float degreesToRadians(float degs)
 {
 	return degs * (DirectX::XM_PI / 180.0f);
+}
+
+/// @brief Utility function to clamp float values
+/// @param in input value
+/// @param low low range to clamp to
+/// @param high high range to clamp to
+/// @return clamped value
+constexpr float clamp(const float in, const float low, const float high)
+{
+    return in < low ? low :
+		in > high ? high :
+		in;
 }
 
 /// @brief Utility function for getting the Texture that represents the backbuffer
@@ -192,7 +225,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_inputLayout->Release();
 	g_cubeVertexBuffer->Release();
 	g_cubeIndexBuffer->Release();
-
+    g_gridVertexBuffer->Release();
+    g_gridIndexBuffer->Release();
 	g_mvpConstantBuffer->Release();
 	g_depthBufferView->Release();
 	g_depthStencilState->Release();
@@ -295,11 +329,36 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 	break;
+    case WM_MOUSEMOVE:
+	{
+        int xPos = GET_X_LPARAM(lParam);
+        int yPos = GET_Y_LPARAM(lParam);
+
+        if (wParam == MK_LBUTTON)
+		{
+            g_deltaMouseX += g_lastX - xPos;
+            g_deltaMouseY += g_lastY - yPos;
+        }
+
+		g_lastX = xPos;
+        g_lastY = yPos;
+    }
+	break;
+    case WM_MOUSEWHEEL:
+	{
+        float modifier = 0.01f;
+        if (MK_SHIFT == GET_KEYSTATE_WPARAM(wParam))
+            modifier = 0.001f;
+
+        float wheel = static_cast<float>(GET_WHEEL_DELTA_WPARAM(wParam)) * modifier;
+        g_cameraRadius += wheel;
+	}
+    break;
+
 	case WM_PAINT:
 	{
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hWnd, &ps);
-		// TODO: Add any drawing code that uses hdc here...
 		EndPaint(hWnd, &ps);
 	}
 	break;
@@ -334,9 +393,9 @@ HRESULT CreateD3D11DeviceAndContext(HWND hWnd,
 	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
 	swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
-    swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    swapChainDesc.SampleDesc.Count = 1;
-    swapChainDesc.SampleDesc.Quality = 0;
+	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	swapChainDesc.SampleDesc.Count = 1;
+	swapChainDesc.SampleDesc.Quality = 0;
 	swapChainDesc.OutputWindow = hWnd;
 	swapChainDesc.Windowed = TRUE;
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
@@ -524,6 +583,83 @@ HRESULT CreateVertexAndIndexBuffers()
 		   0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
 	};
 
+	float gridVertexData[]
+	{
+    //      x,    y,     z,    r,    g,    b,    a
+		// columns
+		-5.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		-5.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		-4.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		-4.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		-3.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		-3.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		-2.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		-2.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		-1.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		-1.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		 0.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		 0.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		 1.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		 1.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		 2.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		 2.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		 3.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		 3.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		 4.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		 4.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		 5.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		 5.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		 // rows
+		-5.0f, 0.0f, -5.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		 5.0f, 0.0f, -5.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		-5.0f, 0.0f, -4.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		 5.0f, 0.0f, -4.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		-5.0f, 0.0f, -3.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		 5.0f, 0.0f, -3.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		-5.0f, 0.0f, -2.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		 5.0f, 0.0f, -2.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		-5.0f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		 5.0f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		-5.0f, 0.0f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		 5.0f, 0.0f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		-5.0f, 0.0f,  1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		 5.0f, 0.0f,  1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		-5.0f, 0.0f,  2.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		 5.0f, 0.0f,  2.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		-5.0f, 0.0f,  3.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		 5.0f, 0.0f,  3.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		-5.0f, 0.0f,  4.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		 5.0f, 0.0f,  4.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		-5.0f, 0.0f,  5.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		 5.0f, 0.0f,  5.0f, 1.0f, 0.0f, 0.0f, 1.0f
+	};
+
+	WORD gridIndices[] =
+	{
+		0, 1,
+		2, 3,
+		4, 5,
+		6, 7,
+		8, 9,
+		10, 11,
+		12, 13,
+		14, 15,
+		16, 17,
+		18, 19,
+		20, 21,
+		22, 23,
+		24, 25,
+		26, 27,
+		28, 29,
+		30, 31,
+		32, 33,
+		34, 35,
+		36, 37,
+		38, 39,
+		40, 41,
+		42, 43
+	};
+
 	// Create index buffer
 	WORD indices[] =
 	{
@@ -550,7 +686,6 @@ HRESULT CreateVertexAndIndexBuffers()
 	// In this case, we now have 7 elements per vertex. Three for the position, four for the colour.
 	g_stride = 3 * sizeof(float) + 4 * sizeof(float);
 	g_offset = 0;
-	//g_numVerts = sizeof(vertexData) / g_stride;
 	g_numCubeVerts = sizeof(indices) / sizeof(WORD);
 
 	g_numCubeIndices = sizeof(indices) / sizeof(indices[0]);
@@ -577,6 +712,33 @@ HRESULT CreateVertexAndIndexBuffers()
 #ifdef _DEBUG
 	g_cubeVertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_vertexBufferID) - 1, c_vertexBufferID);
 #endif // DEBUG
+
+	g_numGridVerts = sizeof(gridIndices) / sizeof(WORD);
+    g_numGridIndices = sizeof(gridIndices) / sizeof(gridIndices[0]);
+
+	D3D11_BUFFER_DESC gridVertexBufferDesc = {};
+    gridVertexBufferDesc.ByteWidth = sizeof(gridVertexData);
+    gridVertexBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
+    gridVertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+	D3D11_SUBRESOURCE_DATA gridVertexSubresourceData = {};
+    gridVertexSubresourceData.pSysMem = gridVertexData;
+    gridVertexSubresourceData.SysMemPitch = 0;
+    gridVertexSubresourceData.SysMemSlicePitch = 0;
+
+	if (!SUCCEEDED(g_D3DDevice->CreateBuffer(
+		&gridVertexBufferDesc,
+		&gridVertexSubresourceData,
+		&g_gridVertexBuffer)))
+	{
+        OutputDebugStringA("Failed to create the Grid vertex buffer!");
+        return S_FALSE;
+    }
+
+#ifdef _DEBUG
+    g_gridVertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_gridVertexBufferID) - 1, c_gridVertexBufferID);
+#endif // _DEBUG
+
 
 	D3D11_BUFFER_DESC constantBufferDesc = {};
 	constantBufferDesc.ByteWidth = sizeof(ConstantBuffer);
@@ -615,6 +777,28 @@ HRESULT CreateVertexAndIndexBuffers()
 #ifdef _DEBUG
 	g_cubeIndexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_indexBufferID) - 1, c_indexBufferID);
 #endif // DEBUG
+
+	D3D11_BUFFER_DESC gridIndexBufferDesc = {};
+    gridIndexBufferDesc.ByteWidth = sizeof(gridIndices);
+    gridIndexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    gridIndexBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
+    gridIndexBufferDesc.CPUAccessFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA gridInitData = {};
+    gridInitData.pSysMem = gridIndices;
+    gridInitData.SysMemPitch = 0;
+    gridInitData.SysMemSlicePitch = 0;
+
+	if (FAILED(g_D3DDevice->CreateBuffer(&gridIndexBufferDesc, &gridInitData, &g_gridIndexBuffer)))
+	{
+        OutputDebugStringA("Failed to create a new grid index buffer");
+        return S_FALSE;
+	}
+
+#ifdef _DEBUG
+    g_gridIndexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_gridIndexBufferID) - 1, c_gridIndexBufferID);
+#endif
+
 	return S_OK;
 }
 
@@ -672,20 +856,6 @@ void Update(double deltaInSeconds)
 {
 	static double desiredTime = 1.0f / 4.0f; // 1 second / desired number of seconds
 	static double incrementor = desiredTime;
-	if (g_clearColor[2] > 1.0f)
-		incrementor = -1 * desiredTime;
-
-	if (g_clearColor[2] < 0.0f)
-		incrementor = desiredTime;
-
-	// we want the range from 0 to 1 (and 1 to zero) to last for the desired number of seconds
-	// in order to do this, the deltaInSeconds tell us how long the last frame took to process
-	// we need to take that value and break it up based on our incrementor.
-	// so, if we want to measure how much of that 'time' to use in each second, we need to take
-	// the reciprocal of the desired number of seconds.
-	// eg: 1/4 means that in 1 second, we will have traveled .25 of the desired 'unit' of travel.
-	// in this case, we want that 'desired' unit of travel to be time.
-	g_clearColor[2] += static_cast<float>(incrementor * deltaInSeconds);
 
 	/// smoothly rotate our object
 	g_increment += 0.1f * static_cast<float>(deltaInSeconds);
@@ -713,11 +883,21 @@ void Render(
 		0.0f, 1.0f
 	};
 
-	g_mWorld = DirectX::XMMatrixRotationY(g_increment) * DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+	g_mWorld = DirectX::XMMatrixIdentity();
 	g_mView = DirectX::XMMatrixIdentity();
 	g_mProjection = DirectX::XMMatrixIdentity();
 
-	DirectX::XMVECTOR Eye = DirectX::XMVectorSet(0.0f, 0.0f, 2.0f, 1.0f);
+    float polar = degreesToRadians(static_cast<float>(g_deltaMouseX)), azimuth = degreesToRadians(static_cast<float>(g_deltaMouseY));
+    azimuth = clamp(azimuth, -DirectX::XM_PIDIV2, DirectX::XM_PIDIV2);
+    g_cameraRadius = clamp(g_cameraRadius, 1.0f, 10.0f);
+
+	float y = g_cameraRadius * sinf(azimuth);
+    float r = g_cameraRadius * cosf(azimuth);
+    float x = r * cosf(polar);
+    float z = r * sinf(polar);
+
+
+    DirectX::XMVECTOR Eye = DirectX::XMVectorSet(x, y, z, 1.0f);
 	DirectX::XMVECTOR At = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 	DirectX::XMVECTOR Up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
 	g_mView = DirectX::XMMatrixLookAtLH(Eye, At, Up);
@@ -728,15 +908,15 @@ void Render(
 	float aspect = width / height;
 	g_mProjection = DirectX::XMMatrixPerspectiveFovLH(degreesToRadians(78), aspect, 0.01f, 100.0f);
 
-	DirectX::XMMATRIX mvp = g_mWorld * g_mView * g_mProjection;
-
 	// Update constant buffer
-	D3D11_MAPPED_SUBRESOURCE mappedSubresource;
-	g_D3DContext->Map(g_mvpConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
-	ConstantBuffer* constants = (ConstantBuffer*)(mappedSubresource.pData);
-	constants->mModelViewProjection = DirectX::XMMatrixTranspose(mvp);
-	g_D3DContext->Unmap(g_mvpConstantBuffer, 0);
-
+    {
+        DirectX::XMMATRIX mvp = g_mWorld * g_mView * g_mProjection;
+        D3D11_MAPPED_SUBRESOURCE mappedSubresource;
+        g_D3DContext->Map(g_mvpConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
+        ConstantBuffer* constants = (ConstantBuffer*)(mappedSubresource.pData);
+        constants->mModelViewProjection = DirectX::XMMatrixTranspose(mvp);
+        g_D3DContext->Unmap(g_mvpConstantBuffer, 0);
+    }
 	// Clear the back buffer to the clear color
 	g_D3DContext->ClearRenderTargetView(renderTargetView, g_clearColor);
 	g_D3DContext->ClearDepthStencilView(g_depthBufferView, D3D11_CLEAR_DEPTH, 1.0f, 0);
@@ -747,8 +927,30 @@ void Render(
 
 	g_D3DContext->OMSetRenderTargets(1, &g_D3DRenderTargetView, nullptr);
 
+	g_D3DContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+    g_D3DContext->IASetInputLayout(g_inputLayout);
+
+	g_D3DContext->VSSetShader(g_vertexShader, nullptr, 0);
+    g_D3DContext->PSSetShader(g_pixelShader, nullptr, 0);
+    g_D3DContext->VSSetConstantBuffers(0, 1, &g_mvpConstantBuffer);
+
+    g_D3DContext->IASetVertexBuffers(0, 1, &g_gridVertexBuffer, &g_stride, &g_offset);
+    g_D3DContext->IASetIndexBuffer(g_gridIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+
+    g_D3DContext->DrawIndexed(g_numGridIndices, 0, 0);
+
+	g_mWorld = DirectX::XMMatrixRotationY(g_increment) * DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+    {
+        DirectX::XMMATRIX mvp = g_mWorld * g_mView * g_mProjection;
+        D3D11_MAPPED_SUBRESOURCE mappedSubresource;
+        g_D3DContext->Map(g_mvpConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
+        ConstantBuffer* constants = (ConstantBuffer*)(mappedSubresource.pData);
+        constants->mModelViewProjection = DirectX::XMMatrixTranspose(mvp);
+        g_D3DContext->Unmap(g_mvpConstantBuffer, 0);
+	}
+
 	g_D3DContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	g_D3DContext->IASetInputLayout(g_inputLayout);
+    g_D3DContext->IASetInputLayout(g_inputLayout);
 
 	g_D3DContext->VSSetShader(g_vertexShader, nullptr, 0);
 	g_D3DContext->PSSetShader(g_pixelShader, nullptr, 0);

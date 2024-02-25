@@ -7,9 +7,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "01_WindowsApp", "01_Windows
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "02_D3D11App", "02_D3D11App\02_D3D11App.vcxproj", "{5AF65130-924F-452F-BC80-6671E342584F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "03_BackBufferApp", "03_BackBufferApp\03_BackBufferApp.vcxproj", "{EA3DACB6-A16E-4C9D-8E35-8F53DC0E6F03}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "03_RenderingAndResourcesApp", "03_BackBufferApp\03_BackBufferApp.vcxproj", "{EA3DACB6-A16E-4C9D-8E35-8F53DC0E6F03}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "04_3DBasicApp", "04_3DBasicApp\04_3DBasicApp.vcxproj", "{EBB80C2E-8FB5-4FDE-B3D6-7886A71E6268}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "05_3DCameraApp", "05_3DCameraApp\05_3DCameraApp.vcxproj", "{4C750872-B1A4-4043-989D-7473A8818BAF}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "05_transformations", "05_transformations\05_transformations.vcxproj", "{0332625B-6E1B-4991-8EDC-D6C8775D22A3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +55,22 @@ Global
 		{EBB80C2E-8FB5-4FDE-B3D6-7886A71E6268}.Release|x64.Build.0 = Release|x64
 		{EBB80C2E-8FB5-4FDE-B3D6-7886A71E6268}.Release|x86.ActiveCfg = Release|Win32
 		{EBB80C2E-8FB5-4FDE-B3D6-7886A71E6268}.Release|x86.Build.0 = Release|Win32
+		{4C750872-B1A4-4043-989D-7473A8818BAF}.Debug|x64.ActiveCfg = Debug|x64
+		{4C750872-B1A4-4043-989D-7473A8818BAF}.Debug|x64.Build.0 = Debug|x64
+		{4C750872-B1A4-4043-989D-7473A8818BAF}.Debug|x86.ActiveCfg = Debug|Win32
+		{4C750872-B1A4-4043-989D-7473A8818BAF}.Debug|x86.Build.0 = Debug|Win32
+		{4C750872-B1A4-4043-989D-7473A8818BAF}.Release|x64.ActiveCfg = Release|x64
+		{4C750872-B1A4-4043-989D-7473A8818BAF}.Release|x64.Build.0 = Release|x64
+		{4C750872-B1A4-4043-989D-7473A8818BAF}.Release|x86.ActiveCfg = Release|Win32
+		{4C750872-B1A4-4043-989D-7473A8818BAF}.Release|x86.Build.0 = Release|Win32
+		{0332625B-6E1B-4991-8EDC-D6C8775D22A3}.Debug|x64.ActiveCfg = Debug|x64
+		{0332625B-6E1B-4991-8EDC-D6C8775D22A3}.Debug|x64.Build.0 = Debug|x64
+		{0332625B-6E1B-4991-8EDC-D6C8775D22A3}.Debug|x86.ActiveCfg = Debug|Win32
+		{0332625B-6E1B-4991-8EDC-D6C8775D22A3}.Debug|x86.Build.0 = Debug|Win32
+		{0332625B-6E1B-4991-8EDC-D6C8775D22A3}.Release|x64.ActiveCfg = Release|x64
+		{0332625B-6E1B-4991-8EDC-D6C8775D22A3}.Release|x64.Build.0 = Release|x64
+		{0332625B-6E1B-4991-8EDC-D6C8775D22A3}.Release|x86.ActiveCfg = Release|Win32
+		{0332625B-6E1B-4991-8EDC-D6C8775D22A3}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

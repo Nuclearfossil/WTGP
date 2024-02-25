@@ -26,12 +26,12 @@ ID3D11RenderTargetView* g_D3DRenderTargetView;  // The Render Target View
 ID3D11VertexShader* g_vertexShader = nullptr;   // The Vertex Shader resource used in this example
 ID3D11PixelShader* g_pixelShader = nullptr;     // The Pixel Shader resource used in this example
 ID3D11InputLayout* g_inputLayout = nullptr;     // The Input layout resource used for the vertex shader
-ID3D11Buffer* g_vertexBuffer = nullptr;         // The D3D11 Buffer used to hold the vertex data.
+ID3D11Buffer* g_cubeVertexBuffer = nullptr;         // The D3D11 Buffer used to hold the vertex data.
 
 float g_clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 double g_delta;
 
-UINT g_numVerts = 0;
+UINT g_numCubeVerts = 0;
 UINT g_stride = 0;
 UINT g_offset = 0;
 
@@ -425,7 +425,7 @@ HRESULT CreateD3DResources()
     // In this case, we have 6 elements per vertex.
 	g_stride = 6 * sizeof(float);
 	g_offset = 0;
-	g_numVerts = sizeof(vertexData) / g_stride;
+	g_numCubeVerts = sizeof(vertexData) / g_stride;
 
 	D3D11_BUFFER_DESC vertexBufferDesc = {};
 	vertexBufferDesc.ByteWidth = sizeof(vertexData);
@@ -437,7 +437,7 @@ HRESULT CreateD3DResources()
     vertexSubresourceData.SysMemPitch = 0;
     vertexSubresourceData.SysMemSlicePitch = 0;
 
-    if (!SUCCEEDED(g_D3DDevice->CreateBuffer(&vertexBufferDesc, &vertexSubresourceData, &g_vertexBuffer)))
+    if (!SUCCEEDED(g_D3DDevice->CreateBuffer(&vertexBufferDesc, &vertexSubresourceData, &g_cubeVertexBuffer)))
     {
         OutputDebugStringA("Failed to create the vertex buffer!");
         return S_FALSE;
@@ -494,9 +494,9 @@ void Render(
     g_D3DContext->VSSetShader(g_vertexShader, nullptr, 0);
     g_D3DContext->PSSetShader(g_pixelShader, nullptr, 0);
 
-    g_D3DContext->IASetVertexBuffers(0, 1, &g_vertexBuffer, &g_stride, &g_offset);
+    g_D3DContext->IASetVertexBuffers(0, 1, &g_cubeVertexBuffer, &g_stride, &g_offset);
 
-    g_D3DContext->Draw(g_numVerts, 0);
+    g_D3DContext->Draw(g_numCubeVerts, 0);
 
 	// Present the back buffer to the screen
 	swapChain->Present(1, 0);

@@ -1,9 +1,8 @@
 // 04_3DBasicApp.cpp : Defines the entry point for the application.
 //
 
-#include "pch.h"
 #include "framework.h"
-#include "01_WindowsApp.h"
+#include "05_transformations.h"
 
 #include <d3d11.h>
 #include <directxmath.h>
@@ -18,7 +17,7 @@
 #pragma comment( lib, "dxguid.lib")
 #pragma comment( lib, "dxgi.lib")
 
-#define MAX_LOADSTRING 100
+#define MAX_LOADSTRING 1000
 
 // Global Variables:
 HINSTANCE hInst;                                // current instance
@@ -110,15 +109,15 @@ inline float degreesToRadians(float degs)
 /// @return a D3D11 Texture 2D to work with
 ID3D11Texture2D* GetBackBuffer(IDXGISwapChain* swapChain)
 {
-    ID3D11Texture2D* backBuffer = nullptr;
-    HRESULT hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backBuffer));
-    if (FAILED(hr)) {
-        // Handle error
-        OutputDebugStringA("Failed to get the Back buffer from the swapchain. Aborting.\n");
-        return nullptr;
-    }
+	ID3D11Texture2D* backBuffer = nullptr;
+	HRESULT hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backBuffer));
+	if (FAILED(hr)) {
+		// Handle error
+		OutputDebugStringA("Failed to get the Back buffer from the swapchain. Aborting.\n");
+		return nullptr;
+	}
 
-    return backBuffer;
+	return backBuffer;
 }
 
 /// @brief Windows Main entry point
@@ -137,14 +136,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	// Initialize global strings
 	LoadStringW(hInstance, IDS_APP_TITLE, g_szTitle, MAX_LOADSTRING);
-	LoadStringW(hInstance, IDC_MY01WINDOWSAPP, g_szWindowClass, MAX_LOADSTRING);
+	LoadStringW(hInstance, IDC_MY05TRANSFORMATIONS, g_szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
 
 	// Perform application initialization:
 	if (!InitInstance(hInstance, nCmdShow))
 		return -1;
 
-	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY01WINDOWSAPP));
+	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY05TRANSFORMATIONS));
 
 	if (!SUCCEEDED(CreateD3D11DeviceAndContext(g_hWnd, 1024, 768)))
 		return -2;
@@ -192,7 +191,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_inputLayout->Release();
 	g_cubeVertexBuffer->Release();
 	g_cubeIndexBuffer->Release();
-
 	g_mvpConstantBuffer->Release();
 	g_depthBufferView->Release();
 	g_depthStencilState->Release();
@@ -230,10 +228,10 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
 	wcex.hInstance = hInstance;
-	wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_MY01WINDOWSAPP));
+	wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_MY05TRANSFORMATIONS));
 	wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)GetStockObject(DKGRAY_BRUSH);
-	wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_MY01WINDOWSAPP);
+	wcex.lpszMenuName = MAKEINTRESOURCEW(IDI_MY05TRANSFORMATIONS);
 	wcex.lpszClassName = g_szWindowClass;
 	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
@@ -334,9 +332,9 @@ HRESULT CreateD3D11DeviceAndContext(HWND hWnd,
 	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
 	swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
-    swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    swapChainDesc.SampleDesc.Count = 1;
-    swapChainDesc.SampleDesc.Quality = 0;
+	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	swapChainDesc.SampleDesc.Count = 1;
+	swapChainDesc.SampleDesc.Quality = 0;
 	swapChainDesc.OutputWindow = hWnd;
 	swapChainDesc.Windowed = TRUE;
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
@@ -350,11 +348,11 @@ HRESULT CreateD3D11DeviceAndContext(HWND hWnd,
 		nullptr,                    // Third Parameter
 #ifdef _DEBUG
 		D3D11_CREATE_DEVICE_DEBUG,  // Fourth Parameter - use D3D11_CREATE_DEVICE_DEBUG
-									// if you want additional debug spew in the console.
+		// if you want additional debug spew in the console.
 #else
 		0,                          // Fourth Parameter
 #endif // DEBUG
-		&featureLevel,              // Fifth Parameter
+		& featureLevel,              // Fifth Parameter
 		1,                          // Sixth Parameter
 		D3D11_SDK_VERSION,          // Seventh Parameter
 		&swapChainDesc,             // Eighth Parameter
@@ -396,9 +394,9 @@ HRESULT CreateD3D11Context(ID3D11Device* device, ID3D11DeviceContext** context)
 HRESULT LoadAndCompileShaders()
 {
 	// creation of Shader Resources
-	ID3DBlob* vsBlob;
-	ID3DBlob* psBlob;
-	ID3DBlob* shaderCompileErrorBlob;
+	ID3DBlob* vsBlob = nullptr;
+	ID3DBlob* psBlob = nullptr;
+	ID3DBlob* shaderCompileErrorBlob = nullptr;
 
 	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
 #ifdef _DEBUG
@@ -413,7 +411,7 @@ HRESULT LoadAndCompileShaders()
 #endif
 
 	// We compile the Vertex shader from the `vertexShaderSource` source string and check for validity
-	if (!SUCCEEDED(D3DCompileFromFile(L"CombinedShader.hlsl", // Shader File
+	HRESULT result = D3DCompileFromFile(L"CombinedShader.hlsl", // Shader File
 		nullptr,                        // Optional array of D3D_SHADER_MARCO defining macros used in compilation
 		nullptr,                        // optional pointer to an ID3DInclude that defines how the compiler handles include files
 		"vs_main",                      // Entry-point of the shader
@@ -421,8 +419,9 @@ HRESULT LoadAndCompileShaders()
 		dwShaderFlags,                  // Any flags that drive D3D compile constants. Things like `D3DCOMPILE_DEBUG`
 		0,                              // Any flags for compiler effect constants. For now we can ignore
 		&vsBlob,                        // An interface to the compiled shader
-		&shaderCompileErrorBlob)))      // An interface to any errors from the compile process.
-	{
+		&shaderCompileErrorBlob);      // An interface to any errors from the compile process.
+	if (!SUCCEEDED(result))
+		{
 		OutputDebugStringA(static_cast<const char*>(shaderCompileErrorBlob->GetBufferPointer()));
 		shaderCompileErrorBlob->Release();
 		return S_FALSE;
@@ -500,7 +499,7 @@ HRESULT LoadAndCompileShaders()
 #ifdef _DEBUG
 	g_inputLayout->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_inputLayoutID) - 1, c_inputLayoutID);
 #endif // DEBUG
-    return S_OK;
+	return S_OK;
 }
 
 /// @brief Create the Vertex and Index buffers, as well as the input layout
