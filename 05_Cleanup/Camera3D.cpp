@@ -13,6 +13,7 @@ void Camera3D::Initialize()
     m_Projection = DirectX::XMMatrixIdentity();
     m_ViewProjection = DirectX::XMMatrixIdentity();
     m_ModelViewProjection = DirectX::XMMatrixIdentity();
+    m_invertY = false;
 
     m_CameraRadius = 2.0f;
 }
@@ -27,6 +28,11 @@ void Camera3D::ChangeRadius(float delta)
 void Camera3D::SetProjection(float width, float height, float aspect)
 {
     m_Projection = DirectX::XMMatrixPerspectiveFovLH(degreesToRadians(78), aspect, 0.01f, 100.0f);
+}
+
+void Camera3D::SetInvertY(bool invertY)
+{
+    m_invertY = invertY;
 }
 
 void Camera3D::RotateAroundPoint(DirectX::XMVECTOR point, float polar, float azimuth)

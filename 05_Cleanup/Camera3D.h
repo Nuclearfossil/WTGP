@@ -1,4 +1,7 @@
 #pragma once
+
+#include <directxmath.h>
+
 class Camera3D
 {
 public:
@@ -11,6 +14,7 @@ public:
     void Update(double deltaTime);
 
     void SetProjection(float width, float height, float projection);
+    void SetInvertY(bool invertY);
 
     void ChangeRadius(float delta);
 
@@ -26,4 +30,5 @@ private:
     DirectX::XMMATRIX m_ModelViewProjection;
 
     float m_CameraRadius;           // distance of the camera to the polar center point
+    bool m_invertY;                 // invert the Y axis
 };
