@@ -23,27 +23,28 @@
 
 #define MAX_LOADSTRING 1000
 
+struct GameData
+{
+    int m_lastX = 0;
+    int m_lastY = 0;
+
+    int m_deltaMouseX = 0;
+    int m_deltaMouseY = 0;
+    float m_wheelDelta = 0.f;
+
+    double m_delta = 0.0;
+
+    bool m_InvertYAxis = false;
+
+    float m_increment = 0;
+};
+
 // Global Variables:
 HINSTANCE hInst;                                // current instance
 HWND g_hWnd;                                    // Handle to the main window
 RECT g_winRect;                                 // Window rectangle
 WCHAR g_szTitle[MAX_LOADSTRING];                // The title bar text
 WCHAR g_szWindowClass[MAX_LOADSTRING];          // The main window class name
-
-
-Camera3D g_Camera;								// Camera
-
-int g_lastX = 0;
-int g_lastY = 0;
-
-int g_deltaMouseX = 0;
-int g_deltaMouseY = 0;
-
-double g_delta;
-
-bool g_InvertYAxis = false;
-
-float g_increment = 0;
 
 // Forward declare message handler from imgui_impl_win32.cpp
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -52,17 +53,17 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 // Windows specific functions ------------------------------------------------
 ATOM                MyRegisterClass(HINSTANCE hInstance);
-BOOL                InitInstance(HINSTANCE, int);
+BOOL				InitInstance(HINSTANCE, int, GameData* gameDataPtr);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 
 
 HRESULT InitIMGUI(GraphicsDX11& graphics);
 void DestroyIMGUI();
 
-void DrawUI();
+void DrawUI(GameData& data);
 
 // Additional functions
-void Update(double deltaInSeconds, GraphicsDX11& graphics);
+void Update(double deltaInSeconds, GraphicsDX11& graphics, Camera3D& camera, GameData& data);
 
 // [END] - Forward declarations of functions: =============================================================================================
 /// @brief Windows Main entry point
@@ -79,7 +80,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	GraphicsDX11 graphicsDX11;
+	GameData data;	// data related to the application
+
+    Camera3D camera;			// Camera
+	GraphicsDX11 graphicsDX11;  // Graphics system
 
 	// Initialize global strings
 	LoadStringW(hInstance, IDS_APP_TITLE, g_szTitle, MAX_LOADSTRING);
@@ -87,12 +91,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	MyRegisterClass(hInstance);
 
 	// Perform application initialization:
-	if (!InitInstance(hInstance, nCmdShow))
+	if (!InitInstance(hInstance, nCmdShow, &data))
 		return -1;
 
 	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY01WINDOWSAPP));
 
-	g_Camera.Initialize();
+	camera.Initialize();
 
 	if (!SUCCEEDED(graphicsDX11.CreateD3D11DeviceAndContext(g_hWnd, 1024, 768)))
 		return -2;
@@ -137,11 +141,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 
 		// Let's throttle the application so that we render at a constant speed, regardless of processor speed.
-        Update(deltaSeconds, graphicsDX11);
+        Update(deltaSeconds, graphicsDX11, camera, data);
 
-		DrawUI();
+		DrawUI(data);
 
-		g_Camera.SetInvertY(g_InvertYAxis);
+		camera.SetInvertY(data.m_InvertYAxis);
 
 		graphicsDX11.Render(g_hWnd, g_winRect, deltaSeconds);
 		lastStart = current;
@@ -182,7 +186,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 /// @param hInstance application instance handle
 /// @param nCmdShow Ignore
 /// @return true if we are able to initialize the instance of this application
-BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
+BOOL InitInstance(HINSTANCE hInstance, int nCmdShow,  GameData* gameDataPtr)
 {
 	hInst = hInstance; // Store instance handle in our global variable
 
@@ -196,7 +200,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 		nullptr,
 		nullptr,
 		hInstance,
-		nullptr);
+        gameDataPtr);
 
 	if (!hWnd)
 		return FALSE;
@@ -222,6 +226,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	switch (message)
 	{
+    case WM_CREATE:
+		{
+		/// A little trick to avoid using a singleton: https://learn.microsoft.com/en-us/windows/win32/learnwin32/managing-application-state-
+			CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
+			GameData* pState = reinterpret_cast<GameData*>(pCreate->lpCreateParams);
+			SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)pState);
+		}
+        break;
+
 	case WM_COMMAND:
 	{
 		int wmId = LOWORD(wParam);
@@ -244,24 +257,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		int xPos = GET_X_LPARAM(lParam);
         int yPos = GET_Y_LPARAM(lParam);
 
-        if (wParam == MK_LBUTTON)
+		LONG_PTR ptr = GetWindowLongPtr(hWnd, GWLP_USERDATA);
+        GameData* gameData = reinterpret_cast<GameData*>(ptr);
+
+		if (wParam == MK_LBUTTON)
 		{
-            g_deltaMouseX += g_lastX - xPos;
-            g_deltaMouseY += g_InvertYAxis ? (g_lastY - yPos) : -(g_lastY - yPos);
+            gameData->m_deltaMouseX += gameData->m_lastX - xPos;
+            gameData->m_deltaMouseY += gameData->m_InvertYAxis ? (gameData->m_lastY - yPos) : -(gameData->m_lastY - yPos);
         }
 
-		g_lastX = xPos;
-        g_lastY = yPos;
+		gameData->m_lastX = xPos;
+        gameData->m_lastY = yPos;
     }
 	break;
     case WM_MOUSEWHEEL:
 	{
+        LONG_PTR ptr = GetWindowLongPtr(hWnd, GWLP_USERDATA);
+        GameData* gameData = reinterpret_cast<GameData*>(ptr);
+
 		float modifier = 0.01f;
+
         if (MK_SHIFT == GET_KEYSTATE_WPARAM(wParam))
             modifier = 0.001f;
 
-        float wheel = static_cast<float>(GET_WHEEL_DELTA_WPARAM(wParam)) * modifier;
-        g_Camera.ChangeRadius(wheel);
+        gameData->m_wheelDelta = static_cast<float>(GET_WHEEL_DELTA_WPARAM(wParam)) * modifier;
 	}
     break;
 
@@ -272,14 +291,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		EndPaint(hWnd, &ps);
 	}
 	break;
+
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
+
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 	return 0;
 }
+
 /// @brief Initialize Everything relating to ImGui
 /// @return S_OK if successful
 HRESULT InitIMGUI(GraphicsDX11& graphics)
@@ -306,7 +328,7 @@ HRESULT InitIMGUI(GraphicsDX11& graphics)
 }
 
 /// @brief Draw our UI
-void DrawUI()
+void DrawUI(GameData& data)
 {
 	// Start the Dear ImGui frame
     ImGui_ImplDX11_NewFrame();
@@ -316,7 +338,7 @@ void DrawUI()
 
     ImGui::Begin("App Settings");
 
-    ImGui::Checkbox("Invert Y Axis", &g_InvertYAxis); // Edit if we want to invert the Y axis
+    ImGui::Checkbox("Invert Y Axis", &data.m_InvertYAxis); // Edit if we want to invert the Y axis
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
@@ -337,7 +359,7 @@ void DestroyIMGUI()
 
 /// @brief Application Update function
 /// @param deltaInSeconds time between frames in seconds
-void Update(double deltaInSeconds, GraphicsDX11& graphics)
+void Update(double deltaInSeconds, GraphicsDX11& graphics, Camera3D& camera, GameData& data)
 {
     // This could be cached, as we don't intend to resize the window.
     RECT winRect;
@@ -355,25 +377,29 @@ void Update(double deltaInSeconds, GraphicsDX11& graphics)
     float height = static_cast<float>(winRect.bottom - winRect.top);
     float aspect = width / height;
 
-    g_Camera.SetProjection(width, height, aspect);
+    camera.SetProjection(width, height, aspect);
 
 	static double desiredTime = 1.0f / 4.0f; // 1 second / desired number of seconds
 	static double incrementor = desiredTime;
 
 	/// smoothly rotate our object
-	g_increment += 0.1f * static_cast<float>(deltaInSeconds);
-	if (g_increment > 360.0f) g_increment -= 360.0f;
+    data.m_increment += 0.1f * static_cast<float>(deltaInSeconds);
+    if (data.m_increment > 360.0f)
+        data.m_increment -= 360.0f;
 
-	float polar = degreesToRadians(static_cast<float>(g_deltaMouseX)), azimuth = degreesToRadians(static_cast<float>(g_deltaMouseY));
+	float polar = degreesToRadians(static_cast<float>(data.m_deltaMouseX)), azimuth = degreesToRadians(static_cast<float>(data.m_deltaMouseY));
     azimuth = clamp(azimuth, -DirectX::XM_PIDIV2, DirectX::XM_PIDIV2);
     DirectX::XMVECTOR At = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 
-    g_Camera.RotateAroundPoint(At, polar, azimuth);
+    camera.RotateAroundPoint(At, polar, azimuth);
+    camera.ChangeRadius(data.m_wheelDelta);
 
-	g_Camera.Update(deltaInSeconds);
+	camera.Update(deltaInSeconds);
 
 	graphics.SetViewport(viewport);
-	graphics.SetMVP(g_Camera.GetMVP());
-    graphics.SetVP(g_Camera.GetVP());
+	graphics.SetMVP(camera.GetMVP());
+    graphics.SetVP(camera.GetVP());
+
+	data.m_wheelDelta = 0.f;
 }
 

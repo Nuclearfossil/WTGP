@@ -15,11 +15,27 @@ constexpr char c_depthStencilBufferID[] = "depthStencilBuffer";
 constexpr char c_rasterizerStateID[] = "rasterizerState";
 #endif // DEBUG
 
-GraphicsDX11::GraphicsDX11()
+GraphicsDX11::GraphicsDX11() : m_D3DDevice(nullptr),
+                               m_SwapChain(nullptr),
+                               m_D3DContext(nullptr),
+                               m_D3DRenderTargetView(nullptr),
+                               m_vertexShader(nullptr),
+                               m_pixelShader(nullptr),
+                               m_inputLayout(nullptr),
+                               m_cubeVertexBuffer(nullptr),
+                               m_cubeIndexBuffer(nullptr),
+                               m_gridVertexBuffer(nullptr),
+                               m_gridIndexBuffer(nullptr),
+                               m_mvpConstantBuffer(nullptr),
+                               m_depthBufferView(nullptr),
+                               m_depthStencilState(nullptr),
+                               m_rasterizerState(nullptr),
+                               m_viewport(D3D11_VIEWPORT()),
+                               m_VP(DirectX::XMMatrixIdentity()),
+                               m_MVP(DirectX::XMMatrixIdentity())
+
 {
-
 }
-
 
 /// @brief Utility function for getting the Texture that represents the backbuffer
 /// @param swapChain DXGI Swapchain to work from

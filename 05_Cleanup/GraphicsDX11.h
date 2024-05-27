@@ -51,15 +51,15 @@ private:
     ID3D11DeviceContext* m_D3DContext;             // The Direct3D Device Context
     ID3D11RenderTargetView* m_D3DRenderTargetView; // The Render Target View
 
-    ID3D11VertexShader* m_vertexShader = nullptr; // The Vertex Shader resource used in this example
-    ID3D11PixelShader* m_pixelShader = nullptr;   // The Pixel Shader resource used in this example
-    ID3D11InputLayout* m_inputLayout = nullptr;   // The Input layout resource used for the vertex shader
+    ID3D11VertexShader* m_vertexShader; // The Vertex Shader resource used in this example
+    ID3D11PixelShader* m_pixelShader;   // The Pixel Shader resource used in this example
+    ID3D11InputLayout* m_inputLayout;   // The Input layout resource used for the vertex shader
 
-    ID3D11Buffer* m_cubeVertexBuffer = nullptr; // The D3D11 Buffer used to hold the vertex data for the cube.
-    ID3D11Buffer* m_cubeIndexBuffer = nullptr;  // The D3D11 Index Buffer for the cube
+    ID3D11Buffer* m_cubeVertexBuffer; // The D3D11 Buffer used to hold the vertex data for the cube.
+    ID3D11Buffer* m_cubeIndexBuffer;  // The D3D11 Index Buffer for the cube
 
-    ID3D11Buffer* m_gridVertexBuffer = nullptr; // The D3D11 Buffer used to hold the vertex data for the grid
-    ID3D11Buffer* m_gridIndexBuffer = nullptr;  // The D3D11 Index Buffer for the grid
+    ID3D11Buffer* m_gridVertexBuffer; // The D3D11 Buffer used to hold the vertex data for the grid
+    ID3D11Buffer* m_gridIndexBuffer;  // The D3D11 Index Buffer for the grid
 
     ID3D11Buffer* m_mvpConstantBuffer = nullptr;  // The constant buffer for the WVP matrices
     ID3D11DepthStencilView* m_depthBufferView;    // The Depth/Stencil view buffer
