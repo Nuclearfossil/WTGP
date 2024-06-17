@@ -19,8 +19,6 @@ class GraphicsDX11
 public:
     GraphicsDX11();
 
-    void Render(HWND hWnd, RECT winRect);
-
     // D3D11 related functions ---------------------------------------------------
     HRESULT CreateD3D11DeviceAndContext(HWND hWnd, UINT width, UINT height);
     HRESULT CreateD3D11Context(ID3D11Device* device, ID3D11DeviceContext** context);

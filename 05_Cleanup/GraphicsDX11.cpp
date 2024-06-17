@@ -65,7 +65,8 @@ ID3D11Texture2D* GraphicsDX11::GetBackBuffer(IDXGISwapChain* swapChain)
 /// @return S_OK if we're successfully created the context and device
 HRESULT GraphicsDX11::CreateD3D11DeviceAndContext(HWND hWnd,
     UINT width,
-    UINT height) {
+    UINT height)
+{
     HRESULT hr = S_OK;
 
     // Define swap chain descriptor
@@ -105,7 +106,8 @@ HRESULT GraphicsDX11::CreateD3D11DeviceAndContext(HWND hWnd,
         nullptr,           // Eleventh Parameter
         &m_D3DContext);    // Twelfth Parameter
 
-    if (FAILED(hr)) {
+    if (FAILED(hr))
+    {
         // TODO: Add logging as to why this failed.
         return hr;
     }
@@ -182,7 +184,6 @@ HRESULT GraphicsDX11::LoadAndCompileShaders() {
     m_vertexShader->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_vertexShaderID) - 1, c_vertexShaderID);
 #endif // DEBUG
 
-
     // We compile the Pixel shader from the `pixelShaderSource` source string and check for validity
     if (!SUCCEEDED(D3DCompileFromFile(L"CombinedShader.hlsl",
             nullptr,
@@ -215,7 +216,8 @@ HRESULT GraphicsDX11::LoadAndCompileShaders() {
 #endif // DEBUG
 
     // Create Input Layout - this describes the format of the vertex data we will use.
-    D3D11_INPUT_ELEMENT_DESC inputElementDesc[] = {
+    D3D11_INPUT_ELEMENT_DESC inputElementDesc[] =
+    {
         { "POS", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "COL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
     };
@@ -246,117 +248,72 @@ HRESULT GraphicsDX11::CreateVertexAndIndexBuffers() {
     // 6 elements per vertex:
     //   - X and Y co-ordinates
     //   - Colours for each vertex representing the Red, Green, Blue and Alpha channels.
-    float vertexData[] = {
-        //    x,     y,     z,    r,    g,    b,    a
-        -0.5f,
-        -0.5f,
-        -0.5f,
-        0.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        -0.5f,
-        -0.5f,
-        0.5f,
-        0.0f,
-        1.0f,
-        0.0f,
-        1.0f,
-        -0.5f,
-        0.5f,
-        -0.5f,
-        1.0f,
-        0.0f,
-        0.0f,
-        1.0f,
-        -0.5f,
-        0.5f,
-        0.5f,
-        0.0f,
-        1.0f,
-        0.0f,
-        1.0f,
-        0.5f,
-        -0.5f,
-        -0.5f,
-        0.0f,
-        0.0f,
-        1.0f,
-        1.0f,
-        0.5f,
-        -0.5f,
-        0.5f,
-        0.0f,
-        1.0f,
-        0.0f,
-        1.0f,
-        0.5f,
-        0.5f,
-        -0.5f,
-        1.0f,
-        0.0f,
-        0.0f,
-        1.0f,
-        0.5f,
-        0.5f,
-        0.5f,
-        0.0f,
-        0.0f,
-        1.0f,
-        1.0f,
+    float vertexData[] =
+    {
+    //      x,     y,     z,     r,     g,     b,     a
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f,  1.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,
+        0.5f,  -0.5f, -0.5f,  0.0f,  0.0f,  1.0f,  1.0f,
+        0.5f,  -0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,
+        0.5f,   0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,
+        0.5f,   0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,
     };
 
-    float gridVertexData[]{
-        //      x,    y,     z,    r,    g,    b,    a
-        // columns
+    float gridVertexData[] =
+    {
+    //      x,    y,     z,    r,    g,    b,    a
+    // columns
         -5.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -5.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+        -5.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
         -4.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -4.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+        -4.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
         -3.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -3.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+        -3.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
         -2.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -2.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+        -2.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
         -1.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -1.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        0.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        0.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        1.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        1.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        2.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        2.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        3.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        3.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        4.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        4.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        5.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        5.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+        -1.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+         0.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+         0.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+         1.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+         1.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+         2.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+         2.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+         3.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+         3.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+         4.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+         4.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+         5.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+         5.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
         // rows
         -5.0f, 0.0f, -5.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        5.0f, 0.0f, -5.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+         5.0f, 0.0f, -5.0f, 1.0f, 0.0f, 0.0f, 1.0f,
         -5.0f, 0.0f, -4.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        5.0f, 0.0f, -4.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+         5.0f, 0.0f, -4.0f, 1.0f, 0.0f, 0.0f, 1.0f,
         -5.0f, 0.0f, -3.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        5.0f, 0.0f, -3.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+         5.0f, 0.0f, -3.0f, 1.0f, 0.0f, 0.0f, 1.0f,
         -5.0f, 0.0f, -2.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        5.0f, 0.0f, -2.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+         5.0f, 0.0f, -2.0f, 1.0f, 0.0f, 0.0f, 1.0f,
         -5.0f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        5.0f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -5.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        5.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -5.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        5.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -5.0f, 0.0f, 2.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        5.0f, 0.0f, 2.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -5.0f, 0.0f, 3.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        5.0f, 0.0f, 3.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -5.0f, 0.0f, 4.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        5.0f, 0.0f, 4.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -5.0f, 0.0f, 5.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        5.0f, 0.0f, 5.0f, 1.0f, 0.0f, 0.0f, 1.0f
+         5.0f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        -5.0f, 0.0f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+         5.0f, 0.0f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        -5.0f, 0.0f,  1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+         5.0f, 0.0f,  1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        -5.0f, 0.0f,  2.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+         5.0f, 0.0f,  2.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        -5.0f, 0.0f,  3.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+         5.0f, 0.0f,  3.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        -5.0f, 0.0f,  4.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+         5.0f, 0.0f,  4.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        -5.0f, 0.0f,  5.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+         5.0f, 0.0f,  5.0f, 1.0f, 0.0f, 0.0f, 1.0f
     };
 
-    WORD gridIndices[] = {
+    WORD gridIndices[] =
+    {
         0, 1,
         2, 3,
         4, 5,
@@ -382,7 +339,8 @@ HRESULT GraphicsDX11::CreateVertexAndIndexBuffers() {
     };
 
     // Create index buffer
-    WORD indices[] = {
+    WORD indices[] =
+    {
         0, 6, 4,
         0, 2, 6,
 
@@ -554,7 +512,8 @@ HRESULT GraphicsDX11::CreateDepthStencilAndRasterizerState() {
 
 /// @brief Create all D3D11 resources we will need for this application
 /// @return S_OK if successful
-HRESULT GraphicsDX11::CreateD3DResources() {
+HRESULT GraphicsDX11::CreateD3DResources()
+{
     if (!SUCCEEDED(LoadAndCompileShaders()))
         return S_FALSE;
 
