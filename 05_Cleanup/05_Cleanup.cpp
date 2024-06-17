@@ -2,6 +2,7 @@
 //
 
 #include "pch.h"
+#include "Game.h"
 #include "framework.h"
 #include "01_WindowsApp.h"
 
@@ -22,22 +23,6 @@
 #pragma comment( lib, "dxgi.lib")
 
 #define MAX_LOADSTRING 1000
-
-struct GameData
-{
-    int m_lastX = 0;
-    int m_lastY = 0;
-
-    int m_deltaMouseX = 0;
-    int m_deltaMouseY = 0;
-    float m_wheelDelta = 0.f;
-
-    double m_delta = 0.0;
-
-    bool m_InvertYAxis = false;
-
-    float m_increment = 0;
-};
 
 // Global Variables:
 HINSTANCE hInst;                                // current instance
@@ -147,7 +132,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 		camera.SetInvertY(data.m_InvertYAxis);
 
-		graphicsDX11.Render(g_hWnd, g_winRect, deltaSeconds);
+		graphicsDX11.Render(g_hWnd, g_winRect, data, deltaSeconds);
 		lastStart = current;
 	}
 
@@ -339,6 +324,8 @@ void DrawUI(GameData& data)
     ImGui::Begin("App Settings");
 
     ImGui::Checkbox("Invert Y Axis", &data.m_InvertYAxis); // Edit if we want to invert the Y axis
+
+	ImGui::SliderFloat3("ObjectPosition", data.m_cubePosition, -3.0f, 3.0f);
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 

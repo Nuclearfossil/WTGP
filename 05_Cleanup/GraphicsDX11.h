@@ -6,7 +6,12 @@
 #include <d3dcommon.h>
 #include <dxgidebug.h>
 #include <dxgi1_3.h>
+#include <vector>
 
+#include "Game.h"
+#include "Shader.h"
+#include "Grid.h"
+#include "Cube.h"
 
 /// @brief Structure defining the Constant buffer. This buffer will be used to pass data into the shader
 struct ConstantBuffer
@@ -32,49 +37,36 @@ public:
     HRESULT CreateVertexAndIndexBuffers();
     HRESULT CreateDepthStencilAndRasterizerState();
 
-    void SetMVP(DirectX::XMMATRIX& mvp) { m_MVP = mvp; }
+    void SetMVP(DirectX::XMMATRIX const& mvp) { m_MVP = mvp; }
 
-    void SetVP(DirectX::XMMATRIX& vp) { m_VP = vp; }
+    void SetVP(DirectX::XMMATRIX const& vp) { m_VP = vp; }
 
     void SetViewport(D3D11_VIEWPORT viewport) { m_viewport = viewport; }
 
-    void Render(HWND hWnd, RECT winRect, double increment);
+    void Render(HWND hWnd, RECT winRect, GameData& data, double increment);
 
     void Cleanup();
 
 private:
-    IDXGISwapChain* m_SwapChain; // DXGI swapchain for double/triple buffering
+    IDXGISwapChain* m_SwapChain = nullptr; // DXGI swapchain for double/triple buffering
 
-    ID3D11Device* m_D3DDevice;                     // The Direct3D Device
-    ID3D11DeviceContext* m_D3DContext;             // The Direct3D Device Context
-    ID3D11RenderTargetView* m_D3DRenderTargetView; // The Render Target View
+    ID3D11Device* m_D3DDevice = nullptr;                        // The Direct3D Device
+    ID3D11DeviceContext* m_D3DContext = nullptr;                // The Direct3D Device Context
+    ID3D11RenderTargetView* m_D3DRenderTargetView = nullptr;    // The Render Target View
 
-    ID3D11VertexShader* m_vertexShader; // The Vertex Shader resource used in this example
-    ID3D11PixelShader* m_pixelShader;   // The Pixel Shader resource used in this example
-    ID3D11InputLayout* m_inputLayout;   // The Input layout resource used for the vertex shader
+    Shader m_shader;
 
-    ID3D11Buffer* m_cubeVertexBuffer; // The D3D11 Buffer used to hold the vertex data for the cube.
-    ID3D11Buffer* m_cubeIndexBuffer;  // The D3D11 Index Buffer for the cube
-
-    ID3D11Buffer* m_gridVertexBuffer; // The D3D11 Buffer used to hold the vertex data for the grid
-    ID3D11Buffer* m_gridIndexBuffer;  // The D3D11 Index Buffer for the grid
+    Cube m_cube;
+    Grid m_grid;
 
     ID3D11Buffer* m_mvpConstantBuffer = nullptr;  // The constant buffer for the WVP matrices
-    ID3D11DepthStencilView* m_depthBufferView;    // The Depth/Stencil view buffer
-    ID3D11DepthStencilState* m_depthStencilState; // The Depth/Stencil State
+    ID3D11DepthStencilView* m_depthBufferView = nullptr; // The Depth/Stencil view buffer
+    ID3D11DepthStencilState* m_depthStencilState = nullptr; // The Depth/Stencil State
     ID3D11RasterizerState* m_rasterizerState;     // The Rasterizer State
 
     D3D11_VIEWPORT m_viewport;
     DirectX::XMMATRIX m_MVP;
     DirectX::XMMATRIX m_VP;
 
-    // Input Assembler and Vertex Buffer globals
-    UINT g_stride = 0;
-    UINT g_offset = 0;
-    UINT g_numCubeVerts = 0;
-    uint16_t g_numCubeIndices = 0;
-    UINT g_numGridVerts = 0;
-    uint16_t g_numGridIndices = 0;
-
-    const float g_clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    const std::vector<float> g_clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 };

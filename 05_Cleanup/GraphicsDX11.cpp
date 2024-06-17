@@ -3,14 +3,9 @@
 
 // Debug names for some of the D3D11 resources we'll be creating
 #ifdef _DEBUG
-constexpr char c_vertexShaderID[] = "vertexShader";
-constexpr char c_pixelShaderID[] = "pixelShader";
-constexpr char c_inputLayoutID[] = "inputLayout";
-constexpr char c_vertexBufferID[] = "vertexBuffer";
 constexpr char c_gridVertexBufferID[] = "gridVertexBuffer";
 constexpr char c_gridIndexBufferID[] = "gridIndexBuffer";
 constexpr char c_constantBufferID[] = "constantBuffer";
-constexpr char c_indexBufferID[] = "indexBuffer";
 constexpr char c_depthStencilBufferID[] = "depthStencilBuffer";
 constexpr char c_rasterizerStateID[] = "rasterizerState";
 #endif // DEBUG
@@ -19,13 +14,6 @@ GraphicsDX11::GraphicsDX11() : m_D3DDevice(nullptr),
                                m_SwapChain(nullptr),
                                m_D3DContext(nullptr),
                                m_D3DRenderTargetView(nullptr),
-                               m_vertexShader(nullptr),
-                               m_pixelShader(nullptr),
-                               m_inputLayout(nullptr),
-                               m_cubeVertexBuffer(nullptr),
-                               m_cubeIndexBuffer(nullptr),
-                               m_gridVertexBuffer(nullptr),
-                               m_gridIndexBuffer(nullptr),
                                m_mvpConstantBuffer(nullptr),
                                m_depthBufferView(nullptr),
                                m_depthStencilState(nullptr),
@@ -135,288 +123,15 @@ HRESULT GraphicsDX11::CreateD3D11Context(ID3D11Device* device, ID3D11DeviceConte
 
 /// @brief Load the Shader from file and compile the Vertex and Pixel shaders
 /// @return S_OK if we were able to compile the shaders
-HRESULT GraphicsDX11::LoadAndCompileShaders() {
-    // creation of Shader Resources
-    ID3DBlob* vsBlob;
-    ID3DBlob* psBlob;
-    ID3DBlob* shaderCompileErrorBlob;
-
-    DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-#ifdef _DEBUG
-    // Set the D3DCOMPILE_DEBUG flag to embed debug information in the shaders.
-    // Setting this flag improves the shader debugging experience, but still allows
-    // the shaders to be optimized and to run exactly the way they will run in
-    // the release configuration of this program.
-    dwShaderFlags |= D3DCOMPILE_DEBUG;
-
-    // Disable optimizations to further improve shader debugging
-    dwShaderFlags |= D3DCOMPILE_SKIP_OPTIMIZATION;
-#endif
-
-    // We compile the Vertex shader from the `vertexShaderSource` source string and check for validity
-    if (!SUCCEEDED(D3DCompileFromFile(L"CombinedShader.hlsl", // Shader File
-            nullptr,                                          // Optional array of D3D_SHADER_MARCO defining macros used in compilation
-            nullptr,                                          // optional pointer to an ID3DInclude that defines how the compiler handles include files
-            "vs_main",                                        // Entry-point of the shader
-            "vs_5_0",                                         // String that specifies what the shader target is.
-            dwShaderFlags,                                    // Any flags that drive D3D compile constants. Things like `D3DCOMPILE_DEBUG`
-            0,                                                // Any flags for compiler effect constants. For now we can ignore
-            &vsBlob,                                          // An interface to the compiled shader
-            &shaderCompileErrorBlob)))                        // An interface to any errors from the compile process.
-    {
-        OutputDebugStringA(static_cast<const char*>(shaderCompileErrorBlob->GetBufferPointer()));
-        shaderCompileErrorBlob->Release();
-        return S_FALSE;
-    }
-
-    // We then create the appropriate Vertex Shader resource: `m_vertexShader`.
-    if (!SUCCEEDED(m_D3DDevice->CreateVertexShader(
-            vsBlob->GetBufferPointer(), // A pointer to the compiled shader.
-            vsBlob->GetBufferSize(),    // And the size of the compiled shader.
-            nullptr,                    // A pointer to the Class Linkage (for now, let's use null).
-            &m_vertexShader)))          // Address of the ID3D11VertexShader interface.
-    {
-        OutputDebugStringA("Failed to create the Vertex Shader!\n");
-        return S_FALSE;
-    }
-
-#ifdef _DEBUG
-    m_vertexShader->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_vertexShaderID) - 1, c_vertexShaderID);
-#endif // DEBUG
-
-    // We compile the Pixel shader from the `pixelShaderSource` source string and check for validity
-    if (!SUCCEEDED(D3DCompileFromFile(L"CombinedShader.hlsl",
-            nullptr,
-            nullptr,
-            "ps_main",
-            "ps_5_0",
-            0,
-            0,
-            &psBlob,
-            &shaderCompileErrorBlob))) {
-        OutputDebugStringA(static_cast<const char*>(shaderCompileErrorBlob->GetBufferPointer()));
-        shaderCompileErrorBlob->Release();
-        return S_FALSE;
-    }
-
-    // We then create the appropriate Pixel Shader resource: `m_pixelShader`
-    if (!SUCCEEDED(m_D3DDevice->CreatePixelShader(
-            psBlob->GetBufferPointer(),
-            psBlob->GetBufferSize(),
-            nullptr,
-            &m_pixelShader))) {
-        OutputDebugStringA("Failed to create the Pixel Shader\n");
-        return S_FALSE;
-    }
-
-    psBlob->Release();
-
-#ifdef _DEBUG
-    m_pixelShader->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_pixelShaderID) - 1, c_pixelShaderID);
-#endif // DEBUG
-
-    // Create Input Layout - this describes the format of the vertex data we will use.
-    D3D11_INPUT_ELEMENT_DESC inputElementDesc[] =
-    {
-        { "POS", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "COL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-    };
-
-    if (!SUCCEEDED(m_D3DDevice->CreateInputLayout(
-            inputElementDesc,            // An array of D3D11_INPUT_ELEMENT_DESC describing the vertex data
-            ARRAYSIZE(inputElementDesc), // How big is the array
-            vsBlob->GetBufferPointer(),  // The compiled vertex shader
-            vsBlob->GetBufferSize(),     // And the size of the vertex shader
-            &m_inputLayout)))            // The resultant input layout
-    {
-        OutputDebugStringA("Failed to create the Input Layout");
-        return S_FALSE;
-    }
-
-    vsBlob->Release();
-
-#ifdef _DEBUG
-    m_inputLayout->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_inputLayoutID) - 1, c_inputLayoutID);
-#endif // DEBUG
-    return S_OK;
+HRESULT GraphicsDX11::LoadAndCompileShaders()
+{
+    return m_shader.Compile(m_D3DDevice, L"CombinedShader.hlsl");
 }
 
 /// @brief Create the Vertex and Index buffers, as well as the input layout
 /// @return S_OK if we are able to create the buffers and input layout
-HRESULT GraphicsDX11::CreateVertexAndIndexBuffers() {
-    // Populate the array representing the vertex data. In this case, we are going to have
-    // 6 elements per vertex:
-    //   - X and Y co-ordinates
-    //   - Colours for each vertex representing the Red, Green, Blue and Alpha channels.
-    float vertexData[] =
-    {
-    //      x,     y,     z,     r,     g,     b,     a
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f,  1.0f,  1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,
-        -0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,
-        0.5f,  -0.5f, -0.5f,  0.0f,  0.0f,  1.0f,  1.0f,
-        0.5f,  -0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,
-        0.5f,   0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,
-        0.5f,   0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,
-    };
-
-    float gridVertexData[] =
-    {
-    //      x,    y,     z,    r,    g,    b,    a
-    // columns
-        -5.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -5.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -4.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -4.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -3.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -3.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -2.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -2.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -1.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -1.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-         0.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-         0.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-         1.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-         1.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-         2.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-         2.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-         3.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-         3.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-         4.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-         4.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-         5.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-         5.0f, 0.0f,  5.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        // rows
-        -5.0f, 0.0f, -5.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         5.0f, 0.0f, -5.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -5.0f, 0.0f, -4.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         5.0f, 0.0f, -4.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -5.0f, 0.0f, -3.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         5.0f, 0.0f, -3.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -5.0f, 0.0f, -2.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         5.0f, 0.0f, -2.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -5.0f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         5.0f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -5.0f, 0.0f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         5.0f, 0.0f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -5.0f, 0.0f,  1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         5.0f, 0.0f,  1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -5.0f, 0.0f,  2.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         5.0f, 0.0f,  2.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -5.0f, 0.0f,  3.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         5.0f, 0.0f,  3.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -5.0f, 0.0f,  4.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         5.0f, 0.0f,  4.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        -5.0f, 0.0f,  5.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-         5.0f, 0.0f,  5.0f, 1.0f, 0.0f, 0.0f, 1.0f
-    };
-
-    WORD gridIndices[] =
-    {
-        0, 1,
-        2, 3,
-        4, 5,
-        6, 7,
-        8, 9,
-        10, 11,
-        12, 13,
-        14, 15,
-        16, 17,
-        18, 19,
-        20, 21,
-        22, 23,
-        24, 25,
-        26, 27,
-        28, 29,
-        30, 31,
-        32, 33,
-        34, 35,
-        36, 37,
-        38, 39,
-        40, 41,
-        42, 43
-    };
-
-    // Create index buffer
-    WORD indices[] =
-    {
-        0, 6, 4,
-        0, 2, 6,
-
-        0, 3, 2,
-        0, 1, 3,
-
-        2, 7, 6,
-        2, 3, 7,
-
-        4, 6, 7,
-        4, 7, 5,
-
-        0, 4, 5,
-        0, 5, 1,
-
-        1, 5, 7,
-        1, 7, 3
-    };
-
-    // The stride represents the _actual_ width of the data for each vertex.
-    // In this case, we now have 7 elements per vertex. Three for the position, four for the colour.
-    g_stride = 3 * sizeof(float) + 4 * sizeof(float);
-    g_offset = 0;
-    g_numCubeVerts = sizeof(indices) / sizeof(WORD);
-
-    g_numCubeIndices = sizeof(indices) / sizeof(indices[0]);
-
-    D3D11_BUFFER_DESC vertexBufferDesc = {};
-    vertexBufferDesc.ByteWidth = sizeof(vertexData);
-    vertexBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
-    vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-
-    D3D11_SUBRESOURCE_DATA vertexSubresourceData;
-    vertexSubresourceData.pSysMem = vertexData;
-    vertexSubresourceData.SysMemPitch = 0;
-    vertexSubresourceData.SysMemSlicePitch = 0;
-
-    if (!SUCCEEDED(m_D3DDevice->CreateBuffer(
-            &vertexBufferDesc,      // The Vertex buffer description
-            &vertexSubresourceData, // And then the sub-resource data
-            &m_cubeVertexBuffer)))  // Finally, the interface that is the vertex buffer
-    {
-        OutputDebugStringA("Failed to create the vertex buffer!");
-        return S_FALSE;
-    }
-
-#ifdef _DEBUG
-    m_cubeVertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_vertexBufferID) - 1, c_vertexBufferID);
-#endif // DEBUG
-
-    g_numGridVerts = sizeof(gridIndices) / sizeof(WORD);
-    g_numGridIndices = sizeof(gridIndices) / sizeof(gridIndices[0]);
-
-    D3D11_BUFFER_DESC gridVertexBufferDesc = {};
-    gridVertexBufferDesc.ByteWidth = sizeof(gridVertexData);
-    gridVertexBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
-    gridVertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-
-    D3D11_SUBRESOURCE_DATA gridVertexSubresourceData = {};
-    gridVertexSubresourceData.pSysMem = gridVertexData;
-    gridVertexSubresourceData.SysMemPitch = 0;
-    gridVertexSubresourceData.SysMemSlicePitch = 0;
-
-    if (!SUCCEEDED(m_D3DDevice->CreateBuffer(
-            &gridVertexBufferDesc,
-            &gridVertexSubresourceData,
-            &m_gridVertexBuffer))) {
-        OutputDebugStringA("Failed to create the Grid vertex buffer!");
-        return S_FALSE;
-    }
-
-#ifdef _DEBUG
-    m_gridVertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_gridVertexBufferID) - 1, c_gridVertexBufferID);
-#endif // _DEBUG
-
-
+HRESULT GraphicsDX11::CreateVertexAndIndexBuffers()
+{
     D3D11_BUFFER_DESC constantBufferDesc = {};
     constantBufferDesc.ByteWidth = sizeof(ConstantBuffer);
     constantBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -432,46 +147,8 @@ HRESULT GraphicsDX11::CreateVertexAndIndexBuffers() {
     m_mvpConstantBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_constantBufferID) - 1, c_constantBufferID);
 #endif // DEBUG
 
-
-    D3D11_BUFFER_DESC indexBufferDesc = {};
-    indexBufferDesc.ByteWidth = sizeof(indices);
-    indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    indexBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
-    indexBufferDesc.CPUAccessFlags = 0;
-
-    D3D11_SUBRESOURCE_DATA initData = {};
-    initData.pSysMem = indices;
-    initData.SysMemPitch = 0;
-    initData.SysMemSlicePitch = 0;
-
-    if (FAILED(m_D3DDevice->CreateBuffer(&indexBufferDesc, &initData, &m_cubeIndexBuffer))) {
-        OutputDebugStringA("Failed to create a new index buffer.");
-        return S_FALSE;
-    }
-
-#ifdef _DEBUG
-    m_cubeIndexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_indexBufferID) - 1, c_indexBufferID);
-#endif // DEBUG
-
-    D3D11_BUFFER_DESC gridIndexBufferDesc = {};
-    gridIndexBufferDesc.ByteWidth = sizeof(gridIndices);
-    gridIndexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    gridIndexBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
-    gridIndexBufferDesc.CPUAccessFlags = 0;
-
-    D3D11_SUBRESOURCE_DATA gridInitData = {};
-    gridInitData.pSysMem = gridIndices;
-    gridInitData.SysMemPitch = 0;
-    gridInitData.SysMemSlicePitch = 0;
-
-    if (FAILED(m_D3DDevice->CreateBuffer(&gridIndexBufferDesc, &gridInitData, &m_gridIndexBuffer))) {
-        OutputDebugStringA("Failed to create a new grid index buffer");
-        return S_FALSE;
-    }
-
-#ifdef _DEBUG
-    m_gridIndexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_gridIndexBufferID) - 1, c_gridIndexBufferID);
-#endif
+    m_cube.Initialize(m_D3DDevice);
+    m_grid.Initialize(m_D3DDevice);
 
     return S_OK;
 }
@@ -529,7 +206,7 @@ HRESULT GraphicsDX11::CreateD3DResources()
 /// @brief Render off a frame
 /// @param hWnd Handle to the window
 /// @param winRect RECT that defines the window to render to
-void GraphicsDX11::Render(HWND hWnd, RECT winRect, double increment)
+void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increment)
 {
     // Update constant buffer
     {
@@ -540,7 +217,7 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, double increment)
         m_D3DContext->Unmap(m_mvpConstantBuffer, 0);
     }
     // Clear the back buffer to the clear color
-    m_D3DContext->ClearRenderTargetView(m_D3DRenderTargetView, g_clearColor);
+    m_D3DContext->ClearRenderTargetView(m_D3DRenderTargetView, g_clearColor.data());
     m_D3DContext->ClearDepthStencilView(m_depthBufferView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
     m_D3DContext->RSSetViewports(1, &m_viewport);
@@ -549,19 +226,9 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, double increment)
 
     m_D3DContext->OMSetRenderTargets(1, &m_D3DRenderTargetView, nullptr);
 
-    m_D3DContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-    m_D3DContext->IASetInputLayout(m_inputLayout);
+    m_grid.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
 
-    m_D3DContext->VSSetShader(m_vertexShader, nullptr, 0);
-    m_D3DContext->PSSetShader(m_pixelShader, nullptr, 0);
-    m_D3DContext->VSSetConstantBuffers(0, 1, &m_mvpConstantBuffer);
-
-    m_D3DContext->IASetVertexBuffers(0, 1, &m_gridVertexBuffer, &g_stride, &g_offset);
-    m_D3DContext->IASetIndexBuffer(m_gridIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
-
-    m_D3DContext->DrawIndexed(g_numGridIndices, 0, 0);
-
-    auto worldMat = DirectX::XMMatrixRotationY((float)increment) * DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+    auto worldMat = DirectX::XMMatrixRotationY((float)increment) * DirectX::XMMatrixTranslation(data.m_cubePosition[0], data.m_cubePosition[1], data.m_cubePosition[2]);
     {
         DirectX::XMMATRIX mvp = worldMat * m_VP;
         D3D11_MAPPED_SUBRESOURCE mappedSubresource;
@@ -571,17 +238,7 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, double increment)
         m_D3DContext->Unmap(m_mvpConstantBuffer, 0);
     }
 
-    m_D3DContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    m_D3DContext->IASetInputLayout(m_inputLayout);
-
-    m_D3DContext->VSSetShader(m_vertexShader, nullptr, 0);
-    m_D3DContext->PSSetShader(m_pixelShader, nullptr, 0);
-    m_D3DContext->VSSetConstantBuffers(0, 1, &m_mvpConstantBuffer);
-
-    m_D3DContext->IASetVertexBuffers(0, 1, &m_cubeVertexBuffer, &g_stride, &g_offset);
-    m_D3DContext->IASetIndexBuffer(m_cubeIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
-
-    m_D3DContext->DrawIndexed(g_numCubeIndices, 0, 0);
+    m_cube.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
 
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
@@ -633,13 +290,10 @@ HRESULT GraphicsDX11::CreateRenderTargetView()
 void GraphicsDX11::Cleanup()
 {
     // Release all our resources
-    m_vertexShader->Release();
-    m_pixelShader->Release();
-    m_inputLayout->Release();
-    m_cubeVertexBuffer->Release();
-    m_cubeIndexBuffer->Release();
-    m_gridVertexBuffer->Release();
-    m_gridIndexBuffer->Release();
+    m_shader.Cleanup();
+    m_cube.Cleanup();
+    m_grid.Cleanup();
+
     m_mvpConstantBuffer->Release();
     m_depthBufferView->Release();
     m_depthStencilState->Release();
