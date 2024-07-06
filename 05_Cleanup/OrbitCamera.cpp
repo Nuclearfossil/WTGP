@@ -4,10 +4,14 @@
 #include <directxmath.h>
 
 #include "mathutils.h"
-#include "Camera3D.h"
+#include "OrbitCamera.h"
 
-void Camera3D::Initialize()
+#include "framework.h"
+
+void OrbitCamera::Initialize()
 {
+    PLOG_INFO << "Initializing the Orbit Camera";
+
     m_World = DirectX::XMMatrixIdentity();
     m_View = DirectX::XMMatrixIdentity();
     m_Projection = DirectX::XMMatrixIdentity();
@@ -18,24 +22,24 @@ void Camera3D::Initialize()
     m_CameraRadius = 2.0f;
 }
 
-void Camera3D::ChangeRadius(float delta)
+void OrbitCamera::ChangeRadius(float delta)
 {
     m_CameraRadius += delta;
 
     m_CameraRadius = clamp(m_CameraRadius, 1.0f, 10.0f);
 }
 
-void Camera3D::SetProjection(float width, float height, float aspect)
+void OrbitCamera::SetProjection(float width, float height, float aspect)
 {
     m_Projection = DirectX::XMMatrixPerspectiveFovLH(degreesToRadians(78), aspect, 0.01f, 100.0f);
 }
 
-void Camera3D::SetInvertY(bool invertY)
+void OrbitCamera::SetInvertY(bool invertY)
 {
     m_invertY = invertY;
 }
 
-void Camera3D::RotateAroundPoint(DirectX::XMVECTOR point, float polar, float azimuth)
+void OrbitCamera::RotateAroundPoint(DirectX::XMVECTOR point, float polar, float azimuth)
 {
     float y = m_CameraRadius * sinf(azimuth);
     float r = m_CameraRadius * cosf(azimuth);
@@ -49,18 +53,18 @@ void Camera3D::RotateAroundPoint(DirectX::XMVECTOR point, float polar, float azi
     m_View = DirectX::XMMatrixLookAtLH(Eye, At, Up);
 }
 
-void Camera3D::Update(double deltaTime)
+void OrbitCamera::Update(double deltaTime)
 {
     m_ViewProjection = m_View * m_Projection;
     m_ModelViewProjection = m_World * m_View * m_Projection;
 }
 
-DirectX::XMMATRIX& Camera3D::GetMVP()
+DirectX::XMMATRIX& OrbitCamera::GetMVP()
 {
     return m_ModelViewProjection;
 }
 
-DirectX::XMMATRIX& Camera3D::GetVP()
+DirectX::XMMATRIX& OrbitCamera::GetVP()
 {
     return m_ViewProjection;
 }

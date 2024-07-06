@@ -1,6 +1,9 @@
 #include <vector>
 #include "Grid.h"
 
+#include "framework.h"
+#include "utils.h"
+
 #ifdef _DEBUG
 constexpr char c_gridVertexBufferID[] = "gridVertexBuffer";
 constexpr char c_gridIndexBufferID[] = "gridIndexBuffer";
@@ -8,11 +11,13 @@ constexpr char c_gridIndexBufferID[] = "gridIndexBuffer";
 
 Grid::~Grid()
 {
+    PLOG_INFO << "Destroying the Grid";
     Cleanup();
 }
 
 HRESULT Grid::Initialize(ID3D11Device * pD3D11Device)
 {
+    PLOG_INFO << "Initializing the Grid";
 
     std::vector<float> gridVertexData =
     {
@@ -113,7 +118,7 @@ HRESULT Grid::Initialize(ID3D11Device * pD3D11Device)
             &gridVertexSubresourceData,
             &m_gridVertexBuffer)))
         {
-            OutputDebugStringA("Failed to create the Grid vertex buffer!");
+            PLOG_ERROR << "Failed to create the Grid vertex buffer!";
             return S_FALSE;
         }
 
@@ -133,16 +138,16 @@ HRESULT Grid::Initialize(ID3D11Device * pD3D11Device)
     gridInitData.SysMemSlicePitch = 0;
 
     if (FAILED(pD3D11Device->CreateBuffer(&gridIndexBufferDesc, &gridInitData, &m_gridIndexBuffer)))
-        {
-            OutputDebugStringA("Failed to create a new grid index buffer");
-            return S_FALSE;
-        }
+    {
+        PLOG_ERROR << "Failed to create a new grid index buffer";
+        return S_FALSE;
+    }
 
 #ifdef _DEBUG
     m_gridIndexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_gridIndexBufferID) - 1, c_gridIndexBufferID);
 #endif
 
-    return S_FALSE;
+    return S_OK;
 }
 
 void Grid::Render(ID3D11DeviceContext* pD3D11DeviceContext, Shader& shader, ID3D11Buffer* mvpConstants)
@@ -162,15 +167,11 @@ void Grid::Render(ID3D11DeviceContext* pD3D11DeviceContext, Shader& shader, ID3D
 
 void Grid::Cleanup()
 {
-    if (m_gridVertexBuffer != nullptr)
-    {
-        m_gridVertexBuffer->Release();
-        m_gridVertexBuffer = nullptr;
-    }
+    PLOG_INFO << "Calling Cleanup on the grid";
 
-    if (m_gridIndexBuffer != nullptr)
-    {
-        m_gridIndexBuffer->Release();
-        m_gridIndexBuffer = nullptr;
-    }
+    SafeRelease(m_gridVertexBuffer);
+    SafeRelease(m_gridIndexBuffer);
+
+    m_gridVertexBuffer = nullptr;
+    m_gridIndexBuffer = nullptr;
 }

@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="05_Cleanup.cpp" />
-    <ClCompile Include="Camera3D.cpp" />
+    <ClCompile Include="OrbitCamera.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp">
       <Filter>imgui</Filter>
@@ -26,10 +26,13 @@
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Cube.cpp" />
     <ClCompile Include="Grid.cpp" />
+    <ClCompile Include="UserInterface.cpp" />
+    <ClCompile Include="ResourceManager.cpp" />
+    <ClCompile Include="Renderable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="01_WindowsApp.h" />
-    <ClInclude Include="Camera3D.h" />
+    <ClInclude Include="OrbitCamera.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="mathutils.h" />
     <ClInclude Include="pch.h" />
@@ -61,6 +64,10 @@
     <ClInclude Include="Cube.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="UserInterface.h" />
+    <ClInclude Include="ResourceManager.h" />
+    <ClInclude Include="Renderable.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="01_WindowsApp.rc" />

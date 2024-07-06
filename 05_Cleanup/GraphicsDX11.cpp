@@ -1,5 +1,9 @@
 #include "GraphicsDX11.h"
 #include "imgui_impl_dx11.h"
+#include "mathutils.h"
+#include "ResourceManager.h"
+
+#include "framework.h"
 
 // Debug names for some of the D3D11 resources we'll be creating
 #ifdef _DEBUG
@@ -57,6 +61,8 @@ HRESULT GraphicsDX11::CreateD3D11DeviceAndContext(HWND hWnd,
 {
     HRESULT hr = S_OK;
 
+    PLOG_INFO << "Initializing D3D11 Device and Context";
+
     // Define swap chain descriptor
     DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
     swapChainDesc.BufferCount = 2;
@@ -96,7 +102,7 @@ HRESULT GraphicsDX11::CreateD3D11DeviceAndContext(HWND hWnd,
 
     if (FAILED(hr))
     {
-        // TODO: Add logging as to why this failed.
+        PLOG_ERROR << "Failed calling D3D11CreateDeviceAndSwapChain.";
         return hr;
     }
 
@@ -107,16 +113,25 @@ HRESULT GraphicsDX11::CreateD3D11DeviceAndContext(HWND hWnd,
 /// @param device D3D11 Device to use for creating the D3D11 Context from
 /// @param context Reference to the context to populate
 /// @return
-HRESULT GraphicsDX11::CreateD3D11Context(ID3D11Device* device, ID3D11DeviceContext** context) {
+HRESULT GraphicsDX11::CreateD3D11Context(ID3D11Device* device, ID3D11DeviceContext** context)
+{
+    PLOG_INFO << "Creating the D3D11 Context";
+
     HRESULT hr = S_OK;
 
     if (device == nullptr || context == nullptr)
+    {
+        PLOG_ERROR << "Calling GraphicsDX11::CreateD3D11Context with either a null device or context";
         return E_INVALIDARG;
+    }
 
     // Create the D3D11 context
     hr = device->CreateDeferredContext(0, context);
     if (FAILED(hr))
+    {
+        PLOG_ERROR << "Failed calling 'CreateDeferredContext' with the given D3D11Device ";
         return hr;
+    }
 
     return S_OK;
 }
@@ -132,6 +147,8 @@ HRESULT GraphicsDX11::LoadAndCompileShaders()
 /// @return S_OK if we are able to create the buffers and input layout
 HRESULT GraphicsDX11::CreateVertexAndIndexBuffers()
 {
+    PLOG_INFO << "Creating the vertex and Index Buffers for General Purpose use";
+
     D3D11_BUFFER_DESC constantBufferDesc = {};
     constantBufferDesc.ByteWidth = sizeof(ConstantBuffer);
     constantBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -139,7 +156,7 @@ HRESULT GraphicsDX11::CreateVertexAndIndexBuffers()
     constantBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
     if (FAILED(m_D3DDevice->CreateBuffer(&constantBufferDesc, nullptr, &m_mvpConstantBuffer))) {
-        OutputDebugStringA("Failed to create a new constant buffer.");
+        PLOG_ERROR << "Failed to create a new constant buffer.";
         return S_FALSE;
     }
 
@@ -155,7 +172,10 @@ HRESULT GraphicsDX11::CreateVertexAndIndexBuffers()
 
 /// @brief Create the depth/stencil buffer as well as the rasterizer state objects
 /// @return S_OK if we are able to create these objects
-HRESULT GraphicsDX11::CreateDepthStencilAndRasterizerState() {
+HRESULT GraphicsDX11::CreateDepthStencilAndRasterizerState()
+{
+    PLOG_INFO << "Creating the Depth Stencil and Rasterizer State";
+
     D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
     depthStencilDesc.DepthEnable = TRUE;
     depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
@@ -174,9 +194,9 @@ HRESULT GraphicsDX11::CreateDepthStencilAndRasterizerState() {
     rasterizerDesc.FillMode = D3D11_FILL_SOLID;
     // rasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
 
-    rasterizerDesc.CullMode = D3D11_CULL_BACK;
+    // rasterizerDesc.CullMode = D3D11_CULL_BACK;
     // rasterizerDesc.CullMode = D3D11_CULL_FRONT;
-    // rasterizerDesc.CullMode = D3D11_CULL_NONE;
+    rasterizerDesc.CullMode = D3D11_CULL_NONE;
 
     m_D3DDevice->CreateRasterizerState(&rasterizerDesc, &m_rasterizerState);
 
@@ -191,14 +211,25 @@ HRESULT GraphicsDX11::CreateDepthStencilAndRasterizerState() {
 /// @return S_OK if successful
 HRESULT GraphicsDX11::CreateD3DResources()
 {
+    PLOG_INFO << "Creating D3D Resources";
+
     if (!SUCCEEDED(LoadAndCompileShaders()))
+    {
+        PLOG_ERROR << "Unable to load and compile shaders.";
         return S_FALSE;
+    }
 
     if (!SUCCEEDED(CreateVertexAndIndexBuffers()))
+    {
+        PLOG_ERROR << "Unable to create Vertex and index buffers for our default geometry";
         return S_FALSE;
+    }
 
     if (!SUCCEEDED(CreateDepthStencilAndRasterizerState()))
+    {
+        PLOG_ERROR << "Unable to create the Depth Stencil and set the Rasterizer state";
         return S_FALSE;
+    }
 
     return S_OK;
 }
@@ -228,7 +259,10 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
 
     m_grid.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
 
-    auto worldMat = DirectX::XMMatrixRotationY((float)increment) * DirectX::XMMatrixTranslation(data.m_cubePosition[0], data.m_cubePosition[1], data.m_cubePosition[2]);
+    auto worldMat = DirectX::XMMatrixRotationX(degreesToRadians(data.m_cubeRotation[0])) *
+                    DirectX::XMMatrixRotationY(degreesToRadians(data.m_cubeRotation[1])) *
+                    DirectX::XMMatrixRotationZ(degreesToRadians(data.m_cubeRotation[2])) *
+                    DirectX::XMMatrixTranslation(data.m_cubePosition[0], data.m_cubePosition[1], data.m_cubePosition[2]);
     {
         DirectX::XMMATRIX mvp = worldMat * m_VP;
         D3D11_MAPPED_SUBRESOURCE mappedSubresource;
@@ -238,7 +272,9 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
         m_D3DContext->Unmap(m_mvpConstantBuffer, 0);
     }
 
-    m_cube.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
+//    m_cube.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
+
+    RenderResources(m_D3DContext, m_shader, m_mvpConstantBuffer);
 
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
@@ -255,14 +291,17 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
 /// @return S_OK if successful
 HRESULT GraphicsDX11::CreateRenderTargetView()
 {
+    PLOG_INFO << "Creating the RenderTarget View";
+
     HRESULT hr = S_OK;
 
     auto backBuffer = GetBackBuffer(m_SwapChain);
 
     // Create render target view
     hr = m_D3DDevice->CreateRenderTargetView(backBuffer, NULL, &m_D3DRenderTargetView);
-    if (FAILED(hr)) {
-        OutputDebugStringA("Failed to create the Render Target view. Aborting\n");
+    if (FAILED(hr))
+    {
+        PLOG_ERROR << "Failed to create the Render Target view. Aborting";
         return hr;
     }
 
@@ -276,9 +315,15 @@ HRESULT GraphicsDX11::CreateRenderTargetView()
 
     ID3D11Texture2D* depthBuffer;
     if (!SUCCEEDED(m_D3DDevice->CreateTexture2D(&depthBufferDesc, nullptr, &depthBuffer)))
+    {
+        PLOG_ERROR << "Cannot Create the depth buffer";
         return S_FALSE;
+    }
     if (depthBuffer == nullptr)
+    {
+        PLOG_ERROR << "Depth Buffer created, but it's null. This should not happen!";
         return S_FALSE;
+    }
 
     m_D3DDevice->CreateDepthStencilView(depthBuffer, nullptr, &m_depthBufferView);
 
@@ -289,6 +334,8 @@ HRESULT GraphicsDX11::CreateRenderTargetView()
 
 void GraphicsDX11::Cleanup()
 {
+    PLOG_INFO << "Cleaning up the resources for the Graphics DX11 class";
+
     // Release all our resources
     m_shader.Cleanup();
     m_cube.Cleanup();

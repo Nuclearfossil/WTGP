@@ -1,6 +1,8 @@
 // 04_3DBasicApp.cpp : Defines the entry point for the application.
 //
 
+#include <windowsx.h>
+
 #include "pch.h"
 #include "Game.h"
 #include "framework.h"
@@ -8,14 +10,15 @@
 
 #include "GraphicsDX11.h"
 
-#include <windowsx.h>
-
-#include <imgui.h>
-#include <imgui_impl_win32.h>
-#include <imgui_impl_dx11.h>
-
-#include "Camera3D.h"
+#include "OrbitCamera.h"
+#include "UserInterface.h"
 #include "mathutils.h"
+
+#include "ResourceManager.h"
+
+#ifdef _DEBUG
+#include <dxgidebug.h>
+#endif
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dcompiler.lib")
@@ -31,9 +34,6 @@ RECT g_winRect;                                 // Window rectangle
 WCHAR g_szTitle[MAX_LOADSTRING];                // The title bar text
 WCHAR g_szWindowClass[MAX_LOADSTRING];          // The main window class name
 
-// Forward declare message handler from imgui_impl_win32.cpp
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
 // [BEGIN] - Forward declarations of functions: ==============================================================================================
 
 // Windows specific functions ------------------------------------------------
@@ -41,14 +41,10 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int, GameData* gameDataPtr);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 
-
-HRESULT InitIMGUI(GraphicsDX11& graphics);
-void DestroyIMGUI();
-
 void DrawUI(GameData& data);
 
 // Additional functions
-void Update(double deltaInSeconds, GraphicsDX11& graphics, Camera3D& camera, GameData& data);
+void Update(double deltaInSeconds, GraphicsDX11& graphics, OrbitCamera& camera, GameData& data);
 
 // [END] - Forward declarations of functions: =============================================================================================
 /// @brief Windows Main entry point
@@ -65,9 +61,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
+	static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
+    static plog::DebugOutputAppender<plog::TxtFormatter> debugConsoleAppender;
+	plog::init(plog::debug, "05_cleanup.log").addAppender(&consoleAppender).addAppender(&debugConsoleAppender); // Initializing Logging
+
+	PLOG_INFO << "=================================================== Beginning of Run ===================================================";
+
 	GameData data;	// data related to the application
 
-    Camera3D camera;			// Camera
+    OrbitCamera camera;			// Camera
 	GraphicsDX11 graphicsDX11;  // Graphics system
 
 	// Initialize global strings
@@ -92,8 +94,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	if (!SUCCEEDED(graphicsDX11.CreateD3DResources()))
 		return -4;
 
-    if (!SUCCEEDED(InitIMGUI(graphicsDX11)))
+    if (!SUCCEEDED(InitIMGUI(g_hWnd, graphicsDX11)))
         return -5;
+
+	if (!SUCCEEDED(InitResources(graphicsDX11.GetD3DDeviceContext())))
+        return -6;
 
 	// Main message loop:
 	MSG msg = { 0 };
@@ -104,11 +109,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	::QueryPerformanceFrequency(&frequency);
 	QueryPerformanceCounter(&lastStart);
-
-    // Our state
-    bool show_demo_window = true;
-    bool show_another_window = false;
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 	while (msg.message != WM_QUIT)
 	{
@@ -138,7 +138,19 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	DestroyIMGUI();
 
+    ClearResources();
+
 	graphicsDX11.Cleanup();
+
+    PLOG_INFO << "====================================================== End of Run ======================================================";
+
+#ifdef _DEBUG
+	IDXGIDebug* debugDev;
+    DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debugDev));
+
+	debugDev->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
+#endif // DEBUG
+
 
 	return (int)msg.wParam;
 }
@@ -148,6 +160,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 /// @return true if we are able to register this application class
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
+    PLOG_INFO << "Windows Class Registration";
+
 	WNDCLASSEXW wcex;
 
 	wcex.cbSize = sizeof(WNDCLASSEX);
@@ -173,6 +187,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 /// @return true if we are able to initialize the instance of this application
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow,  GameData* gameDataPtr)
 {
+    PLOG_INFO << "Initializing the Application instance";
 	hInst = hInstance; // Store instance handle in our global variable
 
 	RECT windowSize = { 0, 0, 1024, 768 };
@@ -206,7 +221,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow,  GameData* gameDataPtr)
 /// @return
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
+    if (HandleWindowsMessages(hWnd, message, wParam, lParam))
         return true;
 
 	switch (message)
@@ -236,7 +251,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	break;
     case WM_MOUSEMOVE:
 	{
-        if (ImGui::GetIO().WantCaptureMouse)
+        if (CheckGuiTrapsMouse())
             break;
 
 		int xPos = GET_X_LPARAM(lParam);
@@ -287,66 +302,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-/// @brief Initialize Everything relating to ImGui
-/// @return S_OK if successful
-HRESULT InitIMGUI(GraphicsDX11& graphics)
-{
-    // Setup Dear ImGui context
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-
-    ImGuiIO& io = ImGui::GetIO();
-    (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
-    io.MouseDrawCursor = true;                            // Avoid mouse lag
-
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    // ImGui::StyleColorsLight();
-
-    // Setup Platform/Renderer backends
-    ImGui_ImplWin32_Init(g_hWnd);
-    ImGui_ImplDX11_Init(graphics.GetD3DDevice(), graphics.GetD3DDeviceContext());
-
-    return S_OK;
-}
-
-/// @brief Draw our UI
-void DrawUI(GameData& data)
-{
-	// Start the Dear ImGui frame
-    ImGui_ImplDX11_NewFrame();
-    ImGui_ImplWin32_NewFrame();
-
-    ImGui::NewFrame();
-
-    ImGui::Begin("App Settings");
-
-    ImGui::Checkbox("Invert Y Axis", &data.m_InvertYAxis); // Edit if we want to invert the Y axis
-
-	ImGui::SliderFloat3("ObjectPosition", data.m_cubePosition, -3.0f, 3.0f);
-
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-
-    ImGui::End();
-
-    // Rendering
-    ImGui::Render();
-}
-
-/// @brief Clean up IMGui
-void DestroyIMGUI()
-{
-    // Cleanup
-    ImGui_ImplDX11_Shutdown();
-    ImGui_ImplWin32_Shutdown();
-    ImGui::DestroyContext();
-}
-
 /// @brief Application Update function
 /// @param deltaInSeconds time between frames in seconds
-void Update(double deltaInSeconds, GraphicsDX11& graphics, Camera3D& camera, GameData& data)
+void Update(double deltaInSeconds, GraphicsDX11& graphics, OrbitCamera& camera, GameData& data)
 {
     // This could be cached, as we don't intend to resize the window.
     RECT winRect;
@@ -374,9 +332,12 @@ void Update(double deltaInSeconds, GraphicsDX11& graphics, Camera3D& camera, Gam
     if (data.m_increment > 360.0f)
         data.m_increment -= 360.0f;
 
-	float polar = degreesToRadians(static_cast<float>(data.m_deltaMouseX)), azimuth = degreesToRadians(static_cast<float>(data.m_deltaMouseY));
-    azimuth = clamp(azimuth, -DirectX::XM_PIDIV2, DirectX::XM_PIDIV2);
-    DirectX::XMVECTOR At = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+	float polar = degreesToRadians(static_cast<float>(data.m_deltaMouseX));
+	float azimuth = degreesToRadians(static_cast<float>(data.m_deltaMouseY));
+
+	azimuth = clamp(azimuth, -DirectX::XM_PIDIV2, DirectX::XM_PIDIV2);
+
+	DirectX::XMVECTOR At = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 
     camera.RotateAroundPoint(At, polar, azimuth);
     camera.ChangeRadius(data.m_wheelDelta);

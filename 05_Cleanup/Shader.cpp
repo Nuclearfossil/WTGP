@@ -8,6 +8,8 @@
 
 #include <vector>
 
+#include "framework.h"
+
 #ifdef _DEBUG
 constexpr char c_vertexShaderID[] = "vertexShader";
 constexpr char c_pixelShaderID[] = "pixelShader";
@@ -16,11 +18,14 @@ constexpr char c_inputLayoutID[] = "inputLayout";
 
 Shader::~Shader()
 {
+    PLOG_INFO << "Destroying the Shader";
     Cleanup();
 }
 
 HRESULT Shader::Compile(ID3D11Device* pD3D11Device, const std::wstring& filename)
 {
+    PLOG_INFO << "Compiling the shader" << filename;
+
     // can we load the file?
     // creation of Shader Resources
     ID3DBlob* vsBlob;
@@ -50,7 +55,7 @@ HRESULT Shader::Compile(ID3D11Device* pD3D11Device, const std::wstring& filename
             &vsBlob,                                        // An interface to the compiled shader
             &shaderCompileErrorBlob)))                      // An interface to any errors from the compile process.
         {
-            OutputDebugStringA(static_cast<const char*>(shaderCompileErrorBlob->GetBufferPointer()));
+            PLOG_ERROR << static_cast<const char*>(shaderCompileErrorBlob->GetBufferPointer());
             shaderCompileErrorBlob->Release();
             return S_FALSE;
         }
@@ -62,7 +67,7 @@ HRESULT Shader::Compile(ID3D11Device* pD3D11Device, const std::wstring& filename
             nullptr,                    // A pointer to the Class Linkage (for now, let's use null).
             &m_vertexShader)))          // Address of the ID3D11VertexShader interface.
         {
-            OutputDebugStringA("Failed to create the Vertex Shader!\n");
+            PLOG_ERROR << "Failed to create the Vertex Shader!";
             return S_FALSE;
         }
 
@@ -81,7 +86,7 @@ HRESULT Shader::Compile(ID3D11Device* pD3D11Device, const std::wstring& filename
             &psBlob,
             &shaderCompileErrorBlob)))
         {
-            OutputDebugStringA(static_cast<const char*>(shaderCompileErrorBlob->GetBufferPointer()));
+            PLOG_ERROR << static_cast<const char*>(shaderCompileErrorBlob->GetBufferPointer());
             shaderCompileErrorBlob->Release();
             return S_FALSE;
         }
@@ -93,7 +98,7 @@ HRESULT Shader::Compile(ID3D11Device* pD3D11Device, const std::wstring& filename
             nullptr,
             &m_pixelShader)))
         {
-            OutputDebugStringA("Failed to create the Pixel Shader\n");
+            PLOG_ERROR << "Failed to create the Pixel Shader";
             return S_FALSE;
         }
 
@@ -116,7 +121,7 @@ HRESULT Shader::Compile(ID3D11Device* pD3D11Device, const std::wstring& filename
             vsBlob->GetBufferSize(),                    // And the size of the vertex shader
             &m_inputLayout)))                           // The resultant input layout
         {
-            OutputDebugStringA("Failed to create the Input Layout");
+            PLOG_ERROR << "Failed to create the Input Layout";
             return S_FALSE;
         }
 
@@ -130,6 +135,7 @@ HRESULT Shader::Compile(ID3D11Device* pD3D11Device, const std::wstring& filename
 
 void Shader::Cleanup()
 {
+    PLOG_INFO << "Cleaning up the Shader";
     if (m_vertexShader != nullptr)
     {
         m_vertexShader->Release();

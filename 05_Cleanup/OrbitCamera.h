@@ -2,10 +2,10 @@
 
 #include <directxmath.h>
 
-class Camera3D
+class OrbitCamera
 {
 public:
-    Camera3D() = default;
+    OrbitCamera() = default;
 
     void Initialize();
 
