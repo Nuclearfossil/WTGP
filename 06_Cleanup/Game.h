@@ -15,6 +15,9 @@ struct GameData
 
     float m_increment = 0;
 
-    float m_cubePosition[3] = { 0.f };
-    float m_cubeRotation[3] = { 0.f };
+    float m_cubePosition1[3] = { 0.f };
+    float m_cubeRotation1[3] = { 0.f };
+
+    float m_cubePosition2[3] = { 0.f };
+    float m_cubeRotation2[3] = { 0.f };
 };

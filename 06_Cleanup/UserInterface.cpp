@@ -67,8 +67,13 @@ void DrawUI(GameData& data)
 
     ImGui::Checkbox("Invert Y Axis", &data.m_InvertYAxis); // Edit if we want to invert the Y axis
 
-    ImGui::SliderFloat3("Object Position", data.m_cubePosition, -3.0f, 3.0f);
-    ImGui::SliderFloat3("Object Rotation", data.m_cubeRotation, -360.0f, 360.0f);
+    ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.1f, 1.0f), "Transform 1");
+    ImGui::SliderFloat3("Object Position##1", data.m_cubePosition1, -3.0f, 3.0f);
+    ImGui::SliderFloat3("Object Rotation##1", data.m_cubeRotation1, -360.0f, 360.0f);
+
+    ImGui::TextColored(ImVec4(0.1f, 0.2f, 1.0f, 1.0f), "Transform 2");
+    ImGui::SliderFloat3("Object Position##2", data.m_cubePosition2, -3.0f, 3.0f);
+    ImGui::SliderFloat3("Object Rotation##2", data.m_cubeRotation2, -360.0f, 360.0f);
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
