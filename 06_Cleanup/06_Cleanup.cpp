@@ -324,9 +324,6 @@ void Update(double deltaInSeconds, GraphicsDX11& graphics, OrbitCamera& camera, 
 
     camera.SetProjection(width, height, aspect);
 
-	static double desiredTime = 1.0f / 4.0f; // 1 second / desired number of seconds
-	static double incrementor = desiredTime;
-
 	/// smoothly rotate our object
     data.m_increment += 0.1f * static_cast<float>(deltaInSeconds);
     if (data.m_increment > 360.0f)

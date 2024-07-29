@@ -259,10 +259,17 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
 
     m_grid.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
 
-    auto worldMat = DirectX::XMMatrixRotationX(degreesToRadians(data.m_cubeRotation[0])) *
-                    DirectX::XMMatrixRotationY(degreesToRadians(data.m_cubeRotation[1])) *
-                    DirectX::XMMatrixRotationZ(degreesToRadians(data.m_cubeRotation[2])) *
-                    DirectX::XMMatrixTranslation(data.m_cubePosition[0], data.m_cubePosition[1], data.m_cubePosition[2]);
+    auto worldMat1 = DirectX::XMMatrixRotationX(degreesToRadians(data.m_cubeRotation1[0])) *
+                    DirectX::XMMatrixRotationY(degreesToRadians(data.m_cubeRotation1[1])) *
+                    DirectX::XMMatrixRotationZ(degreesToRadians(data.m_cubeRotation1[2])) *
+                    DirectX::XMMatrixTranslation(data.m_cubePosition1[0], data.m_cubePosition1[1], data.m_cubePosition1[2]);
+    auto worldMat2 = DirectX::XMMatrixRotationX(degreesToRadians(data.m_cubeRotation2[0])) *
+                     DirectX::XMMatrixRotationY(degreesToRadians(data.m_cubeRotation2[1])) *
+                     DirectX::XMMatrixRotationZ(degreesToRadians(data.m_cubeRotation2[2])) *
+                     DirectX::XMMatrixTranslation(data.m_cubePosition2[0], data.m_cubePosition2[1], data.m_cubePosition2[2]);
+
+    auto worldMat = worldMat1 * worldMat2;
+
     {
         DirectX::XMMATRIX mvp = worldMat * m_VP;
         D3D11_MAPPED_SUBRESOURCE mappedSubresource;
