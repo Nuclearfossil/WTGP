@@ -38,13 +38,13 @@
     <ClCompile Include="..\extern\imgui\imgui_draw.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\extern\imgui\imgui_impl_dx11.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\extern\imgui\imgui_tables.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\extern\imgui\imgui_widgets.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\imgui\backends\imgui_impl_dx11.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

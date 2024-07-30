@@ -147,9 +147,9 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\extern\imgui\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="..\extern\imgui\imgui.cpp" />
     <ClCompile Include="..\extern\imgui\imgui_draw.cpp" />
-    <ClCompile Include="..\extern\imgui\imgui_impl_dx11.cpp" />
     <ClCompile Include="..\extern\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\extern\imgui\imgui_widgets.cpp" />
     <ClCompile Include="05_transformations.cpp" />
