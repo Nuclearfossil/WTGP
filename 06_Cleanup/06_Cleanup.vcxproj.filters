@@ -2,7 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="06_Cleanup.cpp" />
-    <ClCompile Include="UserInterface.cpp" />
     <ClCompile Include="Cube.cpp">
       <Filter>renderables</Filter>
     </ClCompile>
@@ -25,7 +24,7 @@
       <Filter>graphics</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
-      <Filter>OS</Filter>
+      <Filter>OS - resources</Filter>
     </ClCompile>
     <ClCompile Include="..\extern\imgui\imgui.cpp">
       <Filter>imgui</Filter>
@@ -45,13 +44,11 @@
     <ClCompile Include="..\extern\imgui\imgui_widgets.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
+    <ClCompile Include="UserInterface.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="mathutils.h" />
-    <ClInclude Include="UserInterface.h" />
-    <ClInclude Include="utils.h" />
     <ClInclude Include="..\extern\imgui\imconfig.h">
       <Filter>imgui</Filter>
     </ClInclude>
@@ -98,24 +95,39 @@
       <Filter>graphics</Filter>
     </ClInclude>
     <ClInclude Include="targetver.h">
-      <Filter>OS</Filter>
+      <Filter>OS - resources</Filter>
     </ClInclude>
     <ClInclude Include="01_WindowsApp.h">
-      <Filter>OS</Filter>
+      <Filter>OS - resources</Filter>
     </ClInclude>
     <ClInclude Include="Resource.h">
-      <Filter>OS</Filter>
+      <Filter>OS - resources</Filter>
     </ClInclude>
     <ClInclude Include="pch.h">
-      <Filter>OS</Filter>
+      <Filter>OS - resources</Filter>
+    </ClInclude>
+    <ClInclude Include="mathutils.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="framework.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="UserInterface.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>data</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="small.ico">
-      <Filter>OS</Filter>
+      <Filter>OS - resources</Filter>
     </Image>
     <Image Include="01_WindowsApp.ico">
-      <Filter>OS</Filter>
+      <Filter>OS - resources</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
@@ -124,9 +136,6 @@
   <ItemGroup>
     <Filter Include="imgui">
       <UniqueIdentifier>{a04e0a1f-ee0f-4f09-abc9-d5f14fa316e7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="OS">
-      <UniqueIdentifier>{2681985e-ca7f-4468-ae45-f4e47713481f}</UniqueIdentifier>
     </Filter>
     <Filter Include="camera">
       <UniqueIdentifier>{a3495853-d380-4053-b93c-51de89e5ac6a}</UniqueIdentifier>
@@ -140,10 +149,22 @@
     <Filter Include="renderables">
       <UniqueIdentifier>{2221f687-7743-4646-998a-593853f1ce56}</UniqueIdentifier>
     </Filter>
+    <Filter Include="OS - resources">
+      <UniqueIdentifier>{2681985e-ca7f-4468-ae45-f4e47713481f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{e89a7629-d0bf-4aff-a684-a392547cc22f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ui">
+      <UniqueIdentifier>{d40fb533-f1d4-4bee-9232-201344cf2bc9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data">
+      <UniqueIdentifier>{bc7a732a-3e7c-4d1b-b841-c96971a5059c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="01_WindowsApp.rc">
-      <Filter>OS</Filter>
+      <Filter>OS - resources</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
