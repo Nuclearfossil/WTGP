@@ -6,7 +6,7 @@
 
 #include "Shader.h"
 
-struct ColorVertex
+struct [[nodiscard]] ColorVertex
 {
     float x;
     float y;
