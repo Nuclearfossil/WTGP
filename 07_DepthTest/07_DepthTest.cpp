@@ -4,7 +4,7 @@
 #include <windowsx.h>
 
 #include "pch.h"
-#include "Game.h"
+#include "GameData.h"
 #include "framework.h"
 #include "01_WindowsApp.h"
 
@@ -63,7 +63,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
     static plog::DebugOutputAppender<plog::TxtFormatter> debugConsoleAppender;
-	plog::init(plog::debug, "06_Cleanup.log").addAppender(&consoleAppender).addAppender(&debugConsoleAppender); // Initializing Logging
+	plog::init(plog::debug, "07_DepthTest.log").addAppender(&consoleAppender).addAppender(&debugConsoleAppender); // Initializing Logging
 
 	PLOG_INFO << "=================================================== Beginning of Run ===================================================";
 
