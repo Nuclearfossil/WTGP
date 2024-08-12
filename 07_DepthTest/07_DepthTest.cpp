@@ -4,7 +4,7 @@
 #include <windowsx.h>
 
 #include "pch.h"
-#include "Game.h"
+#include "GameData.h"
 #include "framework.h"
 #include "01_WindowsApp.h"
 
@@ -63,7 +63,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
     static plog::DebugOutputAppender<plog::TxtFormatter> debugConsoleAppender;
-	plog::init(plog::debug, "06_Cleanup.log").addAppender(&consoleAppender).addAppender(&debugConsoleAppender); // Initializing Logging
+	plog::init(plog::debug, "07_DepthTest.log").addAppender(&consoleAppender).addAppender(&debugConsoleAppender); // Initializing Logging
 
 	PLOG_INFO << "=================================================== Beginning of Run ===================================================";
 
@@ -85,23 +85,38 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	camera.Initialize();
 
-	if (!SUCCEEDED(graphicsDX11.CreateD3D11DeviceAndContext(g_hWnd, 1024, 768)))
+    if (!SUCCEEDED(graphicsDX11.CreateD3D11DeviceAndContext(g_hWnd, 1024, 768)))
+    {
+        PLOG_ERROR << "Failed creating the D3D11 Device and context";
 		return -2;
+    }
 
-	if (!SUCCEEDED(graphicsDX11.CreateRenderTargetView()))
+    if (!SUCCEEDED(graphicsDX11.CreateRenderTargetView()))
+    {
+        PLOG_ERROR << "Failed creating the D3D11 Render Target and View";
 		return -3;
+    }
 
-	if (!SUCCEEDED(graphicsDX11.CreateD3DResources()))
+    if (!SUCCEEDED(graphicsDX11.CreateD3DResources()))
+    {
+        PLOG_ERROR << "Failed creating the D3D 11 Resources";
 		return -4;
+    }
 
     if (!SUCCEEDED(InitIMGUI(g_hWnd, graphicsDX11)))
+    {
+        PLOG_ERROR << "Failed initializing Dear ImGui";
         return -5;
+    }
 
-	if (!SUCCEEDED(InitResources(graphicsDX11.GetD3DDeviceContext())))
+    if (!SUCCEEDED(InitResources(graphicsDX11.GetD3DDeviceContext())))
+    {
+        PLOG_ERROR << "Failed Initializing additional Graphics resources";
         return -6;
+    }
 
 	// Main message loop:
-	MSG msg = { 0 };
+    MSG msg = { nullptr };
 
 	LARGE_INTEGER current = { 0 };
 	LARGE_INTEGER lastStart = { 0 };
