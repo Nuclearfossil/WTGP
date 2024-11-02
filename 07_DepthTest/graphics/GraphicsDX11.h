@@ -20,10 +20,23 @@ struct ConstantBuffer
     DirectX::XMMATRIX mModelViewProjection;
 };
 
+enum class FillMode
+{
+    Wireframe,
+    Solid
+};
+
+enum class CullMode
+{
+    None,
+    Backface,
+    Frontface
+};
+
 class GraphicsDX11
 {
 public:
-    GraphicsDX11();
+    GraphicsDX11() = default;
 
     // D3D11 related functions ---------------------------------------------------
     HRESULT CreateD3D11DeviceAndContext(HWND hWnd, UINT width, UINT height);
@@ -49,11 +62,12 @@ public:
     void Cleanup();
 
 private:
-    IDXGISwapChain* m_SwapChain = nullptr; // DXGI swapchain for double/triple buffering
+    ID3D11Device* m_D3DDevice = nullptr;   // The Direct3D Device
 
-    ID3D11Device* m_D3DDevice = nullptr;                        // The Direct3D Device
     ID3D11DeviceContext* m_D3DContext = nullptr;                // The Direct3D Device Context
     ID3D11RenderTargetView* m_D3DRenderTargetView = nullptr;    // The Render Target View
+
+    IDXGISwapChain* m_SwapChain = nullptr; // DXGI swapchain for double/triple buffering
 
     Shader m_shader;
 
@@ -71,4 +85,7 @@ private:
     DirectX::XMMATRIX m_VP;
 
     const std::vector<float> g_clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+    FillMode m_fillmode = FillMode::Solid;
+    CullMode m_cullmode = CullMode::None;
 };

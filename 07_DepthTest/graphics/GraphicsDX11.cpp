@@ -14,28 +14,13 @@ constexpr char c_depthStencilBufferID[] = "depthStencilBuffer";
 constexpr char c_rasterizerStateID[] = "rasterizerState";
 #endif // DEBUG
 
-GraphicsDX11::GraphicsDX11() : m_D3DDevice(nullptr),
-                               m_SwapChain(nullptr),
-                               m_D3DContext(nullptr),
-                               m_D3DRenderTargetView(nullptr),
-                               m_mvpConstantBuffer(nullptr),
-                               m_depthBufferView(nullptr),
-                               m_depthStencilState(nullptr),
-                               m_rasterizerState(nullptr),
-                               m_viewport(D3D11_VIEWPORT()),
-                               m_VP(DirectX::XMMatrixIdentity()),
-                               m_MVP(DirectX::XMMatrixIdentity())
-
-{
-}
-
 /// @brief Utility function for getting the Texture that represents the backbuffer
 /// @param swapChain DXGI Swapchain to work from
 /// @return a D3D11 Texture 2D to work with
 ID3D11Texture2D* GraphicsDX11::GetBackBuffer(IDXGISwapChain* swapChain)
 {
     ID3D11Texture2D* backBuffer = nullptr;
-    HRESULT hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backBuffer));
+    auto hr = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backBuffer));
     if (FAILED(hr))
     {
         // Handle error
@@ -45,7 +30,6 @@ ID3D11Texture2D* GraphicsDX11::GetBackBuffer(IDXGISwapChain* swapChain)
 
     return backBuffer;
 }
-
 
 /// @brief Create the D3D11 Device and Device Context
 /// @param hWnd Handle to the window
@@ -59,8 +43,6 @@ HRESULT GraphicsDX11::CreateD3D11DeviceAndContext(HWND hWnd,
     UINT width,
     UINT height)
 {
-    HRESULT hr = S_OK;
-
     PLOG_INFO << "Initializing D3D11 Device and Context";
 
     // Define swap chain descriptor
@@ -81,7 +63,7 @@ HRESULT GraphicsDX11::CreateD3D11DeviceAndContext(HWND hWnd,
 
     // Create device, context, and swap chain
     D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_11_1;
-    hr = D3D11CreateDeviceAndSwapChain(
+    auto hr = D3D11CreateDeviceAndSwapChain(
         nullptr,                  // First Parameter
         D3D_DRIVER_TYPE_HARDWARE, // Second Parameter
         nullptr,                  // Third Parameter
@@ -117,8 +99,6 @@ HRESULT GraphicsDX11::CreateD3D11Context(ID3D11Device* device, ID3D11DeviceConte
 {
     PLOG_INFO << "Creating the D3D11 Context";
 
-    HRESULT hr = S_OK;
-
     if (device == nullptr || context == nullptr)
     {
         PLOG_ERROR << "Calling GraphicsDX11::CreateD3D11Context with either a null device or context";
@@ -126,7 +106,7 @@ HRESULT GraphicsDX11::CreateD3D11Context(ID3D11Device* device, ID3D11DeviceConte
     }
 
     // Create the D3D11 context
-    hr = device->CreateDeferredContext(0, context);
+    auto hr = device->CreateDeferredContext(0, context);
     if (FAILED(hr))
     {
         PLOG_ERROR << "Failed calling 'CreateDeferredContext' with the given D3D11Device ";
@@ -193,12 +173,25 @@ HRESULT GraphicsDX11::CreateDepthStencilAndRasterizerState()
     rasterizerDesc.FrontCounterClockwise = FALSE;
     rasterizerDesc.AntialiasedLineEnable = TRUE;
 
-    rasterizerDesc.FillMode = D3D11_FILL_SOLID;
-    // rasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
+    if (m_fillmode == FillMode::Solid)
+        rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+    else
+        rasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
 
-    // rasterizerDesc.CullMode = D3D11_CULL_BACK;
-    // rasterizerDesc.CullMode = D3D11_CULL_FRONT;
-    rasterizerDesc.CullMode = D3D11_CULL_NONE;
+    switch (m_cullmode)
+        {
+        case CullMode::None:
+            rasterizerDesc.CullMode = D3D11_CULL_NONE;
+            break;
+        case CullMode::Backface:
+            rasterizerDesc.CullMode = D3D11_CULL_BACK;
+            break;
+        case CullMode::Frontface:
+            rasterizerDesc.CullMode = D3D11_CULL_FRONT;
+            break;
+        default:
+            break;
+    }
 
     m_D3DDevice->CreateRasterizerState(&rasterizerDesc, &m_rasterizerState);
 
@@ -279,7 +272,7 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
         DirectX::XMMATRIX mvp = worldMat * m_VP;
         D3D11_MAPPED_SUBRESOURCE mappedSubresource;
         m_D3DContext->Map(m_mvpConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
-        ConstantBuffer* constants = (ConstantBuffer*)(mappedSubresource.pData);
+        auto* constants = (ConstantBuffer*)(mappedSubresource.pData);
         constants->mModelViewProjection = DirectX::XMMatrixTranspose(mvp);
         m_D3DContext->Unmap(m_mvpConstantBuffer, 0);
     }
@@ -303,12 +296,10 @@ HRESULT GraphicsDX11::CreateRenderTargetView()
 {
     PLOG_INFO << "Creating the RenderTarget View";
 
-    HRESULT hr = S_OK;
-
     auto backBuffer = GetBackBuffer(m_SwapChain);
 
     // Create render target view
-    hr = m_D3DDevice->CreateRenderTargetView(backBuffer, NULL, &m_D3DRenderTargetView);
+    auto hr = m_D3DDevice->CreateRenderTargetView(backBuffer, nullptr, &m_D3DRenderTargetView);
     if (FAILED(hr))
     {
         PLOG_ERROR << "Failed to create the Render Target view. Aborting";

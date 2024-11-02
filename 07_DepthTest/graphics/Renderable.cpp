@@ -1,6 +1,6 @@
 #include "Renderable.h"
 #include "utils.h"
-#include "plog\Log.h"
+#include "plog/Log.h"
 
 Renderable::~Renderable()
 {
@@ -19,7 +19,7 @@ void Renderable::Initialize(
     m_offset = 0;
 
     D3D11_BUFFER_DESC vertexBufferDesc = {};
-    vertexBufferDesc.ByteWidth = static_cast<UINT>(vertexBuffer.size() * m_stride); //sizeof(float));
+    vertexBufferDesc.ByteWidth = static_cast<UINT>(vertexBuffer.size() * m_stride);
     vertexBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
     vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
