@@ -173,6 +173,7 @@ xcopy $(MSBuildProjectDirectory)\..\raw\blend\gizmoxyz.fbx  $(TargetDir) /s /i /
     <ClInclude Include="..\extern\imgui\imstb_textedit.h" />
     <ClInclude Include="..\extern\imgui\imstb_truetype.h" />
     <ClInclude Include="01_WindowsApp.h" />
+    <ClInclude Include="Mesh.h" />
     <ClInclude Include="OrbitCamera.h" />
     <ClInclude Include="Cube.h" />
     <ClInclude Include="framework.h" />
@@ -197,6 +198,7 @@ xcopy $(MSBuildProjectDirectory)\..\raw\blend\gizmoxyz.fbx  $(TargetDir) /s /i /
     <ClCompile Include="..\extern\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\extern\imgui\imgui_widgets.cpp" />
     <ClCompile Include="06_Cleanup.cpp" />
+    <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="OrbitCamera.cpp" />
     <ClCompile Include="Cube.cpp" />
     <ClCompile Include="GraphicsDX11.cpp" />

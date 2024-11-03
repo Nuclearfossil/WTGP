@@ -12,6 +12,8 @@
 #include "Shader.h"
 #include "Grid.h"
 #include "Cube.h"
+#include "Mesh.h"
+
 
 /// @brief Structure defining the Constant buffer. This buffer will be used to pass data into the shader
 struct ConstantBuffer
@@ -58,6 +60,8 @@ private:
 
     Cube m_cube;
     Grid m_grid;
+    Mesh m_gizmoXYZ;
+
 
     ID3D11Buffer* m_mvpConstantBuffer = nullptr;  // The constant buffer for the WVP matrices
     ID3D11DepthStencilView* m_depthBufferView = nullptr; // The Depth/Stencil view buffer

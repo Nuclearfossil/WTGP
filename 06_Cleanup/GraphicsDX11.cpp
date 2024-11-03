@@ -166,6 +166,7 @@ HRESULT GraphicsDX11::CreateVertexAndIndexBuffers()
 
     m_cube.Initialize(m_D3DDevice);
     m_grid.Initialize(m_D3DDevice);
+    m_gizmoXYZ.LoadFromFile(m_D3DContext, "gizmoxyz.fbx");
 
     return S_OK;
 }
@@ -280,6 +281,7 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
     }
 
 //    m_cube.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
+    m_gizmoXYZ.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
 
     RenderResources(m_D3DContext, m_shader, m_mvpConstantBuffer);
 
@@ -347,6 +349,7 @@ void GraphicsDX11::Cleanup()
     m_shader.Cleanup();
     m_cube.Cleanup();
     m_grid.Cleanup();
+    m_gizmoXYZ.ClearResources();
 
     m_mvpConstantBuffer->Release();
     m_depthBufferView->Release();

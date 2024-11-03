@@ -47,6 +47,9 @@
     <ClCompile Include="UserInterface.cpp">
       <Filter>ui</Filter>
     </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>renderables</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\extern\imgui\imconfig.h">
@@ -120,6 +123,9 @@
     </ClInclude>
     <ClInclude Include="Game.h">
       <Filter>data</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>renderables</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
