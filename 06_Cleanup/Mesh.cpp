@@ -13,12 +13,19 @@
 
 using namespace Assimp;
 
+Mesh::~Mesh()
+{
+    ClearResources();
+}
+
 bool Mesh::LoadFromFile(ID3D11DeviceContext* pD3D11DeviceContext, std::string path)
 {
     Importer importer;
     importer.SetExtraVerbose(true);
 
     std::filesystem::path filepath = std::filesystem::current_path() / path;
+
+    PLOG_INFO << "Loading mesh from file: " << filepath;
 
     // And have it read the given file with some example postprocessing
     // Usually - if speed is not the most important aspect for you - you'll
@@ -109,6 +116,8 @@ bool Mesh::LoadFromFile(ID3D11DeviceContext* pD3D11DeviceContext, std::string pa
 
 void Mesh::ClearResources()
 {
+    PLOG_INFO << "Clearing Mesh";
+
     for (auto p : mRenderables)
         delete p;
 

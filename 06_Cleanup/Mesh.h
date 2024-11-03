@@ -8,6 +8,8 @@ class Mesh
 {
 public:
     Mesh() = default;
+    ~Mesh();
+
     bool LoadFromFile(ID3D11DeviceContext* pD3D11DeviceContext, std::string);
     void ClearResources();
 
