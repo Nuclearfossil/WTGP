@@ -48,6 +48,9 @@
     <ClCompile Include="graphics\Renderable.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
+    <ClCompile Include="renderables\Mesh.cpp">
+      <Filter>renderables</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -103,6 +106,9 @@
       <Filter>imgui</Filter>
     </ClInclude>
     <ClInclude Include="renderables\Plane.h">
+      <Filter>renderables</Filter>
+    </ClInclude>
+    <ClInclude Include="renderables\Mesh.h">
       <Filter>renderables</Filter>
     </ClInclude>
   </ItemGroup>

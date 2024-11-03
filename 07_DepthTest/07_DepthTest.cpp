@@ -153,8 +153,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	DestroyIMGUI();
 
-    ClearResources();
-
 	graphicsDX11.Cleanup();
 
     PLOG_INFO << "====================================================== End of Run ======================================================";

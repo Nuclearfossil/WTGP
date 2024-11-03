@@ -167,6 +167,7 @@ xcopy $(MSBuildProjectDirectory)\..\raw\blend\gizmoxyz.fbx  $(TargetDir) /s /i /
     <ClInclude Include="data\GameData.h" />
     <ClInclude Include="graphics\GraphicsDX11.h" />
     <ClInclude Include="camera\OrbitCamera.h" />
+    <ClInclude Include="renderables\Mesh.h" />
     <ClInclude Include="utils\framework.h" />
     <ClInclude Include="mathutils.h" />
     <ClInclude Include="pch.h" />
@@ -198,6 +199,7 @@ xcopy $(MSBuildProjectDirectory)\..\raw\blend\gizmoxyz.fbx  $(TargetDir) /s /i /
     <ClCompile Include="renderables\Cube.cpp" />
     <ClInclude Include="renderables\Grid.h" />
     <ClCompile Include="renderables\Grid.cpp" />
+    <ClCompile Include="renderables\Mesh.cpp" />
     <ClCompile Include="renderables\Plane.cpp" />
     <ClCompile Include="ui\UserInterface.cpp" />
     <ClCompile Include="07_DepthTest.cpp" />
