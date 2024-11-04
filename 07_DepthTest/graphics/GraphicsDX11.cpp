@@ -147,7 +147,8 @@ HRESULT GraphicsDX11::CreateVertexAndIndexBuffers()
     m_cube.Initialize(m_D3DDevice);
     m_grid.Initialize(m_D3DDevice);
     m_plane.Initialize(m_D3DDevice);
-    m_gridXYZ.LoadFromFile(m_D3DContext, "gizmoxyz.fbx");
+    m_gizmoXYZ01.LoadFromFile(m_D3DContext, "gizmoxyz.fbx");
+    m_gizmoXYZ02.LoadFromFile(m_D3DContext, "gizmoxyz.fbx");
 
     return S_OK;
 }
@@ -253,23 +254,36 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
 
     m_D3DContext->OMSetRenderTargets(1, &m_D3DRenderTargetView, m_depthBufferView);
 
-    m_cube.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
+    // m_cube.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
+    // m_plane.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
+
     m_grid.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
-    m_plane.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
 
-    auto worldMat1 = DirectX::XMMatrixRotationX(degreesToRadians(data.m_cubeRotation1[0])) *
-                     DirectX::XMMatrixRotationY(degreesToRadians(data.m_cubeRotation1[1])) *
-                     DirectX::XMMatrixRotationZ(degreesToRadians(data.m_cubeRotation1[2])) *
-                     DirectX::XMMatrixTranslation(data.m_cubePosition1[0], data.m_cubePosition1[1], data.m_cubePosition1[2]);
+    auto worldMat1 =
+            DirectX::XMMatrixRotationY(degreesToRadians(data.m_cubeRotation1[1])) *
+            DirectX::XMMatrixRotationX(degreesToRadians(data.m_cubeRotation1[0])) *
+            DirectX::XMMatrixRotationZ(degreesToRadians(data.m_cubeRotation1[2])) *
+            DirectX::XMMatrixTranslation(data.m_cubePosition1[0], data.m_cubePosition1[1], data.m_cubePosition1[2]);
 
-    auto worldMat2 = DirectX::XMMatrixRotationX(degreesToRadians(data.m_cubeRotation2[0])) *
-                     DirectX::XMMatrixRotationY(degreesToRadians(data.m_cubeRotation2[1])) *
-                     DirectX::XMMatrixRotationZ(degreesToRadians(data.m_cubeRotation2[2])) *
-                     DirectX::XMMatrixTranslation(data.m_cubePosition2[0], data.m_cubePosition2[1], data.m_cubePosition2[2]);
-
-    auto worldMat = worldMat1 * worldMat2;
+    auto worldMat2 =
+        DirectX::XMMatrixRotationY(degreesToRadians(data.m_cubeRotation2[1])) *
+        DirectX::XMMatrixRotationX(degreesToRadians(data.m_cubeRotation2[0])) *
+        DirectX::XMMatrixRotationZ(degreesToRadians(data.m_cubeRotation2[2])) *
+        DirectX::XMMatrixTranslation(data.m_cubePosition2[0], data.m_cubePosition2[1], data.m_cubePosition2[2]);
 
     {
+        DirectX::XMMATRIX mvp = worldMat2 * m_VP;
+        D3D11_MAPPED_SUBRESOURCE mappedSubresource;
+        m_D3DContext->Map(m_mvpConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
+        auto* constants = (ConstantBuffer*)(mappedSubresource.pData);
+        constants->mModelViewProjection = DirectX::XMMatrixTranspose(mvp);
+        m_D3DContext->Unmap(m_mvpConstantBuffer, 0);
+    }
+
+    m_gizmoXYZ01.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
+
+    {
+        auto worldMat = worldMat1 * worldMat2;
         DirectX::XMMATRIX mvp = worldMat * m_VP;
         D3D11_MAPPED_SUBRESOURCE mappedSubresource;
         m_D3DContext->Map(m_mvpConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
@@ -278,7 +292,7 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
         m_D3DContext->Unmap(m_mvpConstantBuffer, 0);
     }
 
-    m_gridXYZ.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
+    m_gizmoXYZ02.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
 
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
@@ -343,7 +357,8 @@ void GraphicsDX11::Cleanup()
     m_cube.Cleanup();
     m_grid.Cleanup();
     m_plane.Cleanup();
-    m_gridXYZ.Cleanup();
+    m_gizmoXYZ01.Cleanup();
+    m_gizmoXYZ02.Cleanup();
 
     m_mvpConstantBuffer->Release();
     m_depthBufferView->Release();

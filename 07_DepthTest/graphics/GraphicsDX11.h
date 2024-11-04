@@ -75,7 +75,8 @@ private:
     Cube m_cube;
     Grid m_grid;
     Plane m_plane;
-    Mesh m_gridXYZ;
+    Mesh m_gizmoXYZ01;
+    Mesh m_gizmoXYZ02;
 
     ID3D11Buffer* m_mvpConstantBuffer = nullptr;  // The constant buffer for the WVP matrices
     ID3D11DepthStencilView* m_depthBufferView = nullptr; // The Depth/Stencil view buffer

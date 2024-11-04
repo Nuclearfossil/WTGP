@@ -2,10 +2,15 @@
 
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
+#include <stdio.h>
 
 #include "framework.h"
 #include "GraphicsDX11.h"
 #include "UserInterface.h"
+
+//
+// if you're ever looking for help debugging/creating widgets:
+//    https://pthom.github.io/imgui_manual_online/manual/imgui_manual.html
 
 // Forward declare message handler from imgui_impl_win32.cpp
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -66,13 +71,133 @@ void DrawUI(GameData& data)
 
     ImGui::Checkbox("Invert Y Axis", &data.m_InvertYAxis); // Edit if we want to invert the Y axis
 
-    ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.1f, 1.0f), "Transform 1");
-    ImGui::SliderFloat3("Object Position##1", data.m_cubePosition1, -3.0f, 3.0f);
-    ImGui::SliderFloat3("Object Rotation##1", data.m_cubeRotation1, -360.0f, 360.0f);
+    ImGui::BeginTable("nested_table", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable);
+    {
+        ImGui::TableSetupColumn("Transform 01");
+        ImGui::TableSetupColumn("Transform 02");
+        ImGui::TableHeadersRow();
 
-    ImGui::TextColored(ImVec4(0.1f, 0.2f, 1.0f, 1.0f), "Transform 2");
-    ImGui::SliderFloat3("Object Position##2", data.m_cubePosition2, -3.0f, 3.0f);
-    ImGui::SliderFloat3("Object Rotation##2", data.m_cubeRotation2, -360.0f, 360.0f);
+        ImGui::TableNextColumn();
+        ImGui::SetNextItemOpen(true);
+        if (ImGui::TreeNode("Transform 01"))
+            {
+                ImGui::SetNextItemOpen(true);
+                if (ImGui::TreeNode("Position"))
+                    {
+                        char buf1[32];
+                        char buf2[32];
+                        char buf3[32];
+                        snprintf(buf1, sizeof(buf1), "%.2f", data.m_cubePosition1[0]);
+                        snprintf(buf2, sizeof(buf2), "%.2f", data.m_cubePosition1[1]);
+                        snprintf(buf3, sizeof(buf3), "%.2f", data.m_cubePosition1[2]);
+                        ImGui::BeginGroup();
+                        if (ImGui::InputText("X Axis", buf1, 32, ImGuiInputTextFlags_CharsDecimal))
+                            data.m_cubePosition1[0] = atof(buf1);
+                        if (ImGui::InputText("Y Axis", buf2, 32, ImGuiInputTextFlags_CharsDecimal))
+                            data.m_cubePosition1[1] = atof(buf2);
+                        if (ImGui::InputText("Z Axis", buf3, 32, ImGuiInputTextFlags_CharsDecimal))
+                            data.m_cubePosition1[2] = atof(buf3);
+
+                        if (ImGui::Button("Reset"))
+                            {
+                                data.m_cubePosition1[0] = 0.0f;
+                                data.m_cubePosition1[1] = 0.0f;
+                                data.m_cubePosition1[2] = 0.0f;
+                            }
+                        ImGui::EndGroup();
+                        ImGui::TreePop();
+                    }
+
+                ImGui::SetNextItemOpen(true);
+                if (ImGui::TreeNode("Rotation"))
+                    {
+                        char buf1[32];
+                        char buf2[32];
+                        char buf3[32];
+                        snprintf(buf1, sizeof(buf1), "%.2f", data.m_cubeRotation1[0]);
+                        snprintf(buf2, sizeof(buf3), "%.2f", data.m_cubeRotation1[1]);
+                        snprintf(buf3, sizeof(buf3), "%.2f", data.m_cubeRotation1[2]);
+
+                        ImGui::BeginGroup();
+                        if (ImGui::InputText("X Axis", buf1, 32, ImGuiInputTextFlags_CharsDecimal))
+                            data.m_cubeRotation1[0] = atof(buf1);
+                        if (ImGui::InputText("Y Axis", buf2, 32, ImGuiInputTextFlags_CharsDecimal))
+                            data.m_cubeRotation1[1] = atof(buf2);
+                        if (ImGui::InputText("Z Axis", buf3, 32, ImGuiInputTextFlags_CharsDecimal))
+                            data.m_cubeRotation1[2] = atof(buf3);
+                        if (ImGui::Button("Reset"))
+                            {
+                                data.m_cubeRotation1[0] = 0.0f;
+                                data.m_cubeRotation1[1] = 0.0f;
+                                data.m_cubeRotation1[2] = 0.0f;
+                            }
+                        ImGui::EndGroup();
+                        ImGui::TreePop();
+                    }
+                ImGui::TreePop();
+            }
+    }
+
+    ImGui::TableNextColumn();
+    ImGui::SetNextItemOpen(true);
+    if (ImGui::TreeNode("Transform 02"))
+        {
+            ImGui::SetNextItemOpen(true);
+            if (ImGui::TreeNode("Position"))
+                {
+                    char buf1[32];
+                    char buf2[32];
+                    char buf3[32];
+                    snprintf(buf1, sizeof(buf1), "%.2f", data.m_cubePosition2[0]);
+                    snprintf(buf2, sizeof(buf2), "%.2f", data.m_cubePosition2[1]);
+                    snprintf(buf3, sizeof(buf3), "%.2f", data.m_cubePosition2[2]);
+                    ImGui::BeginGroup();
+                    if (ImGui::InputText("X Axis", buf1, 32, ImGuiInputTextFlags_CharsDecimal))
+                        data.m_cubePosition2[0] = atof(buf1);
+                    if (ImGui::InputText("Y Axis", buf2, 32, ImGuiInputTextFlags_CharsDecimal))
+                        data.m_cubePosition2[1] = atof(buf2);
+                    if (ImGui::InputText("Z Axis", buf3, 32, ImGuiInputTextFlags_CharsDecimal))
+                        data.m_cubePosition2[2] = atof(buf3);
+
+                    if (ImGui::Button("Reset"))
+                        {
+                            data.m_cubePosition2[0] = 0.0f;
+                            data.m_cubePosition2[1] = 0.0f;
+                            data.m_cubePosition2[2] = 0.0f;
+                        }
+                    ImGui::EndGroup();
+                    ImGui::TreePop();
+                }
+
+            ImGui::SetNextItemOpen(true);
+            if (ImGui::TreeNode("Rotation"))
+                {
+                    char buf1[32];
+                    char buf2[32];
+                    char buf3[32];
+                    snprintf(buf1, sizeof(buf1), "%.2f", data.m_cubeRotation2[0]);
+                    snprintf(buf2, sizeof(buf2), "%.2f", data.m_cubeRotation2[1]);
+                    snprintf(buf3, sizeof(buf3), "%.2f", data.m_cubeRotation2[2]);
+
+                    ImGui::BeginGroup();
+                    if (ImGui::InputText("X Axis", buf1, 32, ImGuiInputTextFlags_CharsDecimal))
+                        data.m_cubeRotation2[0] = atof(buf1);
+                    if (ImGui::InputText("Y Axis", buf2, 32, ImGuiInputTextFlags_CharsDecimal))
+                        data.m_cubeRotation2[1] = atof(buf2);
+                    if (ImGui::InputText("Z Axis", buf3, 32, ImGuiInputTextFlags_CharsDecimal))
+                        data.m_cubeRotation2[2] = atof(buf3);
+                    if (ImGui::Button("Reset"))
+                        {
+                            data.m_cubeRotation2[0] = 0.0f;
+                            data.m_cubeRotation2[1] = 0.0f;
+                            data.m_cubeRotation2[2] = 0.0f;
+                        }
+                    ImGui::EndGroup();
+                    ImGui::TreePop();
+                }
+            ImGui::TreePop();
+        }
+    ImGui::EndTable();
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 

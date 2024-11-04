@@ -33,6 +33,8 @@ HWND g_hWnd;                                    // Handle to the main window
 RECT g_winRect;                                 // Window rectangle
 WCHAR g_szTitle[MAX_LOADSTRING];                // The title bar text
 WCHAR g_szWindowClass[MAX_LOADSTRING];          // The main window class name
+static const RECT c_windowSize = { 0, 0, 1782, 1024 };  // Fixed window size
+RECT s_windowSize = { c_windowSize.left, c_windowSize.top, c_windowSize.right, c_windowSize.bottom };        // Fixed window size
 
 // [BEGIN] - Forward declarations of functions: ==============================================================================================
 
@@ -85,7 +87,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	camera.Initialize();
 
-    if (!SUCCEEDED(graphicsDX11.CreateD3D11DeviceAndContext(g_hWnd, 1024, 768)))
+    if (!SUCCEEDED(graphicsDX11.CreateD3D11DeviceAndContext(g_hWnd, c_windowSize.right, c_windowSize.bottom)))
     {
         PLOG_ERROR << "Failed creating the D3D11 Device and context";
 		return -2;
@@ -203,13 +205,12 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow,  GameData* gameDataPtr)
     PLOG_INFO << "Initializing the Application instance";
 	hInst = hInstance; // Store instance handle in our global variable
 
-	RECT windowSize = { 0, 0, 1024, 768 };
-	AdjustWindowRect(&windowSize, WS_OVERLAPPEDWINDOW, FALSE);
+	AdjustWindowRect(&s_windowSize, WS_OVERLAPPEDWINDOW, FALSE);
 
 	HWND hWnd = CreateWindowW(g_szWindowClass,
 		g_szTitle,
 		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX,
-		0, 0, windowSize.right - windowSize.left, windowSize.bottom - windowSize.top,
+		0, 0, s_windowSize.right - s_windowSize.left, s_windowSize.bottom - s_windowSize.top,
 		nullptr,
 		nullptr,
 		hInstance,
