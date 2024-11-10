@@ -259,20 +259,20 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
 
     m_grid.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
 
-    auto worldMat1 =
+    data.m_matrix01 =
             DirectX::XMMatrixRotationY(degreesToRadians(data.m_cubeRotation1[1])) *
             DirectX::XMMatrixRotationX(degreesToRadians(data.m_cubeRotation1[0])) *
             DirectX::XMMatrixRotationZ(degreesToRadians(data.m_cubeRotation1[2])) *
             DirectX::XMMatrixTranslation(data.m_cubePosition1[0], data.m_cubePosition1[1], data.m_cubePosition1[2]);
 
-    auto worldMat2 =
+    data.m_matrix02 =
         DirectX::XMMatrixRotationY(degreesToRadians(data.m_cubeRotation2[1])) *
         DirectX::XMMatrixRotationX(degreesToRadians(data.m_cubeRotation2[0])) *
         DirectX::XMMatrixRotationZ(degreesToRadians(data.m_cubeRotation2[2])) *
         DirectX::XMMatrixTranslation(data.m_cubePosition2[0], data.m_cubePosition2[1], data.m_cubePosition2[2]);
 
     {
-        DirectX::XMMATRIX mvp = worldMat2 * m_VP;
+        DirectX::XMMATRIX mvp = data.m_matrix02 * m_VP;
         D3D11_MAPPED_SUBRESOURCE mappedSubresource;
         m_D3DContext->Map(m_mvpConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
         auto* constants = (ConstantBuffer*)(mappedSubresource.pData);
@@ -280,10 +280,11 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
         m_D3DContext->Unmap(m_mvpConstantBuffer, 0);
     }
 
-    m_gizmoXYZ01.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
+    if (data.m_showTransform02)
+        m_gizmoXYZ01.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
 
     {
-        auto worldMat = worldMat1 * worldMat2;
+        auto worldMat = data.m_matrix01 * data.m_matrix02;
         DirectX::XMMATRIX mvp = worldMat * m_VP;
         D3D11_MAPPED_SUBRESOURCE mappedSubresource;
         m_D3DContext->Map(m_mvpConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
@@ -292,7 +293,8 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
         m_D3DContext->Unmap(m_mvpConstantBuffer, 0);
     }
 
-    m_gizmoXYZ02.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
+    if (data.m_showTransform01)
+        m_gizmoXYZ02.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
 
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 

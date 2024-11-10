@@ -1,5 +1,7 @@
 #pragma once
 
+#include <DirectXMath.h>
+
 constexpr int MAX_LOADSTRING = 1000;
 
 struct GameData
@@ -32,4 +34,10 @@ struct GameData
     float m_cubeRotation2[3] = { 0.f };
 
     float m_increment = 0;
+
+    DirectX::XMMATRIX m_matrix01;
+    DirectX::XMMATRIX m_matrix02;
+
+    bool m_showTransform01 = true;
+    bool m_showTransform02 = true;
 };
