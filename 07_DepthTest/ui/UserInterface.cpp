@@ -62,6 +62,13 @@ HRESULT InitIMGUI(HWND hWnd, GraphicsDX11& graphics)
 /// @brief Draw our UI
 void DrawUI(GameData& data)
 {
+    ImU32 backgroundColors[4] = {
+        ImGui::GetColorU32(ImVec4(1.0f, 0.0f, 0.0f, 1.0f)),
+        ImGui::GetColorU32(ImVec4(0.0f, 0.8f, 0.0f, 1.0f)),
+        ImGui::GetColorU32(ImVec4(0.0f, 0.0f, 1.0f, 1.0f)),
+        ImGui::GetColorU32(ImVec4(0.0f, 0.0f, 0.0f, 1.0f))
+    };
+
     // Start the Dear ImGui frame
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
@@ -74,6 +81,7 @@ void DrawUI(GameData& data)
 
     ImGui::BeginTable("nested_table", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable);
     {
+
         ImGui::TableSetupColumn("Transform 01");
         ImGui::TableSetupColumn("Transform 02");
         ImGui::TableHeadersRow();
@@ -148,6 +156,7 @@ void DrawUI(GameData& data)
             for (int index = 0; index < 4; index++)
             {
                 ImGui::TableNextColumn();
+                ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
                 {
                     char buf1[12];
                     char buf2[12];
@@ -159,10 +168,13 @@ void DrawUI(GameData& data)
                     snprintf(buf4, sizeof(buf4), "%.2f", data.m_matrix01.r[index].m128_f32[2]);
                     ImGui::Text(buf1);
                     ImGui::TableNextColumn();
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
                     ImGui::Text(buf2);
                     ImGui::TableNextColumn();
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
                     ImGui::Text(buf3);
                     ImGui::TableNextColumn();
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
                     ImGui::Text(buf4);
                 }
                 ImGui::TableNextRow();
@@ -241,6 +253,7 @@ void DrawUI(GameData& data)
         for (int index = 0; index < 4; index++)
         {
             ImGui::TableNextColumn();
+            ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
             {
                 char buf1[12];
                 char buf2[12];
@@ -252,10 +265,13 @@ void DrawUI(GameData& data)
                 snprintf(buf4, sizeof(buf4), "%.2f", data.m_matrix02.r[index].m128_f32[2]);
                 ImGui::Text(buf1);
                 ImGui::TableNextColumn();
+                ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
                 ImGui::Text(buf2);
                 ImGui::TableNextColumn();
+                ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
                 ImGui::Text(buf3);
                 ImGui::TableNextColumn();
+                ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
                 ImGui::Text(buf4);
             }
             ImGui::TableNextRow();
