@@ -31,8 +31,8 @@ void OrbitCamera::ChangeRadius(float delta)
 
 void OrbitCamera::Translate(float x, float y)
 {
-    auto right = DirectX::XMVectorScale(m_Right, x * 0.001f);
-    auto up = DirectX::XMVectorScale(DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f), y * 0.001f);
+    auto right = DirectX::XMVectorScale(m_Right, x * -0.001f);
+    auto up = DirectX::XMVectorScale(DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f), y * -0.001f);
 
     m_EyeFocusPoint = DirectX::XMVectorAdd(m_EyeFocusPoint, DirectX::XMVectorAdd(right, up));
 }
