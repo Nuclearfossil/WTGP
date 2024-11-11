@@ -5,7 +5,6 @@
 #include <directxmath.h>
 
 #include <filesystem>
-#include <iostream>
 
 #include "ResourceManager.h"
 

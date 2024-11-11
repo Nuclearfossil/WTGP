@@ -1,7 +1,6 @@
 #include "pch.h"
 
-#include <d3d11.h>
-#include <directxmath.h>
+#include <DirectXMath.h>
 
 #include "mathutils.h"
 #include "OrbitCamera.h"
@@ -31,10 +30,10 @@ void OrbitCamera::ChangeRadius(float delta)
 
 void OrbitCamera::Translate(float x, float y)
 {
-    auto right = DirectX::XMVectorScale(m_Right, x * -0.001f);
-    auto up = DirectX::XMVectorScale(DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f), y * -0.001f);
+    auto rightScaled = DirectX::XMVectorScale(m_Right, x * -0.001f);
+    auto upScaled = DirectX::XMVectorScale(DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f), y * -0.001f);
 
-    m_EyeFocusPoint = DirectX::XMVectorAdd(m_EyeFocusPoint, DirectX::XMVectorAdd(right, up));
+    m_EyeFocusPoint = DirectX::XMVectorAdd(m_EyeFocusPoint, DirectX::XMVectorAdd(rightScaled, upScaled));
 }
 
 void OrbitCamera::SetProjection(float width, float height, float aspect)

@@ -364,7 +364,7 @@ void Update(double deltaInSeconds, GraphicsDX11& graphics, OrbitCamera& camera, 
     camera.ChangeRadius(data.m_wheelDelta);
 
 	if (data.m_LMBDown)
-        camera.Translate(data.m_deltaTransformX, data.m_deltaTransformY);
+        camera.Translate(static_cast<float>(data.m_deltaTransformX), static_cast<float>(data.m_deltaTransformY));
 
 	camera.Update(deltaInSeconds);
 
