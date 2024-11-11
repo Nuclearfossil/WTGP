@@ -9,14 +9,17 @@ public:
 
     void Initialize();
 
-    void RotateAroundPoint(DirectX::XMVECTOR point, float polar, float azimuth);
+    void RotateAroundPoint(float polar, float azimuth);
 
     void Update(double deltaTime);
 
     void SetProjection(float width, float height, float projection);
     void SetInvertY(bool invertY);
+    void SetEyeFocusPoint(float x, float y, float z);
 
     void ChangeRadius(float delta);
+
+    void Translate(float x, float y);
 
     DirectX::XMMATRIX& GetMVP();
     DirectX::XMMATRIX& GetVP();
@@ -28,6 +31,10 @@ private:
 
     DirectX::XMMATRIX m_ViewProjection;
     DirectX::XMMATRIX m_ModelViewProjection;
+
+    DirectX::XMVECTOR m_EyeFocusPoint = { 0.0f };
+    DirectX::XMVECTOR m_Forward = { 0.0f, 0.0f, 1.0f };
+    DirectX::XMVECTOR m_Right = { 1.0f, 0.0f, 0.0f };
 
     float m_CameraRadius;           // distance of the camera to the polar center point
     bool m_invertY;                 // invert the Y axis

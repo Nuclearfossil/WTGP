@@ -241,13 +241,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	switch (message)
 	{
     case WM_CREATE:
-		{
-		/// A little trick to avoid using a singleton: https://learn.microsoft.com/en-us/windows/win32/learnwin32/managing-application-state-
-			CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
-			GameData* pState = reinterpret_cast<GameData*>(pCreate->lpCreateParams);
-			SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)pState);
-		}
-        break;
+	{
+	/// A little trick to avoid using a singleton: https://learn.microsoft.com/en-us/windows/win32/learnwin32/managing-application-state-
+		CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
+		GameData* pState = reinterpret_cast<GameData*>(pCreate->lpCreateParams);
+		SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)pState);
+	}
+    break;
 
 	case WM_COMMAND:
 	{
@@ -278,6 +278,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
             gameData->m_deltaMouseX += gameData->m_lastX - xPos;
             gameData->m_deltaMouseY += gameData->m_InvertYAxis ? (gameData->m_lastY - yPos) : -(gameData->m_lastY - yPos);
+        }
+
+		if (wParam == MK_RBUTTON)
+		{
+            gameData->m_deltaTransformX = gameData->m_lastX - xPos;
+            gameData->m_deltaTransformY = gameData->m_lastY - yPos;
+            gameData->m_LMBDown = true;
+		}
+		else
+		{
+            gameData->m_deltaTransformX = gameData->m_deltaTransformY = 0;
+            gameData->m_LMBDown = false;
         }
 
 		gameData->m_lastX = xPos;
@@ -348,10 +360,11 @@ void Update(double deltaInSeconds, GraphicsDX11& graphics, OrbitCamera& camera, 
 
 	azimuth = clamp(azimuth, -DirectX::XM_PIDIV2, DirectX::XM_PIDIV2);
 
-	DirectX::XMVECTOR At = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
-
-    camera.RotateAroundPoint(At, polar, azimuth);
+    camera.RotateAroundPoint(polar, azimuth);
     camera.ChangeRadius(data.m_wheelDelta);
+
+	if (data.m_LMBDown)
+        camera.Translate(data.m_deltaTransformX, data.m_deltaTransformY);
 
 	camera.Update(deltaInSeconds);
 

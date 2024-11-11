@@ -77,11 +77,12 @@ void DrawUI(GameData& data)
 
     ImGui::Begin("App Settings");
 
+    static bool enhanceMatrix = false;
     ImGui::Checkbox("Invert Y Axis", &data.m_InvertYAxis); // Edit if we want to invert the Y axis
+    ImGui::Checkbox("Enhance Matrix", &enhanceMatrix);
 
     ImGui::BeginTable("nested_table", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable);
     {
-
         ImGui::TableSetupColumn("Transform 01");
         ImGui::TableSetupColumn("Transform 02");
         ImGui::TableHeadersRow();
@@ -94,9 +95,9 @@ void DrawUI(GameData& data)
             ImGui::SetNextItemOpen(true);
             if (ImGui::TreeNode("Position"))
             {
-                char buf1[12];
-                char buf2[12];
-                char buf3[12];
+                char buf1[8];
+                char buf2[8];
+                char buf3[8];
                 snprintf(buf1, sizeof(buf1), "%.2f", data.m_cubePosition1[0]);
                 snprintf(buf2, sizeof(buf2), "%.2f", data.m_cubePosition1[1]);
                 snprintf(buf3, sizeof(buf3), "%.2f", data.m_cubePosition1[2]);
@@ -121,9 +122,9 @@ void DrawUI(GameData& data)
             ImGui::SetNextItemOpen(true);
             if (ImGui::TreeNode("Rotation"))
             {
-                char buf1[12];
-                char buf2[12];
-                char buf3[12];
+                char buf1[8];
+                char buf2[8];
+                char buf3[8];
                 snprintf(buf1, sizeof(buf1), "%.2f", data.m_cubeRotation1[0]);
                 snprintf(buf2, sizeof(buf3), "%.2f", data.m_cubeRotation1[1]);
                 snprintf(buf3, sizeof(buf3), "%.2f", data.m_cubeRotation1[2]);
@@ -146,35 +147,45 @@ void DrawUI(GameData& data)
             }
             ImGui::TreePop();
             ImGui::BeginGroup();
-            ImGui::BeginTable("TF01_mat", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable);
-            ImGui::TableSetupColumn("01");
-            ImGui::TableSetupColumn("02");
-            ImGui::TableSetupColumn("03");
-            ImGui::TableSetupColumn("04");
+            ImGui::BeginTable("TF01_mat", 5, ImGuiTableFlags_Borders | /*ImGuiTableFlags_Resizable |*/ ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable);
+            ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed);
+            ImGui::TableSetupColumn("01", ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableSetupColumn("02", ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableSetupColumn("03", ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableSetupColumn("04", ImGuiTableColumnFlags_WidthStretch);
             ImGui::TableHeadersRow();
 
             for (int index = 0; index < 4; index++)
             {
+                char buf0[8];
+                snprintf(buf0, sizeof(buf0), "%02d", index + 1);
+
                 ImGui::TableNextColumn();
-                ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
+                ImGui::Text(buf0);
+                ImGui::TableNextColumn();
+                if (enhanceMatrix)
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
                 {
-                    char buf1[12];
-                    char buf2[12];
-                    char buf3[12];
-                    char buf4[12];
+                    char buf1[8];
+                    char buf2[8];
+                    char buf3[8];
+                    char buf4[8];
                     snprintf(buf1, sizeof(buf1), "%.2f", data.m_matrix01.r[index].m128_f32[0]);
                     snprintf(buf2, sizeof(buf3), "%.2f", data.m_matrix01.r[index].m128_f32[1]);
                     snprintf(buf3, sizeof(buf3), "%.2f", data.m_matrix01.r[index].m128_f32[2]);
                     snprintf(buf4, sizeof(buf4), "%.2f", data.m_matrix01.r[index].m128_f32[2]);
                     ImGui::Text(buf1);
                     ImGui::TableNextColumn();
-                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
+                    if (enhanceMatrix)
+                        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
                     ImGui::Text(buf2);
                     ImGui::TableNextColumn();
-                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
+                    if (enhanceMatrix)
+                        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
                     ImGui::Text(buf3);
                     ImGui::TableNextColumn();
-                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
+                    if (enhanceMatrix)
+                        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
                     ImGui::Text(buf4);
                 }
                 ImGui::TableNextRow();
@@ -192,9 +203,9 @@ void DrawUI(GameData& data)
         ImGui::SetNextItemOpen(true);
         if (ImGui::TreeNode("Position"))
         {
-            char buf1[12];
-            char buf2[12];
-            char buf3[12];
+            char buf1[8];
+            char buf2[8];
+            char buf3[8];
             snprintf(buf1, sizeof(buf1), "%.2f", data.m_cubePosition2[0]);
             snprintf(buf2, sizeof(buf2), "%.2f", data.m_cubePosition2[1]);
             snprintf(buf3, sizeof(buf3), "%.2f", data.m_cubePosition2[2]);
@@ -219,9 +230,9 @@ void DrawUI(GameData& data)
         ImGui::SetNextItemOpen(true);
         if (ImGui::TreeNode("Rotation"))
         {
-            char buf1[12];
-            char buf2[12];
-            char buf3[12];
+            char buf1[8];
+            char buf2[8];
+            char buf3[8];
             snprintf(buf1, sizeof(buf1), "%.2f", data.m_cubeRotation2[0]);
             snprintf(buf2, sizeof(buf2), "%.2f", data.m_cubeRotation2[1]);
             snprintf(buf3, sizeof(buf3), "%.2f", data.m_cubeRotation2[2]);
@@ -243,35 +254,49 @@ void DrawUI(GameData& data)
             ImGui::TreePop();
         }
         ImGui::BeginGroup();
-        ImGui::BeginTable("TF02_mat", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable);
-        ImGui::TableSetupColumn("01");
-        ImGui::TableSetupColumn("02");
-        ImGui::TableSetupColumn("03");
-        ImGui::TableSetupColumn("04");
+        ImGui::BeginTable("TF02_mat", 5, ImGuiTableFlags_Borders | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable);
+
+        ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed);
+        ImGui::TableSetupColumn("01", ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableSetupColumn("02", ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableSetupColumn("03", ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableSetupColumn("04", ImGuiTableColumnFlags_WidthStretch);
         ImGui::TableHeadersRow();
 
         for (int index = 0; index < 4; index++)
         {
+            char buf0[8];
+            snprintf(buf0, sizeof(buf0), "%02d", index + 1);
+
             ImGui::TableNextColumn();
-            ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
+            ImGui::Text(buf0);
+
+            ImGui::TableNextColumn();
+
+            if (enhanceMatrix)
+                ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
+
             {
-                char buf1[12];
-                char buf2[12];
-                char buf3[12];
-                char buf4[12];
+                char buf1[8];
+                char buf2[8];
+                char buf3[8];
+                char buf4[8];
                 snprintf(buf1, sizeof(buf1), "%.2f", data.m_matrix02.r[index].m128_f32[0]);
                 snprintf(buf2, sizeof(buf3), "%.2f", data.m_matrix02.r[index].m128_f32[1]);
                 snprintf(buf3, sizeof(buf3), "%.2f", data.m_matrix02.r[index].m128_f32[2]);
                 snprintf(buf4, sizeof(buf4), "%.2f", data.m_matrix02.r[index].m128_f32[2]);
                 ImGui::Text(buf1);
                 ImGui::TableNextColumn();
-                ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
+                if (enhanceMatrix)
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
                 ImGui::Text(buf2);
                 ImGui::TableNextColumn();
-                ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
+                if (enhanceMatrix)
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
                 ImGui::Text(buf3);
                 ImGui::TableNextColumn();
-                ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
+                if (enhanceMatrix)
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, backgroundColors[index]);
                 ImGui::Text(buf4);
             }
             ImGui::TableNextRow();

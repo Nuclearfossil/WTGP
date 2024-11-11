@@ -29,6 +29,14 @@ void OrbitCamera::ChangeRadius(float delta)
     m_CameraRadius = clamp(m_CameraRadius, 1.0f, 10.0f);
 }
 
+void OrbitCamera::Translate(float x, float y)
+{
+    auto right = DirectX::XMVectorScale(m_Right, x * 0.001f);
+    auto up = DirectX::XMVectorScale(DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f), y * 0.001f);
+
+    m_EyeFocusPoint = DirectX::XMVectorAdd(m_EyeFocusPoint, DirectX::XMVectorAdd(right, up));
+}
+
 void OrbitCamera::SetProjection(float width, float height, float aspect)
 {
     m_Projection = DirectX::XMMatrixPerspectiveFovLH(degreesToRadians(78), aspect, 0.01f, 100.0f);
@@ -39,7 +47,12 @@ void OrbitCamera::SetInvertY(bool invertY)
     m_invertY = invertY;
 }
 
-void OrbitCamera::RotateAroundPoint(DirectX::XMVECTOR point, float polar, float azimuth)
+void OrbitCamera::SetEyeFocusPoint(float x, float y, float z)
+{
+    m_EyeFocusPoint = DirectX::XMVectorSet(x, y, z, 1.0f);
+}
+
+void OrbitCamera::RotateAroundPoint(float polar, float azimuth)
 {
     float y = m_CameraRadius * sinf(azimuth);
     float r = m_CameraRadius * cosf(azimuth);
@@ -47,10 +60,12 @@ void OrbitCamera::RotateAroundPoint(DirectX::XMVECTOR point, float polar, float 
     float z = r * sinf(polar);
 
 
-    DirectX::XMVECTOR Eye = DirectX::XMVectorSet(x, y, z, 1.0f);
-    DirectX::XMVECTOR At = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+    DirectX::XMVECTOR At = m_EyeFocusPoint;
+    DirectX::XMVECTOR Eye = DirectX::XMVectorAdd(m_EyeFocusPoint, DirectX::XMVectorSet(x, y, z, 1.0f));
     DirectX::XMVECTOR Up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
     m_View = DirectX::XMMatrixLookAtLH(Eye, At, Up);
+    m_Forward = DirectX::XMVectorSubtract(At, Eye);
+    m_Right = DirectX::XMVector3Cross(m_Forward, DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f));
 }
 
 void OrbitCamera::Update(double deltaTime)

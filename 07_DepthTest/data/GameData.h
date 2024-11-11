@@ -23,6 +23,11 @@ struct GameData
     int m_deltaMouseY = 0;
     float m_wheelDelta = 0.f;
 
+    bool m_LMBDown = false;
+
+    int m_deltaTransformX = 0;
+    int m_deltaTransformY = 0;
+
     double m_delta = 0.0;
 
     bool m_InvertYAxis = false;
