@@ -59,13 +59,12 @@ void OrbitCamera::RotateAroundPoint(float polar, float azimuth)
     float x = r * cosf(polar);
     float z = r * sinf(polar);
 
-
     DirectX::XMVECTOR At = m_EyeFocusPoint;
-    DirectX::XMVECTOR Eye = DirectX::XMVectorAdd(m_EyeFocusPoint, DirectX::XMVectorSet(x, y, z, 1.0f));
-    DirectX::XMVECTOR Up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
+    DirectX::XMVECTOR Eye = DirectX::XMVectorAdd(m_EyeFocusPoint, DirectX::XMVectorSet(x, y, z, 0.0f));
+    DirectX::XMVECTOR Up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
     m_View = DirectX::XMMatrixLookAtLH(Eye, At, Up);
-    m_Forward = DirectX::XMVectorSubtract(At, Eye);
-    m_Right = DirectX::XMVector3Cross(m_Forward, DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f));
+    m_Forward = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(At, Eye));
+    m_Right = DirectX::XMVector3Cross(m_Forward, DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
 }
 
 void OrbitCamera::Update(double deltaTime)
