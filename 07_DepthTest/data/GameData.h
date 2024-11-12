@@ -4,6 +4,8 @@
 
 constexpr int MAX_LOADSTRING = 1000;
 
+class OrbitCamera;
+
 struct GameData
 {
     HINSTANCE m_hInst = 0;
@@ -45,4 +47,6 @@ struct GameData
 
     bool m_showTransform01 = true;
     bool m_showTransform02 = true;
+
+    OrbitCamera* m_Camera = nullptr;
 };

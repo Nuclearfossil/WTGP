@@ -82,4 +82,7 @@ DirectX::XMMATRIX& OrbitCamera::GetVP()
     return m_ViewProjection;
 }
 
-
+DirectX::XMMATRIX& OrbitCamera::GetView()
+{
+    return m_View;
+}

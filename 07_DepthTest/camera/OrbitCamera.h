@@ -23,6 +23,7 @@ public:
 
     DirectX::XMMATRIX& GetMVP();
     DirectX::XMMATRIX& GetVP();
+    DirectX::XMMATRIX& GetView();
 
 private:
     DirectX::XMMATRIX m_World;      // The Model transform matrix

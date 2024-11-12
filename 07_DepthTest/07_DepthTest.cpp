@@ -4,7 +4,6 @@
 #include <windowsx.h>
 
 #include "pch.h"
-#include "GameData.h"
 #include "framework.h"
 #include "01_WindowsApp.h"
 
@@ -13,6 +12,8 @@
 #include "OrbitCamera.h"
 #include "UserInterface.h"
 #include "mathutils.h"
+
+#include "GameData.h"
 
 #include "ResourceManager.h"
 
@@ -73,6 +74,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     OrbitCamera camera;			// Camera
 	GraphicsDX11 graphicsDX11;  // Graphics system
+    data.m_Camera = &camera;
 
 	// Initialize global strings
 	LoadStringW(hInstance, IDS_APP_TITLE, g_szTitle, MAX_LOADSTRING);
