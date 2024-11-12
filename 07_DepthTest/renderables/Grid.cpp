@@ -19,7 +19,8 @@ HRESULT Grid::Initialize(ID3D11Device * pD3D11Device)
 {
     PLOG_INFO << "Initializing the Grid";
 
-    std::vector<float> gridVertexData = {
+    std::vector<float> gridVertexData =
+    {
         //      x,    y,     z,    r,    g,    b,    a
         // columns
         -5.0f, 0.0f, -5.0f, 0.0f, 0.0f, 1.0f, 1.0f,
@@ -68,6 +69,7 @@ HRESULT Grid::Initialize(ID3D11Device * pD3D11Device)
         -5.0f, 0.0f, 5.0f, 1.0f, 0.0f, 0.0f, 1.0f,
         5.0f, 0.0f, 5.0f, 1.0f, 0.0f, 0.0f, 1.0f
     };
+
     std::vector<WORD> gridIndices =
     {
         0, 1,

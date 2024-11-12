@@ -4,7 +4,6 @@
 #include <windowsx.h>
 
 #include "pch.h"
-#include "Game.h"
 #include "framework.h"
 #include "01_WindowsApp.h"
 
@@ -13,6 +12,8 @@
 #include "OrbitCamera.h"
 #include "UserInterface.h"
 #include "mathutils.h"
+
+#include "GameData.h"
 
 #include "ResourceManager.h"
 
@@ -33,6 +34,8 @@ HWND g_hWnd;                                    // Handle to the main window
 RECT g_winRect;                                 // Window rectangle
 WCHAR g_szTitle[MAX_LOADSTRING];                // The title bar text
 WCHAR g_szWindowClass[MAX_LOADSTRING];          // The main window class name
+static const RECT c_windowSize = { 0, 0, 1782, 1024 };  // Fixed window size
+RECT s_windowSize = { c_windowSize.left, c_windowSize.top, c_windowSize.right, c_windowSize.bottom };        // Fixed window size
 
 // [BEGIN] - Forward declarations of functions: ==============================================================================================
 
@@ -63,7 +66,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	static plog::ColorConsoleAppender<plog::TxtFormatter> consoleAppender;
     static plog::DebugOutputAppender<plog::TxtFormatter> debugConsoleAppender;
-	plog::init(plog::debug, "06_Cleanup.log").addAppender(&consoleAppender).addAppender(&debugConsoleAppender); // Initializing Logging
+	plog::init(plog::debug, "07_DepthTest.log").addAppender(&consoleAppender).addAppender(&debugConsoleAppender); // Initializing Logging
 
 	PLOG_INFO << "=================================================== Beginning of Run ===================================================";
 
@@ -71,6 +74,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     OrbitCamera camera;			// Camera
 	GraphicsDX11 graphicsDX11;  // Graphics system
+    data.m_Camera = &camera;
 
 	// Initialize global strings
 	LoadStringW(hInstance, IDS_APP_TITLE, g_szTitle, MAX_LOADSTRING);
@@ -85,23 +89,38 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	camera.Initialize();
 
-	if (!SUCCEEDED(graphicsDX11.CreateD3D11DeviceAndContext(g_hWnd, 1024, 768)))
+    if (!SUCCEEDED(graphicsDX11.CreateD3D11DeviceAndContext(g_hWnd, c_windowSize.right, c_windowSize.bottom)))
+    {
+        PLOG_ERROR << "Failed creating the D3D11 Device and context";
 		return -2;
+    }
 
-	if (!SUCCEEDED(graphicsDX11.CreateRenderTargetView()))
+    if (!SUCCEEDED(graphicsDX11.CreateRenderTargetView()))
+    {
+        PLOG_ERROR << "Failed creating the D3D11 Render Target and View";
 		return -3;
+    }
 
-	if (!SUCCEEDED(graphicsDX11.CreateD3DResources()))
+    if (!SUCCEEDED(graphicsDX11.CreateD3DResources()))
+    {
+        PLOG_ERROR << "Failed creating the D3D 11 Resources";
 		return -4;
+    }
 
     if (!SUCCEEDED(InitIMGUI(g_hWnd, graphicsDX11)))
+    {
+        PLOG_ERROR << "Failed initializing Dear ImGui";
         return -5;
+    }
 
-	if (!SUCCEEDED(InitResources(graphicsDX11.GetD3DDeviceContext())))
+    if (!SUCCEEDED(InitResources(graphicsDX11.GetD3DDeviceContext())))
+    {
+        PLOG_ERROR << "Failed Initializing additional Graphics resources";
         return -6;
+    }
 
 	// Main message loop:
-	MSG msg = { 0 };
+    MSG msg = { nullptr };
 
 	LARGE_INTEGER current = { 0 };
 	LARGE_INTEGER lastStart = { 0 };
@@ -137,8 +156,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	}
 
 	DestroyIMGUI();
-
-    ClearResources();
 
 	graphicsDX11.Cleanup();
 
@@ -190,13 +207,12 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow,  GameData* gameDataPtr)
     PLOG_INFO << "Initializing the Application instance";
 	hInst = hInstance; // Store instance handle in our global variable
 
-	RECT windowSize = { 0, 0, 1024, 768 };
-	AdjustWindowRect(&windowSize, WS_OVERLAPPEDWINDOW, FALSE);
+	AdjustWindowRect(&s_windowSize, WS_OVERLAPPEDWINDOW, FALSE);
 
 	HWND hWnd = CreateWindowW(g_szWindowClass,
 		g_szTitle,
 		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX,
-		0, 0, windowSize.right - windowSize.left, windowSize.bottom - windowSize.top,
+		0, 0, s_windowSize.right - s_windowSize.left, s_windowSize.bottom - s_windowSize.top,
 		nullptr,
 		nullptr,
 		hInstance,
@@ -227,13 +243,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	switch (message)
 	{
     case WM_CREATE:
-		{
-		/// A little trick to avoid using a singleton: https://learn.microsoft.com/en-us/windows/win32/learnwin32/managing-application-state-
-			CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
-			GameData* pState = reinterpret_cast<GameData*>(pCreate->lpCreateParams);
-			SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)pState);
-		}
-        break;
+	{
+	/// A little trick to avoid using a singleton: https://learn.microsoft.com/en-us/windows/win32/learnwin32/managing-application-state-
+		CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
+		GameData* pState = reinterpret_cast<GameData*>(pCreate->lpCreateParams);
+		SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)pState);
+	}
+    break;
 
 	case WM_COMMAND:
 	{
@@ -264,6 +280,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
             gameData->m_deltaMouseX += gameData->m_lastX - xPos;
             gameData->m_deltaMouseY += gameData->m_InvertYAxis ? (gameData->m_lastY - yPos) : -(gameData->m_lastY - yPos);
+        }
+
+		if (wParam == MK_RBUTTON)
+		{
+            gameData->m_deltaTransformX = gameData->m_lastX - xPos;
+            gameData->m_deltaTransformY = gameData->m_lastY - yPos;
+            gameData->m_LMBDown = true;
+		}
+		else
+		{
+            gameData->m_deltaTransformX = gameData->m_deltaTransformY = 0;
+            gameData->m_LMBDown = false;
         }
 
 		gameData->m_lastX = xPos;
@@ -334,10 +362,11 @@ void Update(double deltaInSeconds, GraphicsDX11& graphics, OrbitCamera& camera, 
 
 	azimuth = clamp(azimuth, -DirectX::XM_PIDIV2, DirectX::XM_PIDIV2);
 
-	DirectX::XMVECTOR At = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
-
-    camera.RotateAroundPoint(At, polar, azimuth);
+    camera.RotateAroundPoint(polar, azimuth);
     camera.ChangeRadius(data.m_wheelDelta);
+
+	if (data.m_LMBDown)
+        camera.Translate(static_cast<float>(data.m_deltaTransformX), static_cast<float>(data.m_deltaTransformY));
 
 	camera.Update(deltaInSeconds);
 

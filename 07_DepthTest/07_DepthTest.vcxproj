@@ -13,10 +13,10 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{28DFBD27-7709-4A63-B734-242259D62778}</ProjectGuid>
+    <ProjectGuid>{E9B4D56A-9AA8-45C2-A50C-23982B458B45}</ProjectGuid>
     <RootNamespace>My01WindowsApp</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>06_Cleanup</ProjectName>
+    <ProjectName>07_DepthTest</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -69,7 +69,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <ExternalIncludePath>$(SolutionDir)\extern\plog\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)\extern\plog\include;$(SolutionDir)\extern\imgui;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
@@ -77,7 +77,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <ExternalIncludePath>$(SolutionDir)\extern\plog\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)\extern\plog\include;$(SolutionDir)\extern\imgui;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -87,7 +87,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)camera;$(ProjectDir)data;$(ProjectDir)graphics;$(ProjectDir)renderables;$(ProjectDir)resources;$(ProjectDir)shaders;$(ProjectDir)ui;$(ProjectDir)utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -104,7 +104,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)\extern\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)camera;$(ProjectDir)data;$(ProjectDir)graphics;$(ProjectDir)renderables;$(ProjectDir)resources;$(ProjectDir)shaders;$(ProjectDir)ui;$(ProjectDir)utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -121,7 +121,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)\extern\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)camera;$(ProjectDir)data;$(ProjectDir)graphics;$(ProjectDir)renderables;$(ProjectDir)resources;$(ProjectDir)shaders;$(ProjectDir)ui;$(ProjectDir)utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -129,7 +129,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy $(MSBuildProjectDirectory)\CombinedShader.hlsl $(TargetDir) /s /i /q /y
+      <Command>xcopy $(MSBuildProjectDirectory)\shaders\CombinedShader.hlsl $(TargetDir) /s /i /q /y
 xcopy $(MSBuildProjectDirectory)\..\raw\blend\gizmoxyz.fbx  $(TargetDir) /s /i /q /y</Command>
     </PostBuildEvent>
     <PostBuildEvent>
@@ -146,7 +146,7 @@ xcopy $(MSBuildProjectDirectory)\..\raw\blend\gizmoxyz.fbx  $(TargetDir) /s /i /
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)\extern\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)camera;$(ProjectDir)data;$(ProjectDir)graphics;$(ProjectDir)renderables;$(ProjectDir)resources;$(ProjectDir)shaders;$(ProjectDir)ui;$(ProjectDir)utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -156,7 +156,7 @@ xcopy $(MSBuildProjectDirectory)\..\raw\blend\gizmoxyz.fbx  $(TargetDir) /s /i /
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy $(MSBuildProjectDirectory)\CombinedShader.hlsl $(TargetDir) /s /i /q /y
+      <Command>xcopy $(MSBuildProjectDirectory)\shaders\CombinedShader.hlsl $(TargetDir) /s /i /q /y
 xcopy $(MSBuildProjectDirectory)\..\raw\blend\gizmoxyz.fbx  $(TargetDir) /s /i /q /y</Command>
     </PostBuildEvent>
     <PostBuildEvent>
@@ -164,65 +164,61 @@ xcopy $(MSBuildProjectDirectory)\..\raw\blend\gizmoxyz.fbx  $(TargetDir) /s /i /
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\extern\imgui\imconfig.h" />
-    <ClInclude Include="..\extern\imgui\imgui.h" />
-    <ClInclude Include="..\extern\imgui\imgui_impl_dx11.h" />
-    <ClInclude Include="..\extern\imgui\imgui_impl_win32.h" />
-    <ClInclude Include="..\extern\imgui\imgui_internal.h" />
-    <ClInclude Include="..\extern\imgui\imstb_rectpack.h" />
-    <ClInclude Include="..\extern\imgui\imstb_textedit.h" />
-    <ClInclude Include="..\extern\imgui\imstb_truetype.h" />
-    <ClInclude Include="01_WindowsApp.h" />
-    <ClInclude Include="Mesh.h" />
-    <ClInclude Include="OrbitCamera.h" />
-    <ClInclude Include="Cube.h" />
-    <ClInclude Include="framework.h" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="GraphicsDX11.h" />
-    <ClInclude Include="Grid.h" />
+    <ClInclude Include="data\GameData.h" />
+    <ClInclude Include="graphics\GraphicsDX11.h" />
+    <ClInclude Include="camera\OrbitCamera.h" />
+    <ClInclude Include="renderables\Mesh.h" />
+    <ClInclude Include="utils\framework.h" />
     <ClInclude Include="mathutils.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Renderable.h" />
-    <ClInclude Include="Resource.h" />
-    <ClInclude Include="ResourceManager.h" />
-    <ClInclude Include="Shader.h" />
-    <ClInclude Include="targetver.h" />
-    <ClInclude Include="UserInterface.h" />
-    <ClInclude Include="utils.h" />
+    <ClInclude Include="resources\01_WindowsApp.h" />
+    <ClInclude Include="resources\Resource.h" />
+    <ClInclude Include="resources\targetver.h" />
+    <ClInclude Include="ui\UserInterface.h" />
+    <ClInclude Include="utils\utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\extern\imgui\imgui_internal.h" />
+    <ClInclude Include="..\extern\imgui\imconfig.h" />
     <ClCompile Include="..\extern\imgui\imgui.cpp" />
     <ClCompile Include="..\extern\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\extern\imgui\imgui_impl_dx11.cpp" />
     <ClCompile Include="..\extern\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="..\extern\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\extern\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="06_Cleanup.cpp" />
-    <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="OrbitCamera.cpp" />
-    <ClCompile Include="Cube.cpp" />
-    <ClCompile Include="GraphicsDX11.cpp" />
-    <ClCompile Include="Grid.cpp" />
+    <ClCompile Include="camera\OrbitCamera.cpp" />
+    <ClCompile Include="graphics\GraphicsDX11.cpp" />
+    <ClInclude Include="graphics\Renderable.h" />
+    <ClCompile Include="graphics\Renderable.cpp" />
+    <ClInclude Include="graphics\ResourceManager.h" />
+    <ClCompile Include="graphics\ResourceManager.cpp" />
+    <ClInclude Include="graphics\Shader.h" />
+    <ClCompile Include="graphics\Shader.cpp" />
+    <ClInclude Include="renderables\Plane.h" />
+    <ClInclude Include="renderables\Cube.h" />
+    <ClCompile Include="renderables\Cube.cpp" />
+    <ClInclude Include="renderables\Grid.h" />
+    <ClCompile Include="renderables\Grid.cpp" />
+    <ClCompile Include="renderables\Mesh.cpp" />
+    <ClCompile Include="renderables\Plane.cpp" />
+    <ClCompile Include="ui\UserInterface.cpp" />
+    <ClCompile Include="07_DepthTest.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Renderable.cpp" />
-    <ClCompile Include="ResourceManager.cpp" />
-    <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="UserInterface.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="01_WindowsApp.rc" />
+    <ResourceCompile Include="resources\01_WindowsApp.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="01_WindowsApp.ico" />
-    <Image Include="small.ico" />
+    <Image Include="resources\01_WindowsApp.ico" />
+    <Image Include="resources\small.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="CombinedShader.hlsl">
+    <Text Include="shaders\CombinedShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
