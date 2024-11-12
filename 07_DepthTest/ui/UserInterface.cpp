@@ -9,6 +9,7 @@
 #include "UserInterface.h"
 #include "OrbitCamera.h"
 #include <cstdio>
+#include <GameData.h>
 
 //
 // if you're ever looking for help debugging/creating widgets:
@@ -62,16 +63,76 @@ HRESULT InitIMGUI(HWND hWnd, GraphicsDX11& graphics)
     return S_OK;
 }
 
+struct TreeNodeData
+{
+    bool showPosition = { true };
+    bool showRotation = { true };
+};
+
+static void DrawTransform(float (&position)[3], float (&rotation)[3], TreeNodeData& treeNode)
+{
+    ImGui::SetNextItemOpen(treeNode.showPosition);
+    treeNode.showPosition = ImGui::TreeNode("Position");
+    if (treeNode.showPosition)
+    {
+        char buf1[8];
+        char buf2[8];
+        char buf3[8];
+        snprintf(buf1, sizeof(buf1), "%.2f", position[0]);
+        snprintf(buf2, sizeof(buf2), "%.2f", position[1]);
+        snprintf(buf3, sizeof(buf3), "%.2f", position[2]);
+        ImGui::BeginGroup();
+        if (ImGui::InputText("X Axis", buf1, 32, ImGuiInputTextFlags_CharsDecimal))
+            position[0] = strtof(buf1, nullptr);
+        if (ImGui::InputText("Y Axis", buf2, 32, ImGuiInputTextFlags_CharsDecimal))
+            position[1] = strtof(buf2, nullptr);
+        if (ImGui::InputText("Z Axis", buf3, 32, ImGuiInputTextFlags_CharsDecimal))
+            position[2] = strtof(buf3, nullptr);
+
+        if (ImGui::Button("Reset"))
+        {
+            position[0] = 0.0f;
+            position[1] = 0.0f;
+            position[2] = 0.0f;
+        }
+        ImGui::EndGroup();
+        ImGui::TreePop();
+     }
+
+    ImGui::SetNextItemOpen(treeNode.showRotation);
+    treeNode.showRotation = ImGui::TreeNode("Rotation");
+    if (treeNode.showRotation)
+    {
+        char buf1[8];
+        char buf2[8];
+        char buf3[8];
+        snprintf(buf1, sizeof(buf1), "%.2f", rotation[0]);
+        snprintf(buf2, sizeof(buf3), "%.2f", rotation[1]);
+        snprintf(buf3, sizeof(buf3), "%.2f", rotation[2]);
+
+        ImGui::BeginGroup();
+        if (ImGui::InputText("X Axis", buf1, 32, ImGuiInputTextFlags_CharsDecimal))
+            rotation[0] = strtof(buf1, nullptr);
+        if (ImGui::InputText("Y Axis", buf2, 32, ImGuiInputTextFlags_CharsDecimal))
+            rotation[1] = strtof(buf2, nullptr);
+        if (ImGui::InputText("Z Axis", buf3, 32, ImGuiInputTextFlags_CharsDecimal))
+            rotation[2] = strtof(buf3, nullptr);
+        if (ImGui::Button("Reset"))
+        {
+            rotation[0] = 0.0f;
+            rotation[1] = 0.0f;
+            rotation[2] = 0.0f;
+        }
+        ImGui::EndGroup();
+        ImGui::TreePop();
+    }
+
+    ImGui::TreePop();
+}
+
 /// @brief Draw our UI
 void DrawUI(GameData& data)
 {
-    ImU32 backgroundColors[4] = {
-        ImGui::GetColorU32(ImVec4(1.0f, 0.0f, 0.0f, 1.0f)),
-        ImGui::GetColorU32(ImVec4(0.0f, 0.8f, 0.0f, 1.0f)),
-        ImGui::GetColorU32(ImVec4(0.0f, 0.0f, 1.0f, 1.0f)),
-        ImGui::GetColorU32(ImVec4(0.0f, 0.0f, 0.0f, 1.0f))
-    };
-
     // Start the Dear ImGui frame
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
@@ -83,79 +144,25 @@ void DrawUI(GameData& data)
     static bool enhanceMatrix = false;
     static bool expandTransform01 = true;
     static bool expandTransform02 = true;
+    static TreeNodeData Transform01TreeNode;
+    static TreeNodeData Transform02TreeNode;
 
     ImGui::Checkbox("Invert Y Axis", &data.m_InvertYAxis); // Edit if we want to invert the Y axis
     ImGui::Checkbox("Enhance Matrix", &enhanceMatrix);
 
     ImGui::BeginTable("nested_table", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable);
+    ImGui::TableSetupColumn("Transform 01");
+    ImGui::TableSetupColumn("Transform 02");
+    ImGui::TableHeadersRow();
+
+    ImGui::TableNextColumn();
+    ImGui::Checkbox("Render Transform 01", &data.m_showTransform01);
+    ImGui::SetNextItemOpen(expandTransform01);
+    expandTransform01 = ImGui::TreeNode("Transform 01");
+    if (expandTransform01)
     {
-        ImGui::TableSetupColumn("Transform 01");
-        ImGui::TableSetupColumn("Transform 02");
-        ImGui::TableHeadersRow();
-
-        ImGui::TableNextColumn();
-        ImGui::Checkbox("Render Transform 01", &data.m_showTransform01);
-        ImGui::SetNextItemOpen(expandTransform01);
-        expandTransform01 = ImGui::TreeNode("Transform 01");
-        if (expandTransform01)
-        {
-            ImGui::SetNextItemOpen(true);
-            if (ImGui::TreeNode("Position"))
-            {
-                char buf1[8];
-                char buf2[8];
-                char buf3[8];
-                snprintf(buf1, sizeof(buf1), "%.2f", data.m_cubePosition1[0]);
-                snprintf(buf2, sizeof(buf2), "%.2f", data.m_cubePosition1[1]);
-                snprintf(buf3, sizeof(buf3), "%.2f", data.m_cubePosition1[2]);
-                ImGui::BeginGroup();
-                if (ImGui::InputText("X Axis", buf1, 32, ImGuiInputTextFlags_CharsDecimal))
-                    data.m_cubePosition1[0] = strtof(buf1, nullptr);
-                if (ImGui::InputText("Y Axis", buf2, 32, ImGuiInputTextFlags_CharsDecimal))
-                    data.m_cubePosition1[1] = strtof(buf2, nullptr);
-                if (ImGui::InputText("Z Axis", buf3, 32, ImGuiInputTextFlags_CharsDecimal))
-                    data.m_cubePosition1[2] = strtof(buf3, nullptr);
-
-                if (ImGui::Button("Reset"))
-                {
-                    data.m_cubePosition1[0] = 0.0f;
-                    data.m_cubePosition1[1] = 0.0f;
-                    data.m_cubePosition1[2] = 0.0f;
-                }
-                ImGui::EndGroup();
-                ImGui::TreePop();
-            }
-
-            ImGui::SetNextItemOpen(true);
-            if (ImGui::TreeNode("Rotation"))
-            {
-                char buf1[8];
-                char buf2[8];
-                char buf3[8];
-                snprintf(buf1, sizeof(buf1), "%.2f", data.m_cubeRotation1[0]);
-                snprintf(buf2, sizeof(buf3), "%.2f", data.m_cubeRotation1[1]);
-                snprintf(buf3, sizeof(buf3), "%.2f", data.m_cubeRotation1[2]);
-
-                ImGui::BeginGroup();
-                if (ImGui::InputText("X Axis", buf1, 32, ImGuiInputTextFlags_CharsDecimal))
-                    data.m_cubeRotation1[0] = strtof(buf1, nullptr);
-                if (ImGui::InputText("Y Axis", buf2, 32, ImGuiInputTextFlags_CharsDecimal))
-                    data.m_cubeRotation1[1] = strtof(buf2, nullptr);
-                if (ImGui::InputText("Z Axis", buf3, 32, ImGuiInputTextFlags_CharsDecimal))
-                    data.m_cubeRotation1[2] = strtof(buf3, nullptr);
-                if (ImGui::Button("Reset"))
-                {
-                    data.m_cubeRotation1[0] = 0.0f;
-                    data.m_cubeRotation1[1] = 0.0f;
-                    data.m_cubeRotation1[2] = 0.0f;
-                }
-                ImGui::EndGroup();
-                ImGui::TreePop();
-            }
-            ImGui::TreePop();
-
-            DrawMatrix("TF01_mat", data.m_matrix01, enhanceMatrix);
-        }
+            DrawTransform(data.m_cubePosition1, data.m_cubeRotation1, Transform01TreeNode);
+        DrawMatrix("TF01_mat", data.m_matrix01, enhanceMatrix);
     }
 
     ImGui::TableNextColumn();
@@ -164,62 +171,8 @@ void DrawUI(GameData& data)
     expandTransform02 = ImGui::TreeNode("Transform 02");
     if (expandTransform02)
     {
-        ImGui::SetNextItemOpen(true);
-        if (ImGui::TreeNode("Position"))
-        {
-            char buf1[8];
-            char buf2[8];
-            char buf3[8];
-            snprintf(buf1, sizeof(buf1), "%.2f", data.m_cubePosition2[0]);
-            snprintf(buf2, sizeof(buf2), "%.2f", data.m_cubePosition2[1]);
-            snprintf(buf3, sizeof(buf3), "%.2f", data.m_cubePosition2[2]);
-            ImGui::BeginGroup();
-            if (ImGui::InputText("X Axis", buf1, 32, ImGuiInputTextFlags_CharsDecimal))
-                data.m_cubePosition2[0] = strtof(buf1, nullptr);
-            if (ImGui::InputText("Y Axis", buf2, 32, ImGuiInputTextFlags_CharsDecimal))
-                data.m_cubePosition2[1] = strtof(buf2, nullptr);
-            if (ImGui::InputText("Z Axis", buf3, 32, ImGuiInputTextFlags_CharsDecimal))
-                data.m_cubePosition2[2] = strtof(buf3, nullptr);
-
-            if (ImGui::Button("Reset"))
-            {
-                data.m_cubePosition2[0] = 0.0f;
-                data.m_cubePosition2[1] = 0.0f;
-                data.m_cubePosition2[2] = 0.0f;
-            }
-            ImGui::EndGroup();
-            ImGui::TreePop();
-        }
-
-        ImGui::SetNextItemOpen(true);
-        if (ImGui::TreeNode("Rotation"))
-        {
-            char buf1[8];
-            char buf2[8];
-            char buf3[8];
-            snprintf(buf1, sizeof(buf1), "%.2f", data.m_cubeRotation2[0]);
-            snprintf(buf2, sizeof(buf2), "%.2f", data.m_cubeRotation2[1]);
-            snprintf(buf3, sizeof(buf3), "%.2f", data.m_cubeRotation2[2]);
-
-            ImGui::BeginGroup();
-            if (ImGui::InputText("X Axis", buf1, 32, ImGuiInputTextFlags_CharsDecimal))
-                data.m_cubeRotation2[0] = strtof(buf1, nullptr);
-            if (ImGui::InputText("Y Axis", buf2, 32, ImGuiInputTextFlags_CharsDecimal))
-                data.m_cubeRotation2[1] = strtof(buf2, nullptr);
-            if (ImGui::InputText("Z Axis", buf3, 32, ImGuiInputTextFlags_CharsDecimal))
-                data.m_cubeRotation2[2] = strtof(buf3, nullptr);
-            if (ImGui::Button("Reset"))
-            {
-                data.m_cubeRotation2[0] = 0.0f;
-                data.m_cubeRotation2[1] = 0.0f;
-                data.m_cubeRotation2[2] = 0.0f;
-            }
-            ImGui::EndGroup();
-            ImGui::TreePop();
-        }
-        ImGui::TreePop();
-
-        DrawMatrix("TFM_02", data.m_matrix02, enhanceMatrix);
+            DrawTransform(data.m_cubePosition2, data.m_cubeRotation2, Transform02TreeNode);
+        DrawMatrix("TF02_mat", data.m_matrix02, enhanceMatrix);
     }
     ImGui::EndTable();
 
