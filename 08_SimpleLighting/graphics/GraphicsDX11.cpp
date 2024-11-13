@@ -120,7 +120,8 @@ HRESULT GraphicsDX11::CreateD3D11Context(ID3D11Device* device, ID3D11DeviceConte
 /// @return S_OK if we were able to compile the shaders
 HRESULT GraphicsDX11::LoadAndCompileShaders()
 {
-    return m_shader.Compile(m_D3DDevice, L"CombinedShader.hlsl");
+    m_simpleLit.Compile(m_D3DDevice, L"SimpleLit.hlsl", IALayout_VertexColorNormal);
+    return m_shader.Compile(m_D3DDevice, L"CombinedShader.hlsl", IALayout_VertexColor);
 }
 
 /// @brief Create the Vertex and Index buffers, as well as the input layout
@@ -241,6 +242,7 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
         D3D11_MAPPED_SUBRESOURCE mappedSubresource;
         m_D3DContext->Map(m_mvpConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
         ConstantBuffer* constants = (ConstantBuffer*)(mappedSubresource.pData);
+        constants->mModelView = DirectX::XMMatrixTranspose(m_MV);
         constants->mModelViewProjection = DirectX::XMMatrixTranspose(m_MVP);
         m_D3DContext->Unmap(m_mvpConstantBuffer, 0);
     }
@@ -276,12 +278,13 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
         D3D11_MAPPED_SUBRESOURCE mappedSubresource;
         m_D3DContext->Map(m_mvpConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
         auto* constants = (ConstantBuffer*)(mappedSubresource.pData);
+        constants->mModelView = DirectX::XMMatrixTranspose(m_MV);
         constants->mModelViewProjection = DirectX::XMMatrixTranspose(mvp);
         m_D3DContext->Unmap(m_mvpConstantBuffer, 0);
     }
 
     if (data.m_showTransform02)
-        m_gizmoXYZ01.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
+        m_gizmoXYZ01.Render(m_D3DContext, m_simpleLit, m_mvpConstantBuffer);
 
     {
         auto worldMat = data.m_matrix01 * data.m_matrix02;
@@ -289,12 +292,13 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
         D3D11_MAPPED_SUBRESOURCE mappedSubresource;
         m_D3DContext->Map(m_mvpConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
         auto* constants = (ConstantBuffer*)(mappedSubresource.pData);
+        constants->mModelView = DirectX::XMMatrixTranspose(m_MV);
         constants->mModelViewProjection = DirectX::XMMatrixTranspose(mvp);
         m_D3DContext->Unmap(m_mvpConstantBuffer, 0);
     }
 
     if (data.m_showTransform01)
-        m_gizmoXYZ02.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
+        m_gizmoXYZ02.Render(m_D3DContext, m_simpleLit, m_mvpConstantBuffer);
 
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
@@ -355,6 +359,7 @@ void GraphicsDX11::Cleanup()
     PLOG_INFO << "Cleaning up the resources for the Graphics DX11 class";
 
     // Release all our resources
+    m_simpleLit.Cleanup();
     m_shader.Cleanup();
     m_cube.Cleanup();
     m_grid.Cleanup();

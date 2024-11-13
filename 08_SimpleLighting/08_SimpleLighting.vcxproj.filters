@@ -161,5 +161,8 @@
     <Text Include="shaders\CombinedShader.hlsl">
       <Filter>shaders</Filter>
     </Text>
+    <Text Include="shaders\SimpleLit.hlsl">
+      <Filter>shaders</Filter>
+    </Text>
   </ItemGroup>
 </Project>

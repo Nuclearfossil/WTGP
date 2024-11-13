@@ -21,6 +21,7 @@ public:
 
     void Translate(float x, float y);
 
+    DirectX::XMMATRIX& GetMV();
     DirectX::XMMATRIX& GetMVP();
     DirectX::XMMATRIX& GetVP();
     DirectX::XMMATRIX& GetView();
@@ -30,6 +31,7 @@ private:
     DirectX::XMMATRIX m_View;       // The View (Camera) matrix
     DirectX::XMMATRIX m_Projection; // the Perspecitve projection matrix
 
+    DirectX::XMMATRIX m_ModelView;
     DirectX::XMMATRIX m_ViewProjection;
     DirectX::XMMATRIX m_ModelViewProjection;
 

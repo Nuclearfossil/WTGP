@@ -18,6 +18,7 @@
 /// @brief Structure defining the Constant buffer. This buffer will be used to pass data into the shader
 struct ConstantBuffer
 {
+    DirectX::XMMATRIX mModelView;
     DirectX::XMMATRIX mModelViewProjection;
 };
 
@@ -52,6 +53,7 @@ public:
     HRESULT CreateVertexAndIndexBuffers();
     HRESULT CreateDepthStencilAndRasterizerState();
 
+    void SetMV(DirectX::XMMATRIX const& mv) { m_MV = mv; }
     void SetMVP(DirectX::XMMATRIX const& mvp) { m_MVP = mvp; }
 
     void SetVP(DirectX::XMMATRIX const& vp) { m_VP = vp; }
@@ -71,6 +73,7 @@ private:
     IDXGISwapChain* m_SwapChain = nullptr; // DXGI swapchain for double/triple buffering
 
     Shader m_shader;
+    Shader m_simpleLit;
 
     Cube m_cube;
     Grid m_grid;
@@ -84,6 +87,7 @@ private:
     ID3D11RasterizerState* m_rasterizerState;     // The Rasterizer State
 
     D3D11_VIEWPORT m_viewport;
+    DirectX::XMMATRIX m_MV;
     DirectX::XMMATRIX m_MVP;
     DirectX::XMMATRIX m_VP;
 

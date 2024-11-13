@@ -130,6 +130,8 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy $(MSBuildProjectDirectory)\shaders\CombinedShader.hlsl $(TargetDir) /s /i /q /y
+
+xcopy $(MSBuildProjectDirectory)\shaders\SimpleLit.hlsl $(TargetDir) /s /i /q /y
 xcopy $(MSBuildProjectDirectory)\..\raw\blend\gizmoxyz.fbx  $(TargetDir) /s /i /q /y</Command>
     </PostBuildEvent>
     <PostBuildEvent>
@@ -157,6 +159,8 @@ xcopy $(MSBuildProjectDirectory)\..\raw\blend\gizmoxyz.fbx  $(TargetDir) /s /i /
     </Link>
     <PostBuildEvent>
       <Command>xcopy $(MSBuildProjectDirectory)\shaders\CombinedShader.hlsl $(TargetDir) /s /i /q /y
+
+xcopy $(MSBuildProjectDirectory)\shaders\SimpleLit.hlsl $(TargetDir) /s /i /q /y
 xcopy $(MSBuildProjectDirectory)\..\raw\blend\gizmoxyz.fbx  $(TargetDir) /s /i /q /y</Command>
     </PostBuildEvent>
     <PostBuildEvent>
@@ -228,6 +232,11 @@ xcopy $(MSBuildProjectDirectory)\..\raw\blend\gizmoxyz.fbx  $(TargetDir) /s /i /
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-format" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="shaders\SimpleLit.hlsl">
+      <FileType>Document</FileType>
+    </Text>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

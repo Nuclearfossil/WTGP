@@ -14,6 +14,7 @@ void OrbitCamera::Initialize()
     m_World = DirectX::XMMatrixIdentity();
     m_View = DirectX::XMMatrixIdentity();
     m_Projection = DirectX::XMMatrixIdentity();
+    m_ModelView = DirectX::XMMatrixIdentity();
     m_ViewProjection = DirectX::XMMatrixIdentity();
     m_ModelViewProjection = DirectX::XMMatrixIdentity();
     m_invertY = false;
@@ -68,8 +69,14 @@ void OrbitCamera::RotateAroundPoint(float polar, float azimuth)
 
 void OrbitCamera::Update(double deltaTime)
 {
+    m_ModelView = m_World * m_View;
     m_ViewProjection = m_View * m_Projection;
-    m_ModelViewProjection = m_World * m_View * m_Projection;
+    m_ModelViewProjection = m_ModelView * m_Projection;
+}
+
+DirectX::XMMATRIX& OrbitCamera::GetMV()
+{
+    return m_ModelView;
 }
 
 DirectX::XMMATRIX& OrbitCamera::GetMVP()

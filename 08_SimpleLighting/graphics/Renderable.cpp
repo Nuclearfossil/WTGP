@@ -15,7 +15,7 @@ void Renderable::Initialize(
 {
     m_numIndices = static_cast<uint16_t>(indexbuffer.size());
 
-    m_stride = 3 * sizeof(float) + 4 * sizeof(float);
+    m_stride = 3 * sizeof(float) + 4 * sizeof(float) + 3 * sizeof(float);
     m_offset = 0;
 
     D3D11_BUFFER_DESC vertexBufferDesc = {};

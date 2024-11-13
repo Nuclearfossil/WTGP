@@ -69,6 +69,7 @@ bool Mesh::LoadFromFile(ID3D11DeviceContext* pD3D11DeviceContext, std::string pa
             {
                 auto vertex = mesh->mVertices[vertexIndex];
                 auto material = materialbuffer[mesh->mMaterialIndex];
+                auto normal = mesh->mNormals[vertexIndex];
                 vertexBuffer.push_back(ColorVertex{
                     vertex.x,
                     vertex.y,
@@ -76,7 +77,10 @@ bool Mesh::LoadFromFile(ID3D11DeviceContext* pD3D11DeviceContext, std::string pa
                     material.x,
                     material.y,
                     material.z,
-                    1.0f });
+                    1.0f,
+                    normal.x,
+                    normal.y,
+                    normal.z});
             }
 
             for (size_t faceIndex = 0; faceIndex < mesh->mNumFaces; faceIndex++)

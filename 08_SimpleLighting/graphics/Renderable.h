@@ -15,6 +15,9 @@ struct [[nodiscard]] ColorVertex
     float g;
     float b;
     float a;
+    float nx;
+    float ny;
+    float nz;
 };
 
 class Renderable
