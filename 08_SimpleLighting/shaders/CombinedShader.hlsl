@@ -1,0 +1,30 @@
+cbuffer ConstantBuffer : register(b0)
+{
+	matrix ModelViewProjection;
+}
+
+struct VS_Input
+{
+	float3 position : POS;
+	float4 color : COL;
+};
+
+struct VS_Output
+{
+	float4 position : SV_POSITION;
+	float4 color : COL;
+};
+
+VS_Output vs_main(VS_Input input)
+{
+    VS_Output output = (VS_Output)0;
+    output.position = mul(float4(input.position,1.0f), ModelViewProjection);
+	output.color = input.color;
+
+	return output;
+}
+
+float4 ps_main(VS_Output input) : SV_TARGET
+{
+    return input.color;
+}

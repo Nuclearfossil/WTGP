@@ -1,0 +1,165 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="camera\OrbitCamera.cpp">
+      <Filter>camera</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\GraphicsDX11.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\ResourceManager.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\Shader.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="renderables\Cube.cpp">
+      <Filter>renderables</Filter>
+    </ClCompile>
+    <ClCompile Include="renderables\Grid.cpp">
+      <Filter>renderables</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\UserInterface.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\imgui\imgui.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\imgui\imgui_draw.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\imgui\imgui_impl_dx11.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\imgui\imgui_impl_win32.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\imgui\imgui_tables.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\imgui\imgui_widgets.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="renderables\Plane.cpp">
+      <Filter>renderables</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\Renderable.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="renderables\Mesh.cpp">
+      <Filter>renderables</Filter>
+    </ClCompile>
+    <ClCompile Include="08_SimpleLighting.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="camera\OrbitCamera.h">
+      <Filter>camera</Filter>
+    </ClInclude>
+    <ClInclude Include="data\GameData.h">
+      <Filter>data</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\ResourceManager.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\GraphicsDX11.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\Shader.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="renderables\Cube.h">
+      <Filter>renderables</Filter>
+    </ClInclude>
+    <ClInclude Include="renderables\Grid.h">
+      <Filter>renderables</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\Renderable.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\01_WindowsApp.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\Resource.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\targetver.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\UserInterface.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\utils.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="mathutils.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\framework.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\imgui\imconfig.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\imgui\imgui_internal.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="renderables\Plane.h">
+      <Filter>renderables</Filter>
+    </ClInclude>
+    <ClInclude Include="renderables\Mesh.h">
+      <Filter>renderables</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\01_WindowsApp.ico">
+      <Filter>resources</Filter>
+    </Image>
+    <Image Include="resources\small.ico">
+      <Filter>resources</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".clang-format" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="camera">
+      <UniqueIdentifier>{9236c107-1a2b-4e2c-9965-44868e59167d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data">
+      <UniqueIdentifier>{4d3d9fa2-b51e-4981-91a5-e3509b86d540}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphics">
+      <UniqueIdentifier>{03b9cbc9-c17c-4744-a8c8-d78bf4280c26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="renderables">
+      <UniqueIdentifier>{84070419-c530-4dff-92ac-9de11f0b141d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resources">
+      <UniqueIdentifier>{83488972-0a71-4dbe-a9de-c7e2a9c8aa9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{faa09880-6707-4e4e-8549-0d0afe9ca1f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ui">
+      <UniqueIdentifier>{2f6fbb17-76a4-4f8a-9328-f583aceae304}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{1a5aecad-6403-46e5-8644-e7329911c31e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imgui">
+      <UniqueIdentifier>{16266c0b-8a1d-49a2-ae4f-3baaccedc276}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resources\01_WindowsApp.rc">
+      <Filter>resources</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="shaders\CombinedShader.hlsl">
+      <Filter>shaders</Filter>
+    </Text>
+  </ItemGroup>
+</Project>
