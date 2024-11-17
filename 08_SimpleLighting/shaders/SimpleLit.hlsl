@@ -36,10 +36,15 @@ VS_Output vs_main(VS_Input input)
     return output;
 }
 
+// Simple Ambient + diffuse lighting model
 float4 ps_main(VS_Output input) : SV_TARGET
 {
+    float4 minColor = (0.0, 0.0, 0.0, 0.0);
+    float4 maxColor = (1.0, 1.0, 1.0, 1.0);
+    float4 ambient = input.color * .1;
     float3 lightPosition = position;
     float3 l = normalize(lightPosition - input.worldpos);
-    float4 ndotl = max(dot(l, input.normal), 0.0f);
-    return input.color * ndotl;
+    float ndotl = max(dot(l, input.normal), 0.0f);
+    float4 lambertCont = input.color * ndotl;
+    return clamp(lambertCont + ambient, minColor, maxColor);
 }
