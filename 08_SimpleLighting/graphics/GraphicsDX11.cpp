@@ -287,9 +287,8 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
 
     m_grid.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
 
-
     m_light.Render(m_D3DContext, m_lightGeometryShader, m_mvpConstantBuffer, m_lightConstantBuffer);
-    m_sphere.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
+    m_sphere.Render(m_D3DContext, m_lightGeometryShader, m_mvpConstantBuffer, m_lightConstantBuffer);
 
     data.m_matrix01 =
             DirectX::XMMatrixRotationY(degreesToRadians(data.m_cubeRotation1[1])) *

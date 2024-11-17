@@ -38,8 +38,8 @@ VS_Output vs_main(VS_Input input)
 
 float4 ps_main(VS_Output input) : SV_TARGET
 {
-    float3 lightPosition = (1.0f, 1.0f, 0.0f);
-    float3 l = normalize(input.worldpos - lightPosition);
+    float3 lightPosition = position;
+    float3 l = normalize(lightPosition - input.worldpos);
     float4 ndotl = max(dot(l, input.normal), 0.0f);
     return input.color * ndotl;
 }

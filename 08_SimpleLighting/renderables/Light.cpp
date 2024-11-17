@@ -27,7 +27,8 @@ HRESULT Light::Initialize(ID3D11Device* pD3D11Device)
         0.0f, 0.0f, 0.25f, 0.0f, 0.0f, 1.0f, 1.0f,
     };
 
-    std::vector<WORD> indices = {
+    std::vector<WORD> indices =
+    {
         0, 3,
         1, 4,
         2, 5

@@ -126,7 +126,7 @@ HRESULT Sphere::Initialize(ID3D11Device* pD3D11Device, float radius, int sliceCo
     return S_OK;
 }
 
-void Sphere::Render(ID3D11DeviceContext* pD3D11DeviceContext, Shader& shader, ID3D11Buffer* mvpConstants)
+void Sphere::Render(ID3D11DeviceContext* pD3D11DeviceContext, Shader& shader, ID3D11Buffer* mvpConstants, ID3D11Buffer* lightConstants)
 {
     pD3D11DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
     pD3D11DeviceContext->IASetInputLayout(shader.GetLayout());
@@ -134,6 +134,7 @@ void Sphere::Render(ID3D11DeviceContext* pD3D11DeviceContext, Shader& shader, ID
     pD3D11DeviceContext->VSSetShader(shader.GetVertexShader(), nullptr, 0);
     pD3D11DeviceContext->PSSetShader(shader.GetPixelShader(), nullptr, 0);
     pD3D11DeviceContext->VSSetConstantBuffers(0, 1, &mvpConstants);
+    pD3D11DeviceContext->VSSetConstantBuffers(1, 1, &lightConstants);
 
     pD3D11DeviceContext->IASetVertexBuffers(0, 1, &m_vertices, &m_stride, &m_offset);
     pD3D11DeviceContext->IASetIndexBuffer(m_indices, DXGI_FORMAT_R16_UINT, 0);
