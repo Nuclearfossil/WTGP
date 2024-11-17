@@ -15,6 +15,7 @@
 #include "Plane.h"
 #include "Mesh.h"
 #include "Light.h"
+#include "Sphere.h"
 
 /// @brief Structure defining the Constant buffer. This buffer will be used to pass data into the shader
 struct MatrixConstantBuffer
@@ -89,6 +90,7 @@ private:
     Mesh m_gizmoXYZ01;
     Mesh m_gizmoXYZ02;
     Light m_light;
+    Sphere m_sphere;
 
     ID3D11Buffer* m_mvpConstantBuffer = nullptr;            // The constant buffer for the WVP matrices
     ID3D11Buffer* m_lightConstantBuffer = nullptr;          // The constant buffer for lighting

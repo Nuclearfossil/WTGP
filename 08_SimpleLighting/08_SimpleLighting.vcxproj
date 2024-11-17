@@ -187,6 +187,7 @@
     <ClInclude Include="camera\OrbitCamera.h" />
     <ClInclude Include="renderables\Light.h" />
     <ClInclude Include="renderables\Mesh.h" />
+    <ClInclude Include="renderables\Sphere.h" />
     <ClInclude Include="utils\framework.h" />
     <ClInclude Include="mathutils.h" />
     <ClInclude Include="pch.h" />
@@ -221,6 +222,7 @@
     <ClCompile Include="renderables\Light.cpp" />
     <ClCompile Include="renderables\Mesh.cpp" />
     <ClCompile Include="renderables\Plane.cpp" />
+    <ClCompile Include="renderables\Sphere.cpp" />
     <ClCompile Include="ui\UserInterface.cpp" />
     <ClCompile Include="08_SimpleLighting.cpp" />
     <ClCompile Include="pch.cpp">

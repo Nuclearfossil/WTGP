@@ -165,6 +165,7 @@ HRESULT GraphicsDX11::CreateVertexAndIndexBuffers()
     m_grid.Initialize(m_D3DDevice);
     m_plane.Initialize(m_D3DDevice);
     m_light.Initialize(m_D3DDevice);
+    m_sphere.Initialize(m_D3DDevice, 0.25f, 12, 6);
     m_gizmoXYZ01.LoadFromFile(m_D3DContext, "gizmoxyz.fbx");
     m_gizmoXYZ02.LoadFromFile(m_D3DContext, "gizmoxyz.fbx");
 
@@ -268,7 +269,7 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
         LightConstantBuffer* lightConstantBuffer = (LightConstantBuffer*)(lightMappedSubresource.pData);
         lightConstantBuffer->mLightPosition = DirectX::XMFLOAT4(data.m_Light.m_LightPosition[0], data.m_Light.m_LightPosition[1], data.m_Light.m_LightPosition[2], 0.0f);
         lightConstantBuffer->mDiffuse = DirectX::XMFLOAT4(data.m_Light.m_Diffuse[0], data.m_Light.m_Diffuse[1], data.m_Light.m_Diffuse[2], data.m_Light.m_Diffuse[3]);
-        m_D3DContext->Unmap(m_lightConstantBuffer, 0);f
+        m_D3DContext->Unmap(m_lightConstantBuffer, 0);
     }
 
     // Clear the back buffer to the clear color
@@ -288,6 +289,7 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
 
 
     m_light.Render(m_D3DContext, m_lightGeometryShader, m_mvpConstantBuffer, m_lightConstantBuffer);
+    m_sphere.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
 
     data.m_matrix01 =
             DirectX::XMMatrixRotationY(degreesToRadians(data.m_cubeRotation1[1])) *

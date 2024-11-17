@@ -64,7 +64,7 @@ HRESULT Light::Initialize(ID3D11Device* pD3D11Device)
 #endif
 
     D3D11_BUFFER_DESC indexBufferDesc = {};
-    indexBufferDesc.ByteWidth = static_cast<UINT>(indices.size() * sizeof(DWORD));
+    indexBufferDesc.ByteWidth = static_cast<UINT>(indices.size() * sizeof(WORD));
     indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
     indexBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
     indexBufferDesc.CPUAccessFlags = 0;
@@ -88,7 +88,7 @@ HRESULT Light::Initialize(ID3D11Device* pD3D11Device)
 #endif
 
 
-    return S_FALSE;
+    return S_OK;
 }
 
 void Light::Render(ID3D11DeviceContext* pD3D11DeviceContext, Shader& shader, ID3D11Buffer* mvpConstants, ID3D11Buffer* lightConstants)

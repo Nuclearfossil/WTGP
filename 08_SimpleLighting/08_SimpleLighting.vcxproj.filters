@@ -54,6 +54,9 @@
     <ClCompile Include="renderables\Light.cpp">
       <Filter>renderables</Filter>
     </ClCompile>
+    <ClCompile Include="renderables\Sphere.cpp">
+      <Filter>renderables</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -115,6 +118,9 @@
       <Filter>renderables</Filter>
     </ClInclude>
     <ClInclude Include="renderables\Light.h">
+      <Filter>renderables</Filter>
+    </ClInclude>
+    <ClInclude Include="renderables\Sphere.h">
       <Filter>renderables</Filter>
     </ClInclude>
   </ItemGroup>
