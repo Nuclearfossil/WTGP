@@ -6,6 +6,12 @@ constexpr int MAX_LOADSTRING = 1000;
 
 class OrbitCamera;
 
+struct LightData
+{
+    float m_LightPosition[3];
+    float m_Diffuse[4];
+};
+
 struct GameData
 {
     HINSTANCE m_hInst = 0;
@@ -49,4 +55,6 @@ struct GameData
     bool m_showTransform02 = true;
 
     OrbitCamera* m_Camera = nullptr;
+
+    LightData m_Light = { 0 };
 };

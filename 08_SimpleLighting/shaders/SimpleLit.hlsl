@@ -1,7 +1,12 @@
 cbuffer ConstantBuffer : register(b0)
 {
-    matrix ModelView;
+    matrix World;
     matrix ModelViewProjection;
+}
+cbuffer LightBuffer : register(b0)
+{
+    float3 position;
+    float4 color;
 }
 
 struct VS_Input
@@ -23,15 +28,18 @@ VS_Output vs_main(VS_Input input)
 {
     VS_Output output = (VS_Output) 0;
 
-    output.worldpos = float3(input.position);
+    output.worldpos = mul(float4(input.position, 1.0f), World);
     output.position = mul(float4(input.position, 1.0f), ModelViewProjection);
     output.color = input.color;
-    output.normal = normalize(mul(input.normal, (float3x3) ModelView));
+    output.normal = normalize(mul(input.normal, (float3x3) World));
 
     return output;
 }
 
 float4 ps_main(VS_Output input) : SV_TARGET
 {
-    return input.color;
+    float3 lightPosition = (1.0f, 1.0f, 0.0f);
+    float3 l = normalize(input.worldpos - lightPosition);
+    float4 ndotl = max(dot(l, input.normal), 0.0f);
+    return input.color * ndotl;
 }

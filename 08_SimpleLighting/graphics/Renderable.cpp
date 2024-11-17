@@ -9,7 +9,7 @@ Renderable::~Renderable()
 
 
 void Renderable::Initialize(
-    std::vector<ColorVertex> vertexBuffer,
+    std::vector<ColorVertexNormal> vertexBuffer,
     std::vector<uint16_t> indexbuffer,
     ID3D11Device* pD3D11Device)
 {
@@ -58,7 +58,7 @@ void Renderable::Initialize(
     }
 }
 
-void Renderable::Render(ID3D11DeviceContext* pD3D11DeviceContext, Shader& shader, ID3D11Buffer* mvpConstants)
+void Renderable::Render(ID3D11DeviceContext* pD3D11DeviceContext, Shader& shader, ID3D11Buffer* mvpConstants, ID3D11Buffer* lightConstants)
 {
     pD3D11DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     pD3D11DeviceContext->IASetInputLayout(shader.GetLayout());
@@ -66,6 +66,7 @@ void Renderable::Render(ID3D11DeviceContext* pD3D11DeviceContext, Shader& shader
     pD3D11DeviceContext->VSSetShader(shader.GetVertexShader(), nullptr, 0);
     pD3D11DeviceContext->PSSetShader(shader.GetPixelShader(), nullptr, 0);
     pD3D11DeviceContext->VSSetConstantBuffers(0, 1, &mvpConstants);
+    pD3D11DeviceContext->PSSetConstantBuffers(0, 1, &lightConstants);
 
     pD3D11DeviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &m_stride, &m_offset);
     pD3D11DeviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R16_UINT, 0);

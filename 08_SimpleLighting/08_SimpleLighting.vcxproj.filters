@@ -51,6 +51,9 @@
       <Filter>renderables</Filter>
     </ClCompile>
     <ClCompile Include="08_SimpleLighting.cpp" />
+    <ClCompile Include="renderables\Light.cpp">
+      <Filter>renderables</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -111,6 +114,9 @@
     <ClInclude Include="renderables\Mesh.h">
       <Filter>renderables</Filter>
     </ClInclude>
+    <ClInclude Include="renderables\Light.h">
+      <Filter>renderables</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\01_WindowsApp.ico">
@@ -151,6 +157,9 @@
     <Filter Include="imgui">
       <UniqueIdentifier>{16266c0b-8a1d-49a2-ae4f-3baaccedc276}</UniqueIdentifier>
     </Filter>
+    <Filter Include="assets">
+      <UniqueIdentifier>{286e3b45-56bc-4732-a2ae-98100b42adf2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resources\01_WindowsApp.rc">
@@ -158,11 +167,17 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="shaders\CombinedShader.hlsl">
+    <CopyFileToFolders Include="shaders\CombinedShader.hlsl">
       <Filter>shaders</Filter>
-    </Text>
-    <Text Include="shaders\SimpleLit.hlsl">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="shaders\SimpleLit.hlsl">
       <Filter>shaders</Filter>
-    </Text>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="..\raw\blend\gizmoxyz.fbx">
+      <Filter>assets</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="shaders\LightGeometry.hlsl">
+      <Filter>shaders</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>

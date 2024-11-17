@@ -129,14 +129,21 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy $(MSBuildProjectDirectory)\shaders\CombinedShader.hlsl $(TargetDir) /s /i /q /y
-
-xcopy $(MSBuildProjectDirectory)\shaders\SimpleLit.hlsl $(TargetDir) /s /i /q /y
-xcopy $(MSBuildProjectDirectory)\..\raw\blend\gizmoxyz.fbx  $(TargetDir) /s /i /q /y</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy Shader to deployment folder</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>
+      </Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -158,19 +165,27 @@ xcopy $(MSBuildProjectDirectory)\..\raw\blend\gizmoxyz.fbx  $(TargetDir) /s /i /
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy $(MSBuildProjectDirectory)\shaders\CombinedShader.hlsl $(TargetDir) /s /i /q /y
-
-xcopy $(MSBuildProjectDirectory)\shaders\SimpleLit.hlsl $(TargetDir) /s /i /q /y
-xcopy $(MSBuildProjectDirectory)\..\raw\blend\gizmoxyz.fbx  $(TargetDir) /s /i /q /y</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy Shader to deployment folder</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>
+      </Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="data\GameData.h" />
     <ClInclude Include="graphics\GraphicsDX11.h" />
     <ClInclude Include="camera\OrbitCamera.h" />
+    <ClInclude Include="renderables\Light.h" />
     <ClInclude Include="renderables\Mesh.h" />
     <ClInclude Include="utils\framework.h" />
     <ClInclude Include="mathutils.h" />
@@ -203,6 +218,7 @@ xcopy $(MSBuildProjectDirectory)\..\raw\blend\gizmoxyz.fbx  $(TargetDir) /s /i /
     <ClCompile Include="renderables\Cube.cpp" />
     <ClInclude Include="renderables\Grid.h" />
     <ClCompile Include="renderables\Grid.cpp" />
+    <ClCompile Include="renderables\Light.cpp" />
     <ClCompile Include="renderables\Mesh.cpp" />
     <ClCompile Include="renderables\Plane.cpp" />
     <ClCompile Include="ui\UserInterface.cpp" />
@@ -222,21 +238,39 @@ xcopy $(MSBuildProjectDirectory)\..\raw\blend\gizmoxyz.fbx  $(TargetDir) /s /i /
     <Image Include="resources\small.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="shaders\CombinedShader.hlsl">
+    <CopyFileToFolders Include="shaders\CombinedShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <FileType>Document</FileType>
-    </Text>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+    </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
+    <CopyFileToFolders Include="..\raw\blend\gizmoxyz.fbx">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <FileType>Document</FileType>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+    </CopyFileToFolders>
     <None Include=".clang-format" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="shaders\SimpleLit.hlsl">
+    <CopyFileToFolders Include="shaders\SimpleLit.hlsl">
       <FileType>Document</FileType>
-    </Text>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+    </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="shaders\LightGeometry.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <FileType>Document</FileType>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+    </CopyFileToFolders>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

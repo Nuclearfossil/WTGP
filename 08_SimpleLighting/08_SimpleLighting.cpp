@@ -371,9 +371,9 @@ void Update(double deltaInSeconds, GraphicsDX11& graphics, OrbitCamera& camera, 
 	camera.Update(deltaInSeconds);
 
 	graphics.SetViewport(viewport);
-    graphics.SetMV(camera.GetMV());
-	graphics.SetMVP(camera.GetMVP());
-    graphics.SetVP(camera.GetVP());
+    graphics.SetWorld(camera.GetMV());
+    graphics.SetWorldViewProjection(camera.GetMVP());
+    graphics.SetViewProjection(camera.GetVP());
 
 	data.m_wheelDelta = 0.f;
 }

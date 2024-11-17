@@ -14,12 +14,19 @@
 #include "Cube.h"
 #include "Plane.h"
 #include "Mesh.h"
+#include "Light.h"
 
 /// @brief Structure defining the Constant buffer. This buffer will be used to pass data into the shader
-struct ConstantBuffer
+struct MatrixConstantBuffer
 {
-    DirectX::XMMATRIX mModelView;
+    DirectX::XMMATRIX mWorld;
     DirectX::XMMATRIX mModelViewProjection;
+};
+
+struct LightConstantBuffer
+{
+    DirectX::XMFLOAT4 mLightPosition;
+    DirectX::XMFLOAT4 mDiffuse;
 };
 
 enum class FillMode
@@ -53,10 +60,10 @@ public:
     HRESULT CreateVertexAndIndexBuffers();
     HRESULT CreateDepthStencilAndRasterizerState();
 
-    void SetMV(DirectX::XMMATRIX const& mv) { m_MV = mv; }
-    void SetMVP(DirectX::XMMATRIX const& mvp) { m_MVP = mvp; }
+    void SetWorld(DirectX::XMMATRIX const& mv) { m_World = mv; }
+    void SetWorldViewProjection(DirectX::XMMATRIX const& mvp) { m_MVP = mvp; }
 
-    void SetVP(DirectX::XMMATRIX const& vp) { m_VP = vp; }
+    void SetViewProjection(DirectX::XMMATRIX const& vp) { m_VP = vp; }
 
     void SetViewport(D3D11_VIEWPORT viewport) { m_viewport = viewport; }
 
@@ -74,20 +81,23 @@ private:
 
     Shader m_shader;
     Shader m_simpleLit;
+    Shader m_lightGeometryShader;
 
     Cube m_cube;
     Grid m_grid;
     Plane m_plane;
     Mesh m_gizmoXYZ01;
     Mesh m_gizmoXYZ02;
+    Light m_light;
 
-    ID3D11Buffer* m_mvpConstantBuffer = nullptr;  // The constant buffer for the WVP matrices
-    ID3D11DepthStencilView* m_depthBufferView = nullptr; // The Depth/Stencil view buffer
+    ID3D11Buffer* m_mvpConstantBuffer = nullptr;            // The constant buffer for the WVP matrices
+    ID3D11Buffer* m_lightConstantBuffer = nullptr;          // The constant buffer for lighting
+    ID3D11DepthStencilView* m_depthBufferView = nullptr;    // The Depth/Stencil view buffer
     ID3D11DepthStencilState* m_depthStencilState = nullptr; // The Depth/Stencil State
-    ID3D11RasterizerState* m_rasterizerState;     // The Rasterizer State
+    ID3D11RasterizerState* m_rasterizerState;               // The Rasterizer State
 
     D3D11_VIEWPORT m_viewport;
-    DirectX::XMMATRIX m_MV;
+    DirectX::XMMATRIX m_World;
     DirectX::XMMATRIX m_MVP;
     DirectX::XMMATRIX m_VP;
 

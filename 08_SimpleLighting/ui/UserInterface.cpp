@@ -130,6 +130,37 @@ static void DrawTransform(float (&position)[3], float (&rotation)[3], TreeNodeDa
     ImGui::TreePop();
 }
 
+void DrawLight(const char* name, LightData& light)
+{
+    ImGui::BeginTable("LightPosition", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable);
+    ImGui::TableSetupColumn("X");
+    ImGui::TableSetupColumn("Y");
+    ImGui::TableSetupColumn("Z");
+    ImGui::TableHeadersRow();
+
+    ImGui::TableNextColumn();
+
+    char buf1[8];
+    char buf2[8];
+    char buf3[8];
+    snprintf(buf1, sizeof(buf1), "%.2f", light.m_LightPosition[0]);
+    snprintf(buf2, sizeof(buf3), "%.2f", light.m_LightPosition[1]);
+    snprintf(buf3, sizeof(buf3), "%.2f", light.m_LightPosition[2]);
+    if (ImGui::InputText("XPosition", buf1, 32, ImGuiInputTextFlags_CharsDecimal))
+        light.m_LightPosition[0] = strtof(buf1, nullptr);
+    ImGui::TableNextColumn();
+    if (ImGui::InputText("YPosition", buf2, 32, ImGuiInputTextFlags_CharsDecimal))
+        light.m_LightPosition[1] = strtof(buf2, nullptr);
+    ImGui::TableNextColumn();
+    if (ImGui::InputText("ZPosition", buf3, 32, ImGuiInputTextFlags_CharsDecimal))
+        light.m_LightPosition[2] = strtof(buf3, nullptr);
+
+    ImGui::EndTable();
+
+    ImGui::ColorEdit4("Diffuse", light.m_Diffuse);
+
+}
+
 /// @brief Draw our UI
 void DrawUI(GameData& data)
 {
@@ -161,7 +192,7 @@ void DrawUI(GameData& data)
     expandTransform01 = ImGui::TreeNode("Transform 01");
     if (expandTransform01)
     {
-            DrawTransform(data.m_cubePosition1, data.m_cubeRotation1, Transform01TreeNode);
+        DrawTransform(data.m_cubePosition1, data.m_cubeRotation1, Transform01TreeNode);
         DrawMatrix("TF01_mat", data.m_matrix01, enhanceMatrix);
     }
 
@@ -178,6 +209,9 @@ void DrawUI(GameData& data)
 
     ImGui::Text("Camera View Matrix");
     DrawMatrix("Camera", data.m_Camera->GetVP(), false);
+
+    ImGui::Text("Light Information");
+    DrawLight("Light01", data.m_Light);
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 

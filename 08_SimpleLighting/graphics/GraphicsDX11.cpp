@@ -9,7 +9,8 @@
 #ifdef _DEBUG
 constexpr char c_gridVertexBufferID[] = "gridVertexBuffer";
 constexpr char c_gridIndexBufferID[] = "gridIndexBuffer";
-constexpr char c_constantBufferID[] = "constantBuffer";
+constexpr char c_constantBufferID[] = "matrixConstantBuffer";
+constexpr char c_lightConstantBufferID[] = "lightconstantBuffer";
 constexpr char c_depthStencilBufferID[] = "depthStencilBuffer";
 constexpr char c_rasterizerStateID[] = "rasterizerState";
 #endif // DEBUG
@@ -120,6 +121,7 @@ HRESULT GraphicsDX11::CreateD3D11Context(ID3D11Device* device, ID3D11DeviceConte
 /// @return S_OK if we were able to compile the shaders
 HRESULT GraphicsDX11::LoadAndCompileShaders()
 {
+    m_lightGeometryShader.Compile(m_D3DDevice, L"LightGeometry.hlsl", IALayout_VertexColor);
     m_simpleLit.Compile(m_D3DDevice, L"SimpleLit.hlsl", IALayout_VertexColorNormal);
     return m_shader.Compile(m_D3DDevice, L"CombinedShader.hlsl", IALayout_VertexColor);
 }
@@ -131,23 +133,38 @@ HRESULT GraphicsDX11::CreateVertexAndIndexBuffers()
     PLOG_INFO << "Creating the vertex and Index Buffers for General Purpose use";
 
     D3D11_BUFFER_DESC constantBufferDesc = {};
-    constantBufferDesc.ByteWidth = sizeof(ConstantBuffer);
+    constantBufferDesc.ByteWidth = sizeof(MatrixConstantBuffer);
     constantBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
     constantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     constantBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-    if (FAILED(m_D3DDevice->CreateBuffer(&constantBufferDesc, nullptr, &m_mvpConstantBuffer))) {
+    if (FAILED(m_D3DDevice->CreateBuffer(&constantBufferDesc, nullptr, &m_mvpConstantBuffer)))
+    {
         PLOG_ERROR << "Failed to create a new constant buffer.";
+        return S_FALSE;
+    }
+
+    D3D11_BUFFER_DESC lightConstantBufferDesc = {};
+    lightConstantBufferDesc.ByteWidth = sizeof(LightConstantBuffer);
+    lightConstantBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    lightConstantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    lightConstantBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+    if (FAILED(m_D3DDevice->CreateBuffer(&lightConstantBufferDesc, nullptr, &m_lightConstantBuffer)))
+    {
+        PLOG_ERROR << "Failed to create a new lighting constant buffer.";
         return S_FALSE;
     }
 
 #ifdef _DEBUG
     m_mvpConstantBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_constantBufferID) - 1, c_constantBufferID);
+    m_lightConstantBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_lightConstantBufferID) - 1, c_lightConstantBufferID);
 #endif // DEBUG
 
     m_cube.Initialize(m_D3DDevice);
     m_grid.Initialize(m_D3DDevice);
     m_plane.Initialize(m_D3DDevice);
+    m_light.Initialize(m_D3DDevice);
     m_gizmoXYZ01.LoadFromFile(m_D3DContext, "gizmoxyz.fbx");
     m_gizmoXYZ02.LoadFromFile(m_D3DContext, "gizmoxyz.fbx");
 
@@ -241,11 +258,19 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
     {
         D3D11_MAPPED_SUBRESOURCE mappedSubresource;
         m_D3DContext->Map(m_mvpConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
-        ConstantBuffer* constants = (ConstantBuffer*)(mappedSubresource.pData);
-        constants->mModelView = DirectX::XMMatrixTranspose(m_MV);
+        MatrixConstantBuffer* constants = (MatrixConstantBuffer*)(mappedSubresource.pData);
+        constants->mWorld = DirectX::XMMatrixTranspose(m_World);
         constants->mModelViewProjection = DirectX::XMMatrixTranspose(m_MVP);
         m_D3DContext->Unmap(m_mvpConstantBuffer, 0);
+
+        D3D11_MAPPED_SUBRESOURCE lightMappedSubresource;
+        m_D3DContext->Map(m_lightConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &lightMappedSubresource);
+        LightConstantBuffer* lightConstantBuffer = (LightConstantBuffer*)(lightMappedSubresource.pData);
+        lightConstantBuffer->mLightPosition = DirectX::XMFLOAT4(data.m_Light.m_LightPosition[0], data.m_Light.m_LightPosition[1], data.m_Light.m_LightPosition[2], 0.0f);
+        lightConstantBuffer->mDiffuse = DirectX::XMFLOAT4(data.m_Light.m_Diffuse[0], data.m_Light.m_Diffuse[1], data.m_Light.m_Diffuse[2], data.m_Light.m_Diffuse[3]);
+        m_D3DContext->Unmap(m_lightConstantBuffer, 0);f
     }
+
     // Clear the back buffer to the clear color
     m_D3DContext->ClearRenderTargetView(m_D3DRenderTargetView, g_clearColor.data());
     m_D3DContext->ClearDepthStencilView(m_depthBufferView, D3D11_CLEAR_DEPTH, 1.0f, 0);
@@ -260,6 +285,9 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
     // m_plane.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
 
     m_grid.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
+
+
+    m_light.Render(m_D3DContext, m_lightGeometryShader, m_mvpConstantBuffer, m_lightConstantBuffer);
 
     data.m_matrix01 =
             DirectX::XMMatrixRotationY(degreesToRadians(data.m_cubeRotation1[1])) *
@@ -277,28 +305,28 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
         DirectX::XMMATRIX mvp = data.m_matrix02 * m_VP;
         D3D11_MAPPED_SUBRESOURCE mappedSubresource;
         m_D3DContext->Map(m_mvpConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
-        auto* constants = (ConstantBuffer*)(mappedSubresource.pData);
-        constants->mModelView = DirectX::XMMatrixTranspose(m_MV);
+        auto* constants = (MatrixConstantBuffer*)(mappedSubresource.pData);
+        constants->mWorld = DirectX::XMMatrixTranspose(data.m_matrix02);
         constants->mModelViewProjection = DirectX::XMMatrixTranspose(mvp);
         m_D3DContext->Unmap(m_mvpConstantBuffer, 0);
     }
 
     if (data.m_showTransform02)
-        m_gizmoXYZ01.Render(m_D3DContext, m_simpleLit, m_mvpConstantBuffer);
+        m_gizmoXYZ01.Render(m_D3DContext, m_simpleLit, m_mvpConstantBuffer, m_lightConstantBuffer);
 
     {
-        auto worldMat = data.m_matrix01 * data.m_matrix02;
-        DirectX::XMMATRIX mvp = worldMat * m_VP;
+        auto mWorld = data.m_matrix01 * data.m_matrix02;
+        DirectX::XMMATRIX mvp = mWorld * m_VP;
         D3D11_MAPPED_SUBRESOURCE mappedSubresource;
         m_D3DContext->Map(m_mvpConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
-        auto* constants = (ConstantBuffer*)(mappedSubresource.pData);
-        constants->mModelView = DirectX::XMMatrixTranspose(m_MV);
+        auto* constants = (MatrixConstantBuffer*)(mappedSubresource.pData);
+        constants->mWorld = DirectX::XMMatrixTranspose(mWorld);
         constants->mModelViewProjection = DirectX::XMMatrixTranspose(mvp);
         m_D3DContext->Unmap(m_mvpConstantBuffer, 0);
     }
 
     if (data.m_showTransform01)
-        m_gizmoXYZ02.Render(m_D3DContext, m_simpleLit, m_mvpConstantBuffer);
+        m_gizmoXYZ02.Render(m_D3DContext, m_simpleLit, m_mvpConstantBuffer, m_lightConstantBuffer);
 
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
@@ -361,13 +389,16 @@ void GraphicsDX11::Cleanup()
     // Release all our resources
     m_simpleLit.Cleanup();
     m_shader.Cleanup();
+    m_lightGeometryShader.Cleanup();
     m_cube.Cleanup();
     m_grid.Cleanup();
     m_plane.Cleanup();
     m_gizmoXYZ01.Cleanup();
     m_gizmoXYZ02.Cleanup();
+    m_light.Cleanup();
 
     m_mvpConstantBuffer->Release();
+    m_lightConstantBuffer->Release();
     m_depthBufferView->Release();
     m_depthStencilState->Release();
     m_rasterizerState->Release();

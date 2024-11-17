@@ -42,7 +42,7 @@ bool Mesh::LoadFromFile(ID3D11DeviceContext* pD3D11DeviceContext, std::string pa
     }
 
     // construct the buffer to contain the vertices and the index buffer from the scene
-    std::vector<ColorVertex> vertexBuffer;
+    std::vector<ColorVertexNormal> vertexBuffer;
     std::vector<uint16_t> indexbuffer;
     std::vector<DirectX::XMFLOAT3> materialbuffer;
 
@@ -70,7 +70,8 @@ bool Mesh::LoadFromFile(ID3D11DeviceContext* pD3D11DeviceContext, std::string pa
                 auto vertex = mesh->mVertices[vertexIndex];
                 auto material = materialbuffer[mesh->mMaterialIndex];
                 auto normal = mesh->mNormals[vertexIndex];
-                vertexBuffer.push_back(ColorVertex{
+                vertexBuffer.push_back(ColorVertexNormal
+                {
                     vertex.x,
                     vertex.y,
                     vertex.z,
@@ -80,7 +81,8 @@ bool Mesh::LoadFromFile(ID3D11DeviceContext* pD3D11DeviceContext, std::string pa
                     1.0f,
                     normal.x,
                     normal.y,
-                    normal.z});
+                    normal.z
+                });
             }
 
             for (size_t faceIndex = 0; faceIndex < mesh->mNumFaces; faceIndex++)
@@ -127,10 +129,10 @@ void Mesh::Cleanup()
     mRenderables.clear();
 }
 
-void Mesh::Render(ID3D11DeviceContext* pD3D11DeviceContext, Shader& shader, ID3D11Buffer* mvp) const
+void Mesh::Render(ID3D11DeviceContext* pD3D11DeviceContext, Shader& shader, ID3D11Buffer* mvp, ID3D11Buffer* light) const
 {
     for (auto* renderable : mRenderables)
         {
-            renderable->Render(pD3D11DeviceContext, shader, mvp);
+            renderable->Render(pD3D11DeviceContext, shader, mvp, light);
         }
 }

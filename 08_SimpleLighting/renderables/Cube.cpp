@@ -1,5 +1,6 @@
 #include <vector>
 
+#include "framework.h"
 #include "Cube.h"
 
 // Debug names for some of the D3D11 resources we'll be creating
@@ -66,7 +67,7 @@ HRESULT Cube::Initialize(ID3D11Device* pD3D11Device)
     vertexBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
     vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
-    D3D11_SUBRESOURCE_DATA vertexSubresourceData;
+    D3D11_SUBRESOURCE_DATA vertexSubresourceData = {};
     vertexSubresourceData.pSysMem = vertexData.data();
     vertexSubresourceData.SysMemPitch = 0;
     vertexSubresourceData.SysMemSlicePitch = 0;
@@ -76,7 +77,7 @@ HRESULT Cube::Initialize(ID3D11Device* pD3D11Device)
             &vertexSubresourceData, // And then the sub-resource data
             &m_cubeVertexBuffer)))  // Finally, the interface that is the vertex buffer
         {
-            OutputDebugStringA("Failed to create the vertex buffer!");
+            PLOG_ERROR << "Failed to create the vertex buffer!";
             return S_FALSE;
         }
 
