@@ -70,11 +70,18 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	PLOG_INFO << "=================================================== Beginning of Run ===================================================";
 
-	GameData data;	// data related to the application
-
     OrbitCamera camera;			// Camera
 	GraphicsDX11 graphicsDX11;  // Graphics system
+
+	GameData data; // data related to the application
     data.m_Camera = &camera;
+    data.m_Light.m_LightPosition[0] =
+        data.m_Light.m_LightPosition[1] =
+            data.m_Light.m_LightPosition[2] = 1.0f;
+    data.m_Light.m_Diffuse[0] =
+        data.m_Light.m_Diffuse[1] =
+            data.m_Light.m_Diffuse[2] =
+                data.m_Light.m_Diffuse[3] = 1.0f;
 
 	// Initialize global strings
 	LoadStringW(hInstance, IDS_APP_TITLE, g_szTitle, MAX_LOADSTRING);

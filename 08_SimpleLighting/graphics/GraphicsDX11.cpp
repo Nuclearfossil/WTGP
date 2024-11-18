@@ -397,6 +397,7 @@ void GraphicsDX11::Cleanup()
     m_gizmoXYZ01.Cleanup();
     m_gizmoXYZ02.Cleanup();
     m_light.Cleanup();
+    m_sphere.Cleanup();
 
     m_mvpConstantBuffer->Release();
     m_lightConstantBuffer->Release();

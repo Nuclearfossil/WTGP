@@ -120,7 +120,7 @@ HRESULT Sphere::Initialize(ID3D11Device* pD3D11Device, float radius, int sliceCo
         }
 
 #ifdef _DEBUG
-    m_vertices->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_indexBufferID) - 1, c_indexBufferID);
+    m_indices->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_indexBufferID) - 1, c_indexBufferID);
 #endif
 
     return S_OK;
