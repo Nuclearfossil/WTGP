@@ -45,8 +45,8 @@ float4 ps_main(VS_Output input) : SV_TARGET
     float4 ambient = input.color * .1;
 
     float3 lightDir = normalize(position - input.worldpos);
-    float diffuse = saturate(dot(input.normal, lightDir)); // this is the 'intensity' of the light
-    float4 lambertCont = input.color * diffuse;
+    float intensity = saturate(dot(input.normal, lightDir)); // this is the 'intensity' of the light
+    float4 diffuse = input.color * intensity;
 
-    return clamp(lambertCont + ambient, minColor, maxColor);
+    return clamp(diffuse + ambient, minColor, maxColor);
 }
