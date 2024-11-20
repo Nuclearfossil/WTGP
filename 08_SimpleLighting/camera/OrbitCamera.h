@@ -13,7 +13,7 @@ public:
 
     void Update(double deltaTime);
 
-    void SetProjection(float width, float height, float projection);
+    void SetProjection(float width, float height);
     void SetInvertY(bool invertY);
     void SetEyeFocusPoint(float x, float y, float z);
 

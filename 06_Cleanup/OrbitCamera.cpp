@@ -29,8 +29,9 @@ void OrbitCamera::ChangeRadius(float delta)
     m_CameraRadius = clamp(m_CameraRadius, 1.0f, 10.0f);
 }
 
-void OrbitCamera::SetProjection(float width, float height, float aspect)
+void OrbitCamera::SetProjection(float width, float height)
 {
+    float aspect = width / height;
     m_Projection = DirectX::XMMatrixPerspectiveFovLH(degreesToRadians(78), aspect, 0.01f, 100.0f);
 }
 

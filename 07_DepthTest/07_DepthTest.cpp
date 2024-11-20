@@ -348,9 +348,8 @@ void Update(double deltaInSeconds, GraphicsDX11& graphics, OrbitCamera& camera, 
     // Initialize the projection matrix
     float width = static_cast<float>(winRect.right - winRect.left);
     float height = static_cast<float>(winRect.bottom - winRect.top);
-    float aspect = width / height;
 
-    camera.SetProjection(width, height, aspect);
+    camera.SetProjection(width, height);
 
 	/// smoothly rotate our object
     data.m_increment += 0.1f * static_cast<float>(deltaInSeconds);
