@@ -37,8 +37,9 @@ void OrbitCamera::Translate(float x, float y)
     m_EyeFocusPoint = DirectX::XMVectorAdd(m_EyeFocusPoint, DirectX::XMVectorAdd(rightScaled, upScaled));
 }
 
-void OrbitCamera::SetProjection(float width, float height, float aspect)
+void OrbitCamera::SetProjection(float width, float height)
 {
+    float aspect = width / height;
     m_Projection = DirectX::XMMatrixPerspectiveFovLH(degreesToRadians(78), aspect, 0.01f, 100.0f);
 }
 
