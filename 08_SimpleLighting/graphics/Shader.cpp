@@ -24,7 +24,7 @@ Shader::~Shader()
 
 HRESULT Shader::Compile(ID3D11Device* pD3D11Device, const std::wstring& filename, IALayouts layout)
 {
-    PLOG_INFO << "Compiling the shader" << filename;
+    PLOG_INFO << "Compiling the shader: " << filename;
 
     // can we load the file?
     // creation of Shader Resources
