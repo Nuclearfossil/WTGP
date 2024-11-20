@@ -16,4 +16,4 @@ Please use VCPKG to install:
     ./vcpkg install assimp
 ````
 
-Additionally, note that to debug the projects, you may need to set the **Working Directory**, in the _Debugging Configuration_ properties to `$(OutputPath)`. No idea why this doesn't persist into the project currently. It may be part of the User Config files for VCXPROJ files, which I believe I have resolved at this point
+Additionally, note that to debug the projects, you may need to set the **Working Directory**, in the _Debugging Configuration_ properties to `$(OutputPath)`. I have been seeing this not actually persist into the project. It may be part of the User Config files for VCXPROJ files, which I believe I have resolved at this point
