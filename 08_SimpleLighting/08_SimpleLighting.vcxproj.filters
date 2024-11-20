@@ -146,7 +146,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="shaders\CombinedShader.hlsl">
+    <CopyFileToFolders Include="shaders\CombinedShader02.hlsl">
       <Filter>shaders</Filter>
     </CopyFileToFolders>
     <CopyFileToFolders Include="shaders\SimpleLit.hlsl">

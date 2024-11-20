@@ -123,7 +123,7 @@ HRESULT GraphicsDX11::LoadAndCompileShaders()
 {
     m_lightGeometryShader.Compile(m_D3DDevice, L"LightGeometry.hlsl", IALayout_VertexColor);
     m_simpleLit.Compile(m_D3DDevice, L"SimpleLit.hlsl", IALayout_VertexColorNormal);
-    return m_shader.Compile(m_D3DDevice, L"CombinedShader.hlsl", IALayout_VertexColor);
+    return m_shader.Compile(m_D3DDevice, L"CombinedShader02.hlsl", IALayout_VertexColor);
 }
 
 /// @brief Create the Vertex and Index buffers, as well as the input layout
