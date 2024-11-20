@@ -1,7 +1,8 @@
 #include "GraphicsDX11.h"
-#include "imgui_impl_dx11.h"
 #include "mathutils.h"
 #include "ResourceManager.h"
+
+#include <imgui_impl_dx11.h>
 
 #include "framework.h"
 
@@ -283,7 +284,7 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
 //    m_cube.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
     m_gizmoXYZ.Render(m_D3DContext, m_shader, m_mvpConstantBuffer);
 
-    RenderResources(m_D3DContext, m_shader, m_mvpConstantBuffer);
+//     RenderResources(m_D3DContext, m_shader, m_mvpConstantBuffer);
 
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 

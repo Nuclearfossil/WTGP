@@ -24,24 +24,6 @@
     <ClCompile Include="ui\UserInterface.cpp">
       <Filter>ui</Filter>
     </ClCompile>
-    <ClCompile Include="..\extern\imgui\imgui.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extern\imgui\imgui_draw.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extern\imgui\imgui_impl_dx11.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extern\imgui\imgui_impl_win32.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extern\imgui\imgui_tables.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extern\imgui\imgui_widgets.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
     <ClCompile Include="renderables\Plane.cpp">
       <Filter>renderables</Filter>
     </ClCompile>
@@ -99,12 +81,6 @@
     <ClInclude Include="utils\framework.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\extern\imgui\imconfig.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\imgui\imgui_internal.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
     <ClInclude Include="renderables\Plane.h">
       <Filter>renderables</Filter>
     </ClInclude>
@@ -148,9 +124,6 @@
     <Filter Include="utils">
       <UniqueIdentifier>{1a5aecad-6403-46e5-8644-e7329911c31e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="imgui">
-      <UniqueIdentifier>{16266c0b-8a1d-49a2-ae4f-3baaccedc276}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resources\01_WindowsApp.rc">
@@ -158,8 +131,8 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="shaders\CombinedShader.hlsl">
+    <CopyFileToFolders Include="shaders\CombinedShader.hlsl">
       <Filter>shaders</Filter>
-    </Text>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>

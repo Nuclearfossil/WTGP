@@ -129,11 +129,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy $(MSBuildProjectDirectory)\shaders\CombinedShader.hlsl $(TargetDir) /s /i /q /y
-xcopy $(MSBuildProjectDirectory)\..\raw\blend\gizmoxyz.fbx  $(TargetDir) /s /i /q /y</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy Shader to deployment folder</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -156,11 +157,12 @@ xcopy $(MSBuildProjectDirectory)\..\raw\blend\gizmoxyz.fbx  $(TargetDir) /s /i /
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy $(MSBuildProjectDirectory)\shaders\CombinedShader.hlsl $(TargetDir) /s /i /q /y
-xcopy $(MSBuildProjectDirectory)\..\raw\blend\gizmoxyz.fbx  $(TargetDir) /s /i /q /y</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy Shader to deployment folder</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -178,14 +180,6 @@ xcopy $(MSBuildProjectDirectory)\..\raw\blend\gizmoxyz.fbx  $(TargetDir) /s /i /
     <ClInclude Include="utils\utils.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\extern\imgui\imgui_internal.h" />
-    <ClInclude Include="..\extern\imgui\imconfig.h" />
-    <ClCompile Include="..\extern\imgui\imgui.cpp" />
-    <ClCompile Include="..\extern\imgui\imgui_draw.cpp" />
-    <ClCompile Include="..\extern\imgui\imgui_impl_dx11.cpp" />
-    <ClCompile Include="..\extern\imgui\imgui_impl_win32.cpp" />
-    <ClCompile Include="..\extern\imgui\imgui_tables.cpp" />
-    <ClCompile Include="..\extern\imgui\imgui_widgets.cpp" />
     <ClCompile Include="camera\OrbitCamera.cpp" />
     <ClCompile Include="graphics\GraphicsDX11.cpp" />
     <ClInclude Include="graphics\Renderable.h" />
@@ -218,13 +212,15 @@ xcopy $(MSBuildProjectDirectory)\..\raw\blend\gizmoxyz.fbx  $(TargetDir) /s /i /
     <Image Include="resources\small.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="shaders\CombinedShader.hlsl">
+    <CopyFileToFolders Include="shaders\CombinedShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <FileType>Document</FileType>
-    </Text>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+    </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-format" />

@@ -198,14 +198,6 @@
     <ClInclude Include="utils\utils.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\extern\imgui\imgui_internal.h" />
-    <ClInclude Include="..\extern\imgui\imconfig.h" />
-    <ClCompile Include="..\extern\imgui\imgui.cpp" />
-    <ClCompile Include="..\extern\imgui\imgui_draw.cpp" />
-    <ClCompile Include="..\extern\imgui\imgui_impl_dx11.cpp" />
-    <ClCompile Include="..\extern\imgui\imgui_impl_win32.cpp" />
-    <ClCompile Include="..\extern\imgui\imgui_tables.cpp" />
-    <ClCompile Include="..\extern\imgui\imgui_widgets.cpp" />
     <ClCompile Include="camera\OrbitCamera.cpp" />
     <ClCompile Include="graphics\GraphicsDX11.cpp" />
     <ClInclude Include="graphics\Renderable.h" />
