@@ -11,6 +11,8 @@ Please use VCPKG to install:
     cd vcpkg
     ./bootstrap-vcpkg.sh
     ./vcpkg integrate install
+    ./vcpkg install imgui[core,win32-binding,dx11-binding]:x64-windows --recurse
+    ./vcpkg install plog
     ./vcpkg install assimp
 ````
 
