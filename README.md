@@ -11,6 +11,9 @@ Please use VCPKG to install:
     cd vcpkg
     ./bootstrap-vcpkg.sh
     ./vcpkg integrate install
+    ./vcpkg install imgui[core,win32-binding,dx11-binding]:x64-windows --recurse
+    ./vcpkg install plog
     ./vcpkg install assimp
 ````
 
+Additionally, note that to debug the projects, you will need to set the *Working Directory*, in the _Debugging Configuration_ properties to `$(OutputPath)`. No idea why this doesn't persist into the project currently. It may be part of the User Config files for VCXPROJ files.
