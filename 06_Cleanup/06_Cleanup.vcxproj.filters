@@ -26,24 +26,6 @@
     <ClCompile Include="pch.cpp">
       <Filter>OS - resources</Filter>
     </ClCompile>
-    <ClCompile Include="..\extern\imgui\imgui.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extern\imgui\imgui_draw.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extern\imgui\imgui_impl_dx11.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extern\imgui\imgui_impl_win32.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extern\imgui\imgui_tables.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extern\imgui\imgui_widgets.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
     <ClCompile Include="UserInterface.cpp">
       <Filter>ui</Filter>
     </ClCompile>
@@ -52,30 +34,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\extern\imgui\imconfig.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\imgui\imgui.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\imgui\imgui_impl_dx11.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\imgui\imgui_impl_win32.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\imgui\imgui_internal.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\imgui\imstb_rectpack.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\imgui\imstb_textedit.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\imgui\imstb_truetype.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
     <ClInclude Include="Cube.h">
       <Filter>renderables</Filter>
     </ClInclude>
@@ -140,9 +98,6 @@
     <None Include=".clang-format" />
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="imgui">
-      <UniqueIdentifier>{a04e0a1f-ee0f-4f09-abc9-d5f14fa316e7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="camera">
       <UniqueIdentifier>{a3495853-d380-4053-b93c-51de89e5ac6a}</UniqueIdentifier>
     </Filter>
@@ -167,6 +122,9 @@
     <Filter Include="data">
       <UniqueIdentifier>{bc7a732a-3e7c-4d1b-b841-c96971a5059c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="assets">
+      <UniqueIdentifier>{98bd1805-b522-432e-b82e-ec5b77434ebe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="01_WindowsApp.rc">
@@ -174,8 +132,11 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="CombinedShader.hlsl">
+    <CopyFileToFolders Include="..\raw\blend\gizmoxyz.fbx">
+      <Filter>assets</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="CombinedShader.hlsl">
       <Filter>shaders</Filter>
-    </Text>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>

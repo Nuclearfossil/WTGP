@@ -123,6 +123,8 @@ HRESULT Grid::Initialize(ID3D11Device * pD3D11Device)
         }
 
 #ifdef _DEBUG
+    PLOG_INFO << "Initializing the Grid Vertex Buffer name";
+    m_gridVertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, 0, nullptr);
     m_gridVertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_gridVertexBufferID) - 1, c_gridVertexBufferID);
 #endif // _DEBUG
 
@@ -144,6 +146,9 @@ HRESULT Grid::Initialize(ID3D11Device * pD3D11Device)
     }
 
 #ifdef _DEBUG
+    PLOG_INFO << "Initializing the Grid Index buffer name";
+
+    m_gridIndexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, 0, nullptr);
     m_gridIndexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_gridIndexBufferID) - 1, c_gridIndexBufferID);
 #endif
 
