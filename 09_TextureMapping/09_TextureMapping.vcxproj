@@ -185,9 +185,11 @@
     <ClInclude Include="data\GameData.h" />
     <ClInclude Include="graphics\GraphicsDX11.h" />
     <ClInclude Include="camera\OrbitCamera.h" />
+    <ClInclude Include="graphics\Material.h" />
     <ClInclude Include="renderables\Light.h" />
     <ClInclude Include="renderables\Mesh.h" />
     <ClInclude Include="renderables\Sphere.h" />
+    <ClInclude Include="renderables\TexturedMesh.h" />
     <ClInclude Include="utils\framework.h" />
     <ClInclude Include="mathutils.h" />
     <ClInclude Include="pch.h" />
@@ -201,6 +203,7 @@
     <ClCompile Include="camera\OrbitCamera.cpp" />
     <ClCompile Include="graphics\GraphicsDX11.cpp" />
     <ClInclude Include="graphics\Renderable.h" />
+    <ClCompile Include="graphics\Material.cpp" />
     <ClCompile Include="graphics\Renderable.cpp" />
     <ClInclude Include="graphics\ResourceManager.h" />
     <ClCompile Include="graphics\ResourceManager.cpp" />
@@ -215,6 +218,7 @@
     <ClCompile Include="renderables\Mesh.cpp" />
     <ClCompile Include="renderables\Plane.cpp" />
     <ClCompile Include="renderables\Sphere.cpp" />
+    <ClCompile Include="renderables\TexturedMesh.cpp" />
     <ClCompile Include="ui\UserInterface.cpp" />
     <ClCompile Include="09_TextureMapping.cpp" />
     <ClCompile Include="pch.cpp">

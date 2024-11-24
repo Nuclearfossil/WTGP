@@ -4,6 +4,7 @@
 #include "ResourceManager.h"
 
 #include "framework.h"
+#include <dxgidebug.h>
 
 // Debug names for some of the D3D11 resources we'll be creating
 #ifdef _DEBUG
@@ -168,6 +169,7 @@ HRESULT GraphicsDX11::CreateVertexAndIndexBuffers()
     m_sphere.Initialize(m_D3DDevice, 0.25f, 12, 6);
     m_gizmoXYZ01.LoadFromFile(m_D3DContext, "gizmoxyz.fbx");
     m_gizmoXYZ02.LoadFromFile(m_D3DContext, "gizmoxyz.fbx");
+    m_texturedMesh.Initialize(m_D3DDevice, "brickCube.fbx");
 
     return S_OK;
 }
@@ -328,6 +330,8 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
 
     if (data.m_showTransform01)
         m_gizmoXYZ02.Render(m_D3DContext, m_simpleLit, m_mvpConstantBuffer, m_lightConstantBuffer);
+
+    m_texturedMesh.Render(m_D3DContext, m_simpleLit, m_mvpConstantBuffer);
 
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 

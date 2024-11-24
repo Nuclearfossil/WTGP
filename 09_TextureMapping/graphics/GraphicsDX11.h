@@ -2,10 +2,6 @@
 
 #include <d3d11.h>
 #include <directxmath.h>
-#include <d3dcompiler.h>
-#include <d3dcommon.h>
-#include <dxgidebug.h>
-#include <dxgi1_3.h>
 #include <vector>
 
 #include "GameData.h"
@@ -14,8 +10,13 @@
 #include "Cube.h"
 #include "Plane.h"
 #include "Mesh.h"
+#include "TexturedMesh.h"
 #include "Light.h"
 #include "Sphere.h"
+#include <dxgi.h>
+#include <minwindef.h>
+#include <windef.h>
+#include <winnt.h>
 
 /// @brief Structure defining the Constant buffer. This buffer will be used to pass data into the shader
 struct MatrixConstantBuffer
@@ -89,6 +90,7 @@ private:
     Plane m_plane;
     Mesh m_gizmoXYZ01;
     Mesh m_gizmoXYZ02;
+    TexturedMesh m_texturedMesh;
     Light m_light;
     Sphere m_sphere;
 

@@ -6,9 +6,17 @@
 
 #include <filesystem>
 
-#include "ResourceManager.h"
 
 #include "Mesh.h"
+#include <d3d11.h>
+#include <cstdint>
+#include <string>
+#include <vector>
+#include <Renderable.h>
+#include <Shader.h>
+#include <assimp\material.h>
+#include <assimp\types.h>
+#include <plog\Log.h>
 
 using namespace Assimp;
 
