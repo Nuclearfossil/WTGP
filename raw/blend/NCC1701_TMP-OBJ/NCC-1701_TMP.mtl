@@ -1,0 +1,591 @@
+#  ==========================================================================
+#  Wavefront Material file
+#  Exported by Red-i Productions' "Riptide Pro"
+#  (a commercial plugin for Cinema 4D PC & Mac, R9.6 or later)
+#  
+#  Red-i Productions
+#  http://skinprops.com
+#  
+#  ==========================================================================
+
+newmtl Bridge_White
+Ns 50.781250
+illum 2
+Kd 0.778434 0.784314 0.790193
+Ks 0.779294 0.844235 0.920000
+
+newmtl Bridge_Green_Dark
+Ns 50.781250
+illum 2
+Kd 0.425745 0.458495 0.430112
+
+newmtl Bridge_Panel_Lines
+illum 2
+Kd 0.600000 0.600000 0.600000
+
+newmtl Bridge_Tan
+Ns 50.781250
+illum 2
+Kd 0.737255 0.686275 0.607843
+
+newmtl Bridge_Green_Medium
+Ns 50.781250
+illum 2
+Kd 0.741176 0.788235 0.764706
+
+newmtl Bridge_Base_Panels
+Ns 50.781250
+illum 2
+Kd 0.741176 0.784946 0.753382
+
+newmtl Bridge_Base_Lights
+Ns 50.781250
+illum 2
+Kd 0.800000 0.849462 0.080901
+
+newmtl Nacelle_Port_Running_Light
+Ns 50.781250
+d 0.000000
+Ni 1.500000
+illum 2
+Kd 0.072549 0.033333 0.039216
+
+newmtl Airlock_Lights
+Ns 50.781250
+illum 2
+Ka 1.423529 1.423529 1.500000
+Kd 0.949020 0.949020 1.000000
+
+newmtl Bridge_Airlock_Lights
+Ns 50.781250
+illum 2
+Ka 1.423529 1.423529 1.500000
+Kd 0.949020 0.949020 1.000000
+
+newmtl Red_Markings
+Ns 50.781250
+illum 2
+Kd 0.533333 0.000000 0.000000
+
+newmtl Airlock_Door
+Ns 50.781250
+illum 2
+Kd 0.800000 0.800000 0.800000
+map_Kd AirDrCol.tif
+
+newmtl Deck_C_White
+Ns 50.781250
+illum 2
+Kd 0.778434 0.784314 0.790193
+Ks 0.779294 0.844235 0.920000
+
+newmtl Ship_Blue_Medium
+Ns 50.781250
+illum 2
+Kd 0.741176 0.788235 0.764706
+
+newmtl Deck_C_Bright_White
+Ns 50.781250
+illum 2
+Kd 0.843753 0.846667 0.850000
+Ks 0.779294 0.844235 0.920000
+
+newmtl Deck_C_Grey
+illum 2
+Kd 0.680000 0.680000 0.680000
+
+newmtl Deck_C_Blue
+illum 2
+Kd 0.583333 0.663333 0.783333
+
+newmtl Deck_C_Red_Markings
+Ns 50.781250
+illum 2
+Kd 0.533333 0.000000 0.000000
+
+newmtl Conference_Room
+illum 2
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+map_Ka ConRmCol.tif
+map_Kd ConRmCol.tif
+
+newmtl Black_Lettering
+Ns 50.781250
+illum 2
+Kd 0.008000 0.008000 0.008000
+
+newmtl Saucer_Top
+Ns 50.781250
+illum 2
+Kd 1.000000 1.000000 1.000000
+Ks 1.000000 1.000000 1.000000
+map_Kd SauTpCol.tif
+map_Ks SauTpSpc.tif
+
+newmtl Panel_Lines_Light
+illum 2
+Kd 0.600000 0.600000 0.600000
+
+newmtl Quarters
+illum 2
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+map_Ka QuartCol.tif
+map_Kd QuartCol.tif
+
+newmtl Quarters_Walls
+Ns 50.781250
+illum 2
+Ka 0.192000 0.206118 0.230588
+Kd 0.800000 0.858824 0.960784
+
+newmtl Mat
+Ns 50.781250
+illum 2
+Ka 1.000000 1.000000 1.000000
+Kd 0.905882 0.913725 1.000000
+
+newmtl Saucer_Bottom
+Ns 50.781250
+illum 2
+Kd 1.000000 1.000000 1.000000
+map_Kd SauBtCol.tif
+
+newmtl default_Mat
+illum 2
+Kd 0.800000 0.800000 0.800000
+
+newmtl Light_Panels
+illum 2
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+
+newmtl Saucer_Rim
+Ns 50.781250
+illum 2
+Kd 0.856627 0.860000 0.856627
+Ks 1.000000 1.000000 1.000000
+map_Kd SauRmCol.tif
+map_Ks SauRmSpc.tif
+
+newmtl Ship_Hull
+Ns 50.781250
+illum 2
+Kd 0.973043 0.980392 0.987741
+Ks 0.779294 0.844235 0.920000
+
+newmtl Saucer_Lights_1
+Ns 50.781250
+illum 2
+Ka 1.335294 0.711765 0.164706
+Kd 0.892473 0.476930 0.113330
+
+newmtl Illumination
+illum 2
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+
+newmtl VIP_Front_Floor
+illum 2
+Ka 0.200000 0.200000 0.200000
+Kd 0.800000 0.800000 0.800000
+map_Ka VP_FFCol.tif
+map_Kd VP_FFCol.tif
+
+newmtl VIP_Furniture
+illum 2
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+map_Ka VP_FnCol.tif
+map_Kd VP_FnCol.tif
+
+newmtl Tree_1
+illum 2
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+map_Ka VP_TrCol.tif
+map_Kd VP_TrCol.tif
+
+newmtl VIP_Enterprise_1
+illum 2
+Ka 0.150000 0.150000 0.150000
+Kd 0.800000 0.800000 0.800000
+map_Ka VP_EtCol.tif
+map_Kd VP_EtCol.tif
+
+newmtl Rec_Window_Wall
+illum 2
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+map_Ka RC_WWCol.tif
+map_Kd RC_WWCol.tif
+
+newmtl Rec_Light_Tubes
+illum 2
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+map_Ka RC_LtCol.tif
+map_Kd RC_LtCol.tif
+
+newmtl Rec_Railing
+illum 2
+Ka 0.980000 0.980000 0.980000
+Kd 0.800000 0.800000 0.800000
+map_Ka RC_RlCol.tif
+map_Kd RC_RlCol.tif
+
+newmtl Rec_Raised_Floor
+illum 2
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+map_Ka RC_RFCol.tif
+map_Kd RC_RFCol.tif
+
+newmtl Rec_Monitor_Fed_Logo
+illum 2
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+map_Ka RC_MnCol.tif
+map_Kd RC_MnCol.tif
+
+newmtl Rec_Monitor
+illum 2
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+map_Ka RC_MtCol.tif
+map_Kd RC_MtCol.tif
+
+newmtl Sensor_Array
+Ns 50.781250
+illum 2
+Kd 0.800000 0.800000 0.800000
+Ks 1.000000 1.000000 1.000000
+map_Kd SenArCol.tif
+
+newmtl SLD_Bridge_Lights_1
+Ns 50.781250
+illum 2
+Ka 1.423529 1.423529 1.500000
+Kd 0.949020 0.949020 1.000000
+
+newmtl Sensor_Array_Grids
+illum 2
+Kd 0.800000 0.800000 0.800000
+map_Kd SenGrCol.tif
+
+newmtl Navigation_Dome
+Ns 50.781250
+illum 2
+Kd 0.944627 0.880709 0.781624
+
+newmtl Impulse_Engine_1
+Ns 50.781250
+illum 2
+Kd 0.800000 0.800000 0.800000
+Ks 1.000000 1.000000 1.000000
+map_Kd ImEn1Col.tif
+map_Ks ImEn1Spc.tif
+
+newmtl Impulse_Engine_2
+Ns 50.781250
+illum 2
+Kd 0.800000 0.800000 0.800000
+map_Kd ImEn2Col.tif
+
+newmtl Impulse_Engine
+Ns 50.781250
+illum 2
+Ka 1.000000 0.000000 0.000000
+Kd 1.000000 0.000000 0.000000
+
+newmtl SLD_Impulse_Engine_Blue_Dome
+Ns 50.781250
+d 0.700000
+Ni 1.000000
+illum 2
+Ka 0.509804 0.733333 1.000000
+Kd 0.529412 0.627451 0.800000
+
+newmtl Neck_Interior
+illum 2
+Ka 0.310000 0.310000 0.310000
+Kd 0.800000 0.800000 0.800000
+map_Ka NkIntCol.tif
+map_Kd NkIntCol.tif
+
+newmtl Neck
+Ns 50.781250
+illum 2
+Kd 0.800000 0.800000 0.800000
+Ks 1.000000 1.000000 1.000000
+map_Kd NkSrfCol.tif
+map_Ks NkSrfSpc.tif
+
+newmtl Engineering
+Ns 50.781250
+illum 2
+Kd 0.800000 0.800000 0.800000
+Ks 1.000000 1.000000 1.000000
+map_Kd Eng1Col.tif
+map_Ks Eng1Spc.tif
+
+newmtl Engineering_Images
+illum 2
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.796078
+map_Ka EnImgCol.tif
+map_Kd EnImgCol.tif
+
+newmtl Torpedo_Blue
+Ns 50.781250
+illum 2
+Kd 0.219662 0.241580 0.279570
+
+newmtl Logo_Orange
+Ns 50.781250
+illum 2
+Kd 0.677419 0.251792 0.005376
+
+newmtl Panel_Lines
+illum 2
+Kd 0.600000 0.600000 0.600000
+
+newmtl Gold_Markings
+Ns 50.781250
+illum 2
+Kd 0.569892 0.424253 0.153780
+
+newmtl Quarters_Ceiling
+Ns 50.781250
+illum 2
+Kd 0.439324 0.483159 0.559140
+
+newmtl Ship_Blue_Dark
+Ns 50.781250
+illum 2
+Kd 0.425745 0.458495 0.430112
+
+newmtl Hull_Side_Lower_Panels
+Ns 50.781250
+illum 2
+Kd 0.800000 0.800000 0.800000
+Ks 1.000000 1.000000 1.000000
+map_Kd SHSLWCol.tif
+map_Ks SHSLWSpc.tif
+
+newmtl Hull_Sides
+Ns 50.781250
+illum 2
+Kd 0.800000 0.800000 0.800000
+Ks 1.000000 1.000000 1.000000
+map_Kd SHSP1Col.tif
+map_Ks SHSP1Spc.tif
+
+newmtl Hull_Top_Panel_1
+Ns 50.781250
+illum 2
+Kd 0.800000 0.800000 0.800000
+Ks 1.000000 1.000000 1.000000
+map_Kd SHTP1Col.tif
+map_Ks SHTP1Spc.tif
+
+newmtl Hull_Side_Top
+Ns 50.781250
+illum 2
+Kd 0.800000 0.800000 0.800000
+Ks 1.000000 1.000000 1.000000
+map_Kd SHSTPCol.tif
+map_Ks SHSTPSpc.tif
+
+newmtl Red_Glass
+Ns 50.781250
+d 0.100000
+Ni 1.000000
+illum 2
+Ka 2.000000 0.000000 0.000000
+Kd 2.000000 0.000000 0.000000
+
+newmtl Hull_Front_Panels
+Ns 50.781250
+illum 2
+Kd 0.800000 0.800000 0.800000
+Ks 1.000000 1.000000 1.000000
+map_Kd SHFrtCol.tif
+map_Ks SHFrtSpc.tif
+
+newmtl Sensor_Dish_Blue
+illum 2
+Ka 0.049961 0.072392 0.212078
+Kd 0.490196 0.611765 0.815686
+
+newmtl Connector_Cover
+Ns 50.781250
+illum 2
+Kd 0.860215 0.833134 0.764636
+
+newmtl Sensor_Dish_White
+illum 2
+Ka 0.500000 0.500000 0.500000
+Kd 1.000000 1.000000 1.000000
+
+newmtl SB_Walls
+illum 2
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+map_Ka SB_WlCol.tif
+map_Kd SB_WlCol.tif
+
+newmtl Grille_Floor
+Ns 50.781250
+illum 2
+Kd 0.376000 0.376000 0.376000
+
+newmtl Yellow_Markings
+Ns 50.781250
+illum 2
+Ka 0.050000 0.050000 0.000000
+Kd 1.500000 1.500000 0.476471
+
+newmtl Hull_White
+Ns 50.781250
+illum 2
+Kd 0.780392 0.780392 0.780392
+
+newmtl SB_Lower_Wall
+illum 2
+Kd 0.800000 0.800000 0.800000
+map_Kd SB_LWCol.tif
+
+newmtl SB_Door
+illum 2
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+map_Ka SB_DrCol.tif
+map_Kd SB_DrCol.tif
+
+newmtl SB_Bee_Pod
+illum 2
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+map_Ka SB_BPCol.tif
+map_Kd SB_BPCol.tif
+
+newmtl Shuttle_Walls
+Ns 50.781250
+illum 2
+Kd 0.780392 0.705882 0.549020
+
+newmtl Botany_Roof
+Ns 50.781250
+illum 2
+Ka 0.500000 0.500000 0.500000
+Kd 0.800000 0.800000 0.800000
+map_Ka BotRfCol.jpg
+map_Kd BotRfCol.jpg
+
+newmtl Botany_Floor
+illum 2
+Ka 0.500000 0.500000 0.500000
+Kd 0.800000 0.800000 0.800000
+map_Ka BotFlCol.jpg
+map_Kd BotFlCol.jpg
+
+newmtl Botany_Walls
+illum 2
+Ka 0.750000 0.750000 0.750000
+Kd 0.800000 0.800000 0.800000
+map_Ka BotWlCol.jpg
+map_Kd BotWlCol.jpg
+
+newmtl Tree_3_Leafs
+illum 2
+Ka 0.090000 0.090000 0.090000
+Kd 0.800000 0.800000 0.800000
+map_Ka BotL3Col.tif
+map_Kd BotL3Col.tif
+map_d BotL3Col.tif
+
+newmtl Tree_3_Trunk
+illum 2
+Ka 0.060000 0.060000 0.060000
+Kd 0.800000 0.800000 0.800000
+map_Ka BotT3Col.jpg
+map_Kd BotT3Col.jpg
+
+newmtl Tree_4_Leafs
+illum 2
+Ka 0.140000 0.140000 0.140000
+Kd 0.800000 0.800000 0.800000
+map_Ka BotL4Col.tif
+map_Kd BotL4Col.tif
+map_d BotL4Col.tif
+
+newmtl Tree_4_Trunk
+illum 2
+Ka 0.070000 0.070000 0.070000
+Kd 0.800000 0.800000 0.800000
+map_Ka BotT4Col.jpg
+map_Kd BotT4Col.jpg
+
+newmtl brush2
+illum 2
+Ka 0.160000 0.160000 0.160000
+Kd 0.800000 0.800000 0.800000
+map_Ka BotL5Col.tif
+map_Kd BotL5Col.tif
+map_d BotL5Col.tif
+
+newmtl brush1
+illum 2
+Ka 0.120000 0.120000 0.120000
+Kd 0.816000 0.816000 0.816000
+map_Ka BotT5Col.jpg
+map_Kd BotT5Col.jpg
+
+newmtl Tree_7_Leafs
+illum 2
+Ka 0.130000 0.130000 0.130000
+Kd 0.800000 0.800000 0.800000
+map_Ka BotL7Col.tif
+map_Kd BotL7Col.tif
+map_d BotL7Col.tif
+
+newmtl Tree_7_Trunk
+illum 2
+Ka 0.130000 0.130000 0.130000
+Kd 0.800000 0.800000 0.800000
+map_Ka BotT7Col.jpg
+map_Kd BotT7Col.jpg
+
+newmtl Nacelle_Front
+Ns 50.781250
+illum 2
+Kd 0.800000 0.800000 0.800000
+Ks 1.000000 1.000000 1.000000
+map_Kd NCFrtCol.tif
+map_Ks NCFrtSpc.jpg
+
+newmtl Dark_Blue_Grey
+Ns 50.781250
+illum 2
+Kd 0.039216 0.043137 0.160784
+
+newmtl Warp_Blue
+Ns 50.781250
+illum 2
+Ka 0.164706 0.254902 0.690196
+Kd 0.164706 0.254902 1.000000
+
+newmtl Copper
+Ns 50.781250
+illum 2
+Kd 0.800000 0.251779 0.169739
+
+newmtl Nacelle_Pylon
+Ns 50.781250
+illum 2
+Kd 0.800000 0.800000 0.800000
+Ks 1.000000 1.000000 1.000000
+map_Kd NCPylCol.tif
+map_Ks NCPylSpc.tif

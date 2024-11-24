@@ -21,6 +21,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "07_DepthTest", "07_DepthTes
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "08_SimpleLighting", "08_SimpleLighting\08_SimpleLighting.vcxproj", "{EA0FFE4D-3172-412A-A40A-73C9C3A88915}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "09_TextureMapping", "09_TextureMapping\09_TextureMapping.vcxproj", "{EA0FFE4D-3172-412A-A40A-73C9C3A88916}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -63,6 +65,10 @@ Global
 		{EA0FFE4D-3172-412A-A40A-73C9C3A88915}.Debug|x64.Build.0 = Debug|x64
 		{EA0FFE4D-3172-412A-A40A-73C9C3A88915}.Release|x64.ActiveCfg = Release|x64
 		{EA0FFE4D-3172-412A-A40A-73C9C3A88915}.Release|x64.Build.0 = Release|x64
+		{EA0FFE4D-3172-412A-A40A-73C9C3A88916}.Debug|x64.ActiveCfg = Debug|x64
+		{EA0FFE4D-3172-412A-A40A-73C9C3A88916}.Debug|x64.Build.0 = Debug|x64
+		{EA0FFE4D-3172-412A-A40A-73C9C3A88916}.Release|x64.ActiveCfg = Release|x64
+		{EA0FFE4D-3172-412A-A40A-73C9C3A88916}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
