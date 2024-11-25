@@ -12,12 +12,15 @@
 #include "Material.h"
 #include "framework.h"
 
-#include "Mesh.h"
+#include "utils.h"
 
 using namespace Assimp;
 
-HRESULT TexturedMesh::Initialize(ID3D11Device* pD3D11Device, std::string path)
+bool TexturedMesh::LoadFromFile(ID3D11DeviceContext* pDeviceContext, std::string path)
 {
+    ID3D11Device* pDevice = nullptr;
+    pDeviceContext->GetDevice(&pDevice);
+
     Importer importer;
     importer.SetExtraVerbose(true);
 
@@ -33,52 +36,124 @@ HRESULT TexturedMesh::Initialize(ID3D11Device* pD3D11Device, std::string path)
     if (nullptr == scene)
     {
         PLOG_ERROR << importer.GetErrorString();
-        return S_FALSE;
+        return false;
     }
 
     std::vector<ColorVertexNormalUV> vertexBuffer;
     std::vector<uint16_t> indexBuffer;
-    std::vector<Material> materials;
+    std::vector<DirectX::XMFLOAT3> materialbuffer;
 
     if (scene->HasMaterials())
     {
         auto materialCount = scene->mNumMaterials;
+        if (materialCount > 1)
+        {
+            PLOG_ERROR << "Currently only support one texture per material! Found " << materialCount;
+            return false;
+        }
+
         for (size_t materialIndex = 0; materialIndex < materialCount; materialIndex++)
         {
-            auto material = scene->mMaterials[materialIndex];
-            aiColor3D diffuse;
-            material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse);
-            if (material->GetTextureCount(aiTextureType_DIFFUSE) == 0)
+            auto materialCount = scene->mNumMaterials;
+            for (size_t materialIndex = 0; materialIndex < materialCount; materialIndex++)
             {
-                PLOG_ERROR << "Unable to find any textures associated with the material!";
-                return S_FALSE;
+                auto material = scene->mMaterials[materialIndex];
+                aiColor3D diffuse;
+                material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse);
+                materialbuffer.push_back(DirectX::XMFLOAT3{ diffuse.r, diffuse.g, diffuse.b });
             }
 
+            auto material = scene->mMaterials[materialIndex];
             aiString texturePath;
-            auto textureID = material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath);
+            auto foundTexture = material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath);
 
-            Material newMaterial;
-            newMaterial.diffuse[0] = diffuse.r;
-            newMaterial.diffuse[1] = diffuse.g;
-            newMaterial.diffuse[2] = diffuse.b;
+            if (foundTexture && !m_Material.LoadImageFromFile(pDevice, pDeviceContext, texturePath.C_Str()))
+            {
+                PLOG_ERROR << "Failed to load texture from file: " << texturePath.C_Str();
+                return false;
+            }
+        }
+
+        if (scene->HasMeshes())
+        {
+            int offsetVertex = 0;
+            for (size_t meshIndex = 0; meshIndex < scene->mNumMeshes; meshIndex++)
+            {
+                auto mesh = scene->mMeshes[meshIndex];
+                auto vertexcount = mesh->mNumVertices;
+                for (size_t vertexIndex = 0; vertexIndex < vertexcount; vertexIndex++)
+                {
+                    auto vertex = mesh->mVertices[vertexIndex];
+                    auto normal = mesh->mNormals[vertexIndex];
+                    auto uv = mesh->mTextureCoords[0][vertexIndex];
+                    auto materialRef = materialbuffer[mesh->mMaterialIndex];
+                    vertexBuffer.push_back(ColorVertexNormalUV{
+                        vertex.x,
+                        vertex.y,
+                        vertex.z,
+                        materialRef.x,
+                        materialRef.y,
+                        materialRef.z,
+                        1.0f,
+                        normal.x,
+                        normal.y,
+                        normal.z,
+                        uv.x,
+                        uv.y });
+                }
+
+                for (size_t faceIndex = 0; faceIndex < mesh->mNumFaces; faceIndex++)
+                {
+                    auto const& face = mesh->mFaces[faceIndex];
+                    if (face.mNumIndices != 3)
+                    {
+                        PLOG_WARNING << "Skipping as the face is not triangulated. " << face.mNumIndices << "indices per face.";
+                        continue;
+                    }
+
+                    indexBuffer.push_back(face.mIndices[0] + offsetVertex);
+                    indexBuffer.push_back(face.mIndices[1] + offsetVertex);
+                    indexBuffer.push_back(face.mIndices[2] + offsetVertex);
+                }
+
+                if (meshIndex < scene->mNumMeshes - 1)
+                    offsetVertex += scene->mMeshes[meshIndex + 1]->mNumVertices;
+            }
+
+            // NB: Whenever you access a D3D resouce, like so, you need to release it when you're done with it.
+            auto renderable = new Renderable();
+            renderable->Initialize(vertexBuffer, indexBuffer, pDevice);
+
+            mRenderables.push_back(renderable);
+
+            // for the reader, what happens when you comment out this line?
+            pDevice->Release();
+
+            return false;
         }
     }
+
+    pDevice->Release();
 
     return true;
 }
 
-void TexturedMesh::Render(ID3D11DeviceContext* pD3D11DeviceContext, Shader& shader, ID3D11Buffer* mvpConstants)
+void TexturedMesh::Render(ID3D11DeviceContext* pD3D11DeviceContext, Shader& shader, ID3D11Buffer* mvpConstants, ID3D11Buffer* light)
 {
-
+    for (auto* renderable : mRenderables)
+    {
+        renderable->Render(pD3D11DeviceContext, shader, mvpConstants, light);
+    }
 }
 
 void TexturedMesh::Cleanup()
 {
+    PLOG_INFO << "Clearing Mesh";
 
-}
+    for (auto p : mRenderables)
+        delete p;
 
+    mRenderables.clear();
 
-bool TexturedMesh::LoadFromFile(ID3D11DeviceContext* pD3D11DeviceContext, std::string path)
-{
-    return false;
+    m_Material.Cleanup();
 }

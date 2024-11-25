@@ -43,6 +43,7 @@ public:
     ~Renderable();
 
     void Initialize(std::vector<ColorVertexNormal> vertexBuffer, std::vector<uint16_t> indexbuffer, ID3D11Device* pD3D11Device);
+    void Initialize(std::vector<ColorVertexNormalUV> vertexBuffer, std::vector<uint16_t> indexbuffer, ID3D11Device* pD3D11Device);
     void Render(ID3D11DeviceContext* pD3D11DeviceContext, Shader& shader, ID3D11Buffer* mvpConstants, ID3D11Buffer* lightConstants);
 
     void Cleanup();

@@ -169,7 +169,7 @@ HRESULT GraphicsDX11::CreateVertexAndIndexBuffers()
     m_sphere.Initialize(m_D3DDevice, 0.25f, 12, 6);
     m_gizmoXYZ01.LoadFromFile(m_D3DContext, "gizmoxyz.fbx");
     m_gizmoXYZ02.LoadFromFile(m_D3DContext, "gizmoxyz.fbx");
-    m_texturedMesh.Initialize(m_D3DDevice, "brickCube.fbx");
+    m_texturedMesh.LoadFromFile(m_D3DContext, "brickCube.fbx");
 
     return S_OK;
 }
@@ -331,7 +331,7 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
     if (data.m_showTransform01)
         m_gizmoXYZ02.Render(m_D3DContext, m_simpleLit, m_mvpConstantBuffer, m_lightConstantBuffer);
 
-    m_texturedMesh.Render(m_D3DContext, m_simpleLit, m_mvpConstantBuffer);
+    m_texturedMesh.Render(m_D3DContext, m_simpleLit, m_mvpConstantBuffer, m_lightConstantBuffer);
 
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
@@ -400,6 +400,7 @@ void GraphicsDX11::Cleanup()
     m_plane.Cleanup();
     m_gizmoXYZ01.Cleanup();
     m_gizmoXYZ02.Cleanup();
+    m_texturedMesh.Cleanup();
     m_light.Cleanup();
     m_sphere.Cleanup();
 
@@ -419,6 +420,7 @@ void GraphicsDX11::Cleanup()
     {
         IDXGIDebug1* debug = { 0 };
         DXGIGetDebugInterface1(0, IID_IDXGIDebug1, (void**)(&debug));
+        debug->EnableLeakTrackingForThread();
         debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
         debug->Release();
     }

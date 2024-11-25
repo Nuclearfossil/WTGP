@@ -140,7 +140,7 @@ void Mesh::Cleanup()
 void Mesh::Render(ID3D11DeviceContext* pD3D11DeviceContext, Shader& shader, ID3D11Buffer* mvp, ID3D11Buffer* light) const
 {
     for (auto* renderable : mRenderables)
-        {
-            renderable->Render(pD3D11DeviceContext, shader, mvp, light);
-        }
+    {
+        renderable->Render(pD3D11DeviceContext, shader, mvp, light);
+    }
 }
