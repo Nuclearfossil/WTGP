@@ -16,9 +16,8 @@ public:
 
     float diffuse[3];
 
-    // something to hold the texture (or reference to it)
-
 private:
     ID3D11Texture2D* m_pTexture = nullptr;
     ID3D11SamplerState* m_pSamplerState = nullptr;
+    ID3D11ShaderResourceView* m_pShaderResourceView = nullptr;
 };

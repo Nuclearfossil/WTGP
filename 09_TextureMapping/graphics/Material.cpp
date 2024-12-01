@@ -6,6 +6,12 @@
 #include "utils.h"
 #include "framework.h"
 
+#ifdef _DEBUG
+constexpr char c_textureBufferID[] = "texture-buffer";
+constexpr char c_samplerBufferID[] = "sampler-Buffer";
+constexpr char c_shaderResourceViewID[] = "shader-resource-view";
+#endif
+
 Material::~Material()
 {
     Cleanup();
@@ -40,13 +46,16 @@ bool Material::LoadImageFromFile(ID3D11Device* pDevice, ID3D11DeviceContext* pDe
         return false;
     }
 
-    ID3D11ShaderResourceView* shader_resource_view = nullptr;
+#ifdef _DEBUG
+    m_pTexture->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_textureBufferID) - 1, c_textureBufferID);
+#endif // DEBUG
+
     D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc = {};
     srv_desc.Format = texture_desc.Format;
     srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
     srv_desc.Texture2D.MipLevels = 1;
 
-    result = pDevice->CreateShaderResourceView(m_pTexture, &srv_desc, &shader_resource_view);
+    result = pDevice->CreateShaderResourceView(m_pTexture, &srv_desc, &m_pShaderResourceView);
     if (FAILED(result))
     {
         PLOG_ERROR << "Failed to create shader resource view";
@@ -54,6 +63,10 @@ bool Material::LoadImageFromFile(ID3D11Device* pDevice, ID3D11DeviceContext* pDe
         stbi_image_free(data);
         return false;
     }
+
+#ifdef _DEBUG
+    m_pShaderResourceView->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_shaderResourceViewID) - 1, c_shaderResourceViewID);
+#endif // DEBUG
 
     D3D11_SAMPLER_DESC sampDesc;
     ZeroMemory(&sampDesc, sizeof(sampDesc));
@@ -65,7 +78,18 @@ bool Material::LoadImageFromFile(ID3D11Device* pDevice, ID3D11DeviceContext* pDe
     sampDesc.MinLOD = 0;
     sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-    pDevice->CreateSamplerState(&sampDesc, &m_pSamplerState);
+    result = pDevice->CreateSamplerState(&sampDesc, &m_pSamplerState);
+    if (FAILED(result))
+    {
+        PLOG_ERROR << "Failed to create the sampler state";
+        m_pTexture->Release();
+        stbi_image_free(data);
+        return false;
+    }
+
+#ifdef _DEBUG
+    m_pSamplerState->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_samplerBufferID) - 1, c_samplerBufferID);
+#endif // DEBUG
 
     pDevice->Release();
     stbi_image_free(data);
@@ -74,6 +98,7 @@ bool Material::LoadImageFromFile(ID3D11Device* pDevice, ID3D11DeviceContext* pDe
 
 void Material::UseMaterial(ID3D11DeviceContext* pDeviceContext)
 {
+    pDeviceContext->PSSetShaderResources(0, 1, &m_pShaderResourceView);
     pDeviceContext->PSSetSamplers(0, 1, &m_pSamplerState);
 }
 
@@ -81,9 +106,11 @@ void Material::Cleanup()
 {
     PLOG_INFO << "MaterialCleanup Destructor";
 
-    SafeRelease(m_pSamplerState);
     SafeRelease(m_pTexture);
+    SafeRelease(m_pSamplerState);
+    SafeRelease(m_pShaderResourceView);
 
     m_pTexture = nullptr;
     m_pSamplerState = nullptr;
+    m_pShaderResourceView = nullptr;
 }

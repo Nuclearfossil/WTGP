@@ -13,6 +13,15 @@
 #include "framework.h"
 
 #include "utils.h"
+#include <assimp\types.h>
+#include <d3d11.h>
+#include <cstdint>
+#include <string>
+#include <vector>
+#include <Renderable.h>
+#include <Shader.h>
+#include <assimp\material.h>
+#include <plog\Log.h>
 
 using namespace Assimp;
 
@@ -20,6 +29,10 @@ bool TexturedMesh::LoadFromFile(ID3D11DeviceContext* pDeviceContext, std::string
 {
     ID3D11Device* pDevice = nullptr;
     pDeviceContext->GetDevice(&pDevice);
+    auto refCount = pDevice->AddRef();
+    pDevice->Release();
+
+    PLOG_INFO << "Refcount at the start in Textured Mesh of pDevice: " << refCount;
 
     Importer importer;
     importer.SetExtraVerbose(true);
@@ -52,22 +65,23 @@ bool TexturedMesh::LoadFromFile(ID3D11DeviceContext* pDeviceContext, std::string
             return false;
         }
 
+        // Grab the diffuse values
+        for (size_t materialDiffuseIndex = 0; materialDiffuseIndex < materialCount; materialDiffuseIndex++)
+        {
+            auto material = scene->mMaterials[materialDiffuseIndex];
+            aiColor3D diffuse;
+            material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse);
+            materialbuffer.push_back(DirectX::XMFLOAT3{ diffuse.r, diffuse.g, diffuse.b });
+        }
+
+        // And now a texture, if one is associated
         for (size_t materialIndex = 0; materialIndex < materialCount; materialIndex++)
         {
-            auto materialCount = scene->mNumMaterials;
-            for (size_t materialIndex = 0; materialIndex < materialCount; materialIndex++)
-            {
-                auto material = scene->mMaterials[materialIndex];
-                aiColor3D diffuse;
-                material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse);
-                materialbuffer.push_back(DirectX::XMFLOAT3{ diffuse.r, diffuse.g, diffuse.b });
-            }
-
             auto material = scene->mMaterials[materialIndex];
             aiString texturePath;
             auto foundTexture = material->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath);
 
-            if (foundTexture && !m_Material.LoadImageFromFile(pDevice, pDeviceContext, texturePath.C_Str()))
+            if (!m_Material.LoadImageFromFile(pDevice, pDeviceContext, texturePath.C_Str()))
             {
                 PLOG_ERROR << "Failed to load texture from file: " << texturePath.C_Str();
                 return false;
@@ -127,19 +141,23 @@ bool TexturedMesh::LoadFromFile(ID3D11DeviceContext* pDeviceContext, std::string
             mRenderables.push_back(renderable);
 
             // for the reader, what happens when you comment out this line?
-            pDevice->Release();
-
-            return false;
+            // pDevice->Release();
         }
     }
 
+    refCount = pDevice->AddRef();
     pDevice->Release();
+
+    PLOG_INFO << "Refcount at the end in Textured Mesh of pDevice: " << refCount;
+
+    // pDevice->Release();
 
     return true;
 }
 
 void TexturedMesh::Render(ID3D11DeviceContext* pD3D11DeviceContext, Shader& shader, ID3D11Buffer* mvpConstants, ID3D11Buffer* light)
 {
+    m_Material.UseMaterial(pD3D11DeviceContext);
     for (auto* renderable : mRenderables)
     {
         renderable->Render(pD3D11DeviceContext, shader, mvpConstants, light);
