@@ -84,6 +84,7 @@ private:
     Shader m_shader;
     Shader m_simpleLit;
     Shader m_lightGeometryShader;
+    Shader m_texturedShader;
 
     Cube m_cube;
     Grid m_grid;

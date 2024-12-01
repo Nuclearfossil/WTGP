@@ -39,6 +39,8 @@
     <ClCompile Include="renderables\Sphere.cpp">
       <Filter>renderables</Filter>
     </ClCompile>
+    <ClCompile Include="graphics\Material.cpp" />
+    <ClCompile Include="renderables\TexturedMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -99,6 +101,8 @@
     <ClInclude Include="renderables\Sphere.h">
       <Filter>renderables</Filter>
     </ClInclude>
+    <ClInclude Include="graphics\Material.h" />
+    <ClInclude Include="renderables\TexturedMesh.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\01_WindowsApp.ico">
@@ -158,8 +162,13 @@
     <CopyFileToFolders Include="..\raw\blend\brickCube.fbx">
       <Filter>assets</Filter>
     </CopyFileToFolders>
-
     <CopyFileToFolders Include="shaders\LightGeometry.hlsl">
+      <Filter>shaders</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="shaders\psTexturedShader.hlsl">
+      <Filter>shaders</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="shaders\vsTexturedShader.hlsl">
       <Filter>shaders</Filter>
     </CopyFileToFolders>
   </ItemGroup>

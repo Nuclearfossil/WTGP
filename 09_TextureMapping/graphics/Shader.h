@@ -25,7 +25,7 @@ const std::vector<std::vector<D3D11_INPUT_ELEMENT_DESC>> m_IALayouts = {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "UV", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
     }
 };
 
@@ -47,6 +47,7 @@ public:
     ~Shader();
 
     HRESULT Compile(ID3D11Device* pD3D11Device, const std::wstring& filename, IALayouts layout);
+    HRESULT Compile(ID3D11Device* pD3D11Device, const std::wstring& vsFilename, const std::wstring& psFilename, IALayouts layout);
 
     void Cleanup();
 

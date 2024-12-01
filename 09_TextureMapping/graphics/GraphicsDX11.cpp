@@ -122,6 +122,7 @@ HRESULT GraphicsDX11::CreateD3D11Context(ID3D11Device* device, ID3D11DeviceConte
 /// @return S_OK if we were able to compile the shaders
 HRESULT GraphicsDX11::LoadAndCompileShaders()
 {
+    m_texturedShader.Compile(m_D3DDevice, L"vsTexturedShader.hlsl", L"psTexturedShader.hlsl", IALayout_VertexColorNormalUV);
     m_lightGeometryShader.Compile(m_D3DDevice, L"LightGeometry.hlsl", IALayout_VertexColor);
     m_simpleLit.Compile(m_D3DDevice, L"SimpleLit.hlsl", IALayout_VertexColorNormal);
     return m_shader.Compile(m_D3DDevice, L"CombinedShader02.hlsl", IALayout_VertexColor);
@@ -331,7 +332,7 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
     if (data.m_showTransform01)
         m_gizmoXYZ02.Render(m_D3DContext, m_simpleLit, m_mvpConstantBuffer, m_lightConstantBuffer);
 
-    m_texturedMesh.Render(m_D3DContext, m_simpleLit, m_mvpConstantBuffer, m_lightConstantBuffer);
+    m_texturedMesh.Render(m_D3DContext, m_texturedShader, m_mvpConstantBuffer, m_lightConstantBuffer);
 
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
@@ -395,6 +396,7 @@ void GraphicsDX11::Cleanup()
     m_simpleLit.Cleanup();
     m_shader.Cleanup();
     m_lightGeometryShader.Cleanup();
+    m_texturedShader.Cleanup();
     m_cube.Cleanup();
     m_grid.Cleanup();
     m_plane.Cleanup();
