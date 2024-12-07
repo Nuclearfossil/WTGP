@@ -175,8 +175,10 @@ void DrawUI(GameData& data)
     static bool enhanceMatrix = false;
     static bool expandTransform01 = true;
     static bool expandTransform02 = true;
-    static TreeNodeData Transform01TreeNode;
-    static TreeNodeData Transform02TreeNode;
+    static bool expandTransform03 = true;
+    static TreeNodeData transform01TreeNode;
+    static TreeNodeData transform02TreeNode;
+    static TreeNodeData transform03TreeNode;
 
     ImGui::Checkbox("Invert Y Axis", &data.m_InvertYAxis); // Edit if we want to invert the Y axis
     ImGui::Checkbox("Enhance Matrix", &enhanceMatrix);
@@ -192,7 +194,7 @@ void DrawUI(GameData& data)
     expandTransform01 = ImGui::TreeNode("Transform 01");
     if (expandTransform01)
     {
-        DrawTransform(data.m_cubePosition1, data.m_cubeRotation1, Transform01TreeNode);
+        DrawTransform(data.m_cubePosition1, data.m_cubeRotation1, transform01TreeNode);
         DrawMatrix("TF01_mat", data.m_matrix01, enhanceMatrix);
     }
 
@@ -202,10 +204,15 @@ void DrawUI(GameData& data)
     expandTransform02 = ImGui::TreeNode("Transform 02");
     if (expandTransform02)
     {
-            DrawTransform(data.m_cubePosition2, data.m_cubeRotation2, Transform02TreeNode);
+        DrawTransform(data.m_cubePosition2, data.m_cubeRotation2, transform02TreeNode);
         DrawMatrix("TF02_mat", data.m_matrix02, enhanceMatrix);
     }
     ImGui::EndTable();
+
+    ImGui::SetNextItemOpen(expandTransform03);
+    expandTransform03 = ImGui::TreeNode("Textured Mesh");
+    if (expandTransform03)
+        DrawTransform(data.m_texturedMeshPosition, data.m_texturedMeshRotation, transform03TreeNode);
 
     ImGui::Text("Camera View Matrix");
     DrawMatrix("Camera", data.m_Camera->GetVP(), false);

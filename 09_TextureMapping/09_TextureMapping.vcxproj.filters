@@ -39,8 +39,12 @@
     <ClCompile Include="renderables\Sphere.cpp">
       <Filter>renderables</Filter>
     </ClCompile>
-    <ClCompile Include="graphics\Material.cpp" />
-    <ClCompile Include="renderables\TexturedMesh.cpp" />
+    <ClCompile Include="renderables\TexturedMesh.cpp">
+      <Filter>renderables</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\Material.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -101,8 +105,10 @@
     <ClInclude Include="renderables\Sphere.h">
       <Filter>renderables</Filter>
     </ClInclude>
-    <ClInclude Include="graphics\Material.h" />
     <ClInclude Include="renderables\TexturedMesh.h" />
+    <ClInclude Include="graphics\Material.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\01_WindowsApp.ico">

@@ -305,6 +305,12 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
         DirectX::XMMatrixRotationZ(degreesToRadians(data.m_cubeRotation2[2])) *
         DirectX::XMMatrixTranslation(data.m_cubePosition2[0], data.m_cubePosition2[1], data.m_cubePosition2[2]);
 
+    data.m_matrix03 =
+        DirectX::XMMatrixRotationY(degreesToRadians(data.m_texturedMeshRotation[1])) *
+        DirectX::XMMatrixRotationX(degreesToRadians(data.m_texturedMeshRotation[0])) *
+        DirectX::XMMatrixRotationZ(degreesToRadians(data.m_texturedMeshRotation[2])) *
+        DirectX::XMMatrixTranslation(data.m_texturedMeshPosition[0], data.m_texturedMeshPosition[1], data.m_texturedMeshPosition[2]);
+
     {
         DirectX::XMMATRIX mvp = data.m_matrix02 * m_VP;
         D3D11_MAPPED_SUBRESOURCE mappedSubresource;
@@ -332,6 +338,16 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
     if (data.m_showTransform01)
         m_gizmoXYZ02.Render(m_D3DContext, m_simpleLit, m_mvpConstantBuffer, m_lightConstantBuffer);
 
+    {
+        auto mWorld = data.m_matrix03;
+        DirectX::XMMATRIX mvp = mWorld * m_VP;
+        D3D11_MAPPED_SUBRESOURCE mappedSubresource;
+        m_D3DContext->Map(m_mvpConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
+        auto* constants = (MatrixConstantBuffer*)(mappedSubresource.pData);
+        constants->mWorld = DirectX::XMMatrixTranspose(mWorld);
+        constants->mModelViewProjection = DirectX::XMMatrixTranspose(mvp);
+        m_D3DContext->Unmap(m_mvpConstantBuffer, 0);
+    }
     m_texturedMesh.Render(m_D3DContext, m_texturedShader, m_mvpConstantBuffer, m_lightConstantBuffer);
 
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());

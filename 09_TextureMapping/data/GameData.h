@@ -46,10 +46,14 @@ struct GameData
     float m_cubePosition2[3] = { 0.f };
     float m_cubeRotation2[3] = { 0.f };
 
+    float m_texturedMeshPosition[3] = {0.f};
+    float m_texturedMeshRotation[3] = {0.f};
+
     float m_increment = 0;
 
     DirectX::XMMATRIX m_matrix01;
     DirectX::XMMATRIX m_matrix02;
+    DirectX::XMMATRIX m_matrix03;
 
     bool m_showTransform01 = true;
     bool m_showTransform02 = true;
