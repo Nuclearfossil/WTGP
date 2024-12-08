@@ -1,0 +1,204 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="10_SceneGraphs.cpp" />
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="camera\OrbitCamera.cpp">
+      <Filter>camera</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\GraphicsDX11.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\Material.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\Renderable.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\ResourceManager.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\Shader.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="renderables\Cube.cpp">
+      <Filter>renderables</Filter>
+    </ClCompile>
+    <ClCompile Include="renderables\Grid.cpp">
+      <Filter>renderables</Filter>
+    </ClCompile>
+    <ClCompile Include="renderables\Light.cpp">
+      <Filter>renderables</Filter>
+    </ClCompile>
+    <ClCompile Include="renderables\Mesh.cpp">
+      <Filter>renderables</Filter>
+    </ClCompile>
+    <ClCompile Include="renderables\Plane.cpp">
+      <Filter>renderables</Filter>
+    </ClCompile>
+    <ClCompile Include="renderables\TexturedMesh.cpp">
+      <Filter>renderables</Filter>
+    </ClCompile>
+    <ClCompile Include="renderables\Sphere.cpp">
+      <Filter>renderables</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\UserInterface.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="scenegraph\SceneNode.cpp">
+      <Filter>scenegraph</Filter>
+    </ClCompile>
+    <ClCompile Include="renderables\RenderBase.cpp">
+      <Filter>renderables</Filter>
+    </ClCompile>
+    <ClCompile Include="renderables\RenderPrimitive.cpp">
+      <Filter>renderables</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="camera\OrbitCamera.h">
+      <Filter>camera</Filter>
+    </ClInclude>
+    <ClInclude Include="data\GameData.h">
+      <Filter>data</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\GraphicsDX11.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\Material.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\Renderable.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\ResourceManager.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\Shader.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="renderables\Cube.h">
+      <Filter>renderables</Filter>
+    </ClInclude>
+    <ClInclude Include="renderables\Grid.h">
+      <Filter>renderables</Filter>
+    </ClInclude>
+    <ClInclude Include="renderables\Light.h">
+      <Filter>renderables</Filter>
+    </ClInclude>
+    <ClInclude Include="renderables\Mesh.h">
+      <Filter>renderables</Filter>
+    </ClInclude>
+    <ClInclude Include="renderables\Plane.h">
+      <Filter>renderables</Filter>
+    </ClInclude>
+    <ClInclude Include="renderables\TexturedMesh.h">
+      <Filter>renderables</Filter>
+    </ClInclude>
+    <ClInclude Include="renderables\Sphere.h">
+      <Filter>renderables</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\01_WindowsApp.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\Resource.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\targetver.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\UserInterface.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\framework.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="mathutils.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\utils.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="scenegraph\SceneNode.h">
+      <Filter>scenegraph</Filter>
+    </ClInclude>
+    <ClInclude Include="renderables\RenderBase.h">
+      <Filter>renderables</Filter>
+    </ClInclude>
+    <ClInclude Include="renderables\RenderPrimitive.h">
+      <Filter>renderables</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\01_WindowsApp.ico">
+      <Filter>resources</Filter>
+    </Image>
+    <Image Include="resources\small.ico">
+      <Filter>resources</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="..\raw\blend\brickCube.fbx">
+      <Filter>assets</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="..\raw\blend\gizmoxyz.fbx">
+      <Filter>assets</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="shaders\psTexturedShader.hlsl">
+      <Filter>shaders</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="shaders\SimpleLit.hlsl">
+      <Filter>shaders</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="shaders\CombinedShader02.hlsl">
+      <Filter>shaders</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="shaders\LightGeometry.hlsl">
+      <Filter>shaders</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="shaders\vsTexturedShader.hlsl">
+      <Filter>shaders</Filter>
+    </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".clang-format" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="assets">
+      <UniqueIdentifier>{03f0befd-3801-4946-ad6b-dddf2a56cb64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="camera">
+      <UniqueIdentifier>{9cbbb17e-c6d4-4484-9a3b-01d27d2123df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data">
+      <UniqueIdentifier>{663dd153-fa5d-49f8-8449-fa97c8e98a98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphics">
+      <UniqueIdentifier>{f55c7ce9-1dfe-401a-9910-217eb4007f8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="renderables">
+      <UniqueIdentifier>{6c4a85af-763d-4848-b9a7-f36b9cef49bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resources">
+      <UniqueIdentifier>{974eb0bf-65b9-4f38-bb3f-afebfbe04ce7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{68cf9dac-2fc5-487a-8ead-b057b25decc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ui">
+      <UniqueIdentifier>{9cb778e3-3074-4eb4-81fc-b89375646edd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{aaa35039-33ee-40db-bbd8-0e5df2ca01a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scenegraph">
+      <UniqueIdentifier>{dc7b3dfe-e62d-4a66-9b44-1b92ff9a1b6f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resources\01_WindowsApp.rc">
+      <Filter>resources</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
