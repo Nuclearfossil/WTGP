@@ -183,7 +183,7 @@ void DrawUI(GameData& data)
     ImGui::Checkbox("Invert Y Axis", &data.m_InvertYAxis); // Edit if we want to invert the Y axis
     ImGui::Checkbox("Enhance Matrix", &enhanceMatrix);
 
-    ImGui::BeginTable("nested_table", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable);
+    ImGui::BeginTable("nested_table01", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable);
     ImGui::TableSetupColumn("Transform 01");
     ImGui::TableSetupColumn("Transform 02");
     ImGui::TableHeadersRow();
@@ -209,13 +209,21 @@ void DrawUI(GameData& data)
     }
     ImGui::EndTable();
 
+    ImGui::BeginTable("nested_table02", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable);
+    ImGui::TableSetupColumn("Textured Mesh");
+    ImGui::TableSetupColumn("Camera Matrix");
+    ImGui::TableHeadersRow();
+
+    ImGui::TableNextColumn();
     ImGui::SetNextItemOpen(expandTransform03);
     expandTransform03 = ImGui::TreeNode("Textured Mesh");
     if (expandTransform03)
         DrawTransform(data.m_texturedMeshPosition, data.m_texturedMeshRotation, transform03TreeNode);
 
+    ImGui::TableNextColumn();
     ImGui::Text("Camera View Matrix");
     DrawMatrix("Camera", data.m_Camera->GetVP(), false);
+    ImGui::EndTable();
 
     ImGui::Text("Light Information");
     DrawLight("Light01", data.m_Light);
