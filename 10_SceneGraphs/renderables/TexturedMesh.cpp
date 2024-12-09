@@ -12,6 +12,8 @@
 #include "Material.h"
 #include "framework.h"
 
+#include "ConstantBuffers.h"
+
 #include "utils.h"
 #include <assimp\types.h>
 #include <d3d11.h>
@@ -25,6 +27,25 @@
 
 using namespace Assimp;
 
+HRESULT TexturedMesh::Initialize(ID3D11Device* pD3D11Device, ID3D11Buffer* lightConstantBufferPtr)
+{
+    D3D11_BUFFER_DESC localToWorldConstantBufferDesc = {};
+    localToWorldConstantBufferDesc.ByteWidth = sizeof(LocalToWorldConstantBuffer);
+    localToWorldConstantBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    localToWorldConstantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    localToWorldConstantBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+    if (FAILED(pD3D11Device->CreateBuffer(&localToWorldConstantBufferDesc, nullptr, &m_worldConstantBuffer)))
+    {
+        PLOG_ERROR << "Failed to create a new constant buffer.";
+        return S_FALSE;
+    }
+
+    lightConstantBuffer = lightConstantBufferPtr;
+    lightConstantBuffer->AddRef();
+
+    return S_OK;
+}
 bool TexturedMesh::LoadFromFile(ID3D11DeviceContext* pDeviceContext, std::string path)
 {
     ID3D11Device* pDevice = nullptr;
@@ -150,22 +171,28 @@ bool TexturedMesh::LoadFromFile(ID3D11DeviceContext* pDeviceContext, std::string
 
     PLOG_INFO << "Refcount at the end in Textured Mesh of pDevice: " << refCount;
 
-    // pDevice->Release();
-
     return true;
 }
 
-void TexturedMesh::Draw(ID3D11DeviceContext* pD3DContext, std::shared_ptr<Shader> shader,DirectX::XMMATRIX world)
+void TexturedMesh::Draw(ID3D11DeviceContext* pD3DContext, std::shared_ptr<Shader> shader, DirectX::XMMATRIX world)
 {
-    Render(pD3DContext, shader, worldConstantBuffer);
+    Render(pD3DContext, shader, world);
 }
 
-void TexturedMesh::Render(ID3D11DeviceContext* pD3D11DeviceContext, std::shared_ptr<Shader> shader, ID3D11Buffer* light)
+void TexturedMesh::Render(ID3D11DeviceContext* pD3D11DeviceContext, std::shared_ptr<Shader> shader, DirectX::XMMATRIX world)
 {
+    {
+        D3D11_MAPPED_SUBRESOURCE mappedSubresource;
+        pD3D11DeviceContext->Map(m_worldConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
+        LocalToWorldConstantBuffer* constants = (LocalToWorldConstantBuffer*)(mappedSubresource.pData);
+        constants->mLocalToWorld = world;
+        pD3D11DeviceContext->Unmap(m_worldConstantBuffer, 0);
+    }
+
     m_Material.UseMaterial(pD3D11DeviceContext);
     for (auto* renderable : mRenderables)
     {
-        renderable->Render(pD3D11DeviceContext, shader, light);
+        renderable->Render(pD3D11DeviceContext, shader, m_worldConstantBuffer, lightConstantBuffer);
     }
 }
 
@@ -179,4 +206,11 @@ void TexturedMesh::Cleanup()
     mRenderables.clear();
 
     m_Material.Cleanup();
+
+    SafeRelease(m_worldConstantBuffer);
+    SafeRelease(lightConstantBuffer);
+
+    m_worldConstantBuffer = nullptr;
+    lightConstantBuffer = nullptr;
+
 }

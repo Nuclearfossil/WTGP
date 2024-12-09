@@ -75,8 +75,8 @@ private:
 
     std::shared_ptr<Shader> m_shader;
     std::shared_ptr<Shader> m_lightGeometryShader;
-    Shader m_simpleLit;
-    Shader m_texturedShader;
+    std::shared_ptr<Shader> m_simpleLit;
+    std::shared_ptr<Shader> m_texturedShader;
 
     std::shared_ptr<SceneNode> m_SceneRoot;
     std::shared_ptr<Grid> m_grid;

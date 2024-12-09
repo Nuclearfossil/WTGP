@@ -45,7 +45,7 @@ public:
 
     void Initialize(std::vector<ColorVertexNormal> vertexBuffer, std::vector<uint16_t> indexbuffer, ID3D11Device* pD3D11Device);
     void Initialize(std::vector<ColorVertexNormalUV> vertexBuffer, std::vector<uint16_t> indexbuffer, ID3D11Device* pD3D11Device);
-    void Render(ID3D11DeviceContext* pD3D11DeviceContext, std::shared_ptr<Shader> shader, ID3D11Buffer* lightConstants);
+    void Render(ID3D11DeviceContext* pD3D11DeviceContext, std::shared_ptr<Shader> shader, ID3D11Buffer* worldConstants, ID3D11Buffer* lightConstants);
 
     void Cleanup();
 

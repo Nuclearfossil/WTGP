@@ -6,7 +6,7 @@
 
 #include <filesystem>
 
-
+#include "ConstantBuffers.h"
 #include "Mesh.h"
 #include <d3d11.h>
 #include <cstdint>
@@ -17,12 +17,33 @@
 #include <assimp\material.h>
 #include <assimp\types.h>
 #include <plog\Log.h>
+#include "utils.h"
 
 using namespace Assimp;
 
 Mesh::~Mesh()
 {
     Cleanup();
+}
+
+HRESULT Mesh::Initialize(ID3D11Device* pD3D11Device, ID3D11Buffer* lightConstantBufferPtr)
+{
+    D3D11_BUFFER_DESC localToWorldConstantBufferDesc = {};
+    localToWorldConstantBufferDesc.ByteWidth = sizeof(LocalToWorldConstantBuffer);
+    localToWorldConstantBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    localToWorldConstantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    localToWorldConstantBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+    if (FAILED(pD3D11Device->CreateBuffer(&localToWorldConstantBufferDesc, nullptr, &m_worldConstantBuffer)))
+    {
+        PLOG_ERROR << "Failed to create a new constant buffer.";
+        return S_FALSE;
+    }
+
+    lightConstantBuffer = lightConstantBufferPtr;
+    lightConstantBuffer->AddRef();
+
+    return S_OK;
 }
 
 bool Mesh::LoadFromFile(ID3D11DeviceContext* pD3D11DeviceContext, std::string path)
@@ -135,17 +156,31 @@ void Mesh::Cleanup()
         delete p;
 
     mRenderables.clear();
+
+    SafeRelease(m_worldConstantBuffer);
+    SafeRelease(lightConstantBuffer);
+
+    m_worldConstantBuffer = nullptr;
+    lightConstantBuffer = nullptr;
 }
 
-void Mesh::Draw(ID3D11DeviceContext* pD3DContext, std::shared_ptr<Shader> shader,DirectX::XMMATRIX world)
+void Mesh::Draw(ID3D11DeviceContext* pD3DContext, std::shared_ptr<Shader> shader, DirectX::XMMATRIX world)
 {
-    Render(pD3DContext, shader, worldConstantBuffer);
+    Render(pD3DContext, shader, world);
 }
 
-void Mesh::Render(ID3D11DeviceContext* pD3D11DeviceContext, std::shared_ptr<Shader> shader, ID3D11Buffer* light) const
+void Mesh::Render(ID3D11DeviceContext* pD3D11DeviceContext, std::shared_ptr<Shader> shader, DirectX::XMMATRIX world) const
 {
+    {
+        D3D11_MAPPED_SUBRESOURCE mappedSubresource;
+        pD3D11DeviceContext->Map(m_worldConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
+        LocalToWorldConstantBuffer* constants = (LocalToWorldConstantBuffer*)(mappedSubresource.pData);
+        constants->mLocalToWorld = world;
+        pD3D11DeviceContext->Unmap(m_worldConstantBuffer, 0);
+    }
+
     for (auto* renderable : mRenderables)
     {
-        renderable->Render(pD3D11DeviceContext, shader, light);
+        renderable->Render(pD3D11DeviceContext, shader, m_worldConstantBuffer, lightConstantBuffer);
     }
 }

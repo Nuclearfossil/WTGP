@@ -1,3 +1,4 @@
+#include "ConstantBuffers.h"
 #include "Sphere.h"
 #include "framework.h"
 #include "utils.h"
@@ -20,7 +21,7 @@ struct Vertex
     float a;
 };
 
-HRESULT Sphere::Initialize(ID3D11Device* pD3D11Device, float radius, int sliceCount, int stackCount)
+HRESULT Sphere::Initialize(ID3D11Device* pD3D11Device, ID3D11Buffer* lightConstantBufferPtr, float radius, int sliceCount, int stackCount)
 {
     std::vector<Vertex> vertices;
     std::vector<WORD> indices;
@@ -123,18 +124,45 @@ HRESULT Sphere::Initialize(ID3D11Device* pD3D11Device, float radius, int sliceCo
     m_indices->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_indexBufferID) - 1, c_indexBufferID);
 #endif
 
+    D3D11_BUFFER_DESC localToWorldConstantBufferDesc = {};
+    localToWorldConstantBufferDesc.ByteWidth = sizeof(LocalToWorldConstantBuffer);
+    localToWorldConstantBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    localToWorldConstantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    localToWorldConstantBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+    if (FAILED(pD3D11Device->CreateBuffer(&localToWorldConstantBufferDesc, nullptr, &m_worldConstantBuffer)))
+    {
+        PLOG_ERROR << "Failed to create a new constant buffer.";
+        return S_FALSE;
+    }
+
+    lightConstantBuffer = lightConstantBufferPtr;
+    lightConstantBuffer->AddRef();
+
     return S_OK;
 }
 
-void Sphere::Render(ID3D11DeviceContext* pD3D11DeviceContext, Shader& shader, ID3D11Buffer* mvpConstants, ID3D11Buffer* lightConstants)
+void Sphere::Draw(ID3D11DeviceContext* pD3DContext, std::shared_ptr<Shader> shader, DirectX::XMMATRIX world)
 {
-    pD3D11DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-    pD3D11DeviceContext->IASetInputLayout(shader.GetLayout());
+    Render(pD3DContext, shader, world);
+}
 
-    pD3D11DeviceContext->VSSetShader(shader.GetVertexShader(), nullptr, 0);
-    pD3D11DeviceContext->PSSetShader(shader.GetPixelShader(), nullptr, 0);
-    pD3D11DeviceContext->VSSetConstantBuffers(0, 1, &mvpConstants);
-    pD3D11DeviceContext->VSSetConstantBuffers(1, 1, &lightConstants);
+void Sphere::Render(ID3D11DeviceContext* pD3D11DeviceContext, std::shared_ptr<Shader> shader, DirectX::XMMATRIX world)
+{
+    {
+        D3D11_MAPPED_SUBRESOURCE mappedSubresource;
+        pD3D11DeviceContext->Map(m_worldConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
+        LocalToWorldConstantBuffer* constants = (LocalToWorldConstantBuffer*)(mappedSubresource.pData);
+        constants->mLocalToWorld = world;
+        pD3D11DeviceContext->Unmap(m_worldConstantBuffer, 0);
+    }
+    pD3D11DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+    pD3D11DeviceContext->IASetInputLayout(shader->GetLayout());
+
+    pD3D11DeviceContext->VSSetShader(shader->GetVertexShader(), nullptr, 0);
+    pD3D11DeviceContext->PSSetShader(shader->GetPixelShader(), nullptr, 0);
+    pD3D11DeviceContext->VSSetConstantBuffers(1, 1, &m_worldConstantBuffer);
+    pD3D11DeviceContext->VSSetConstantBuffers(2, 1, &lightConstantBuffer);
 
     pD3D11DeviceContext->IASetVertexBuffers(0, 1, &m_vertices, &m_stride, &m_offset);
     pD3D11DeviceContext->IASetIndexBuffer(m_indices, DXGI_FORMAT_R16_UINT, 0);
@@ -148,7 +176,11 @@ void Sphere::Cleanup()
 
     SafeRelease(m_vertices);
     SafeRelease(m_indices);
+    SafeRelease(m_worldConstantBuffer);
+    SafeRelease(lightConstantBuffer);
 
     m_vertices = nullptr;
     m_indices = nullptr;
+    m_worldConstantBuffer = nullptr;
+    lightConstantBuffer = nullptr;
 }

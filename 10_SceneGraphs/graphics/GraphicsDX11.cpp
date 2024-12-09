@@ -122,8 +122,11 @@ HRESULT GraphicsDX11::CreateD3D11Context(ID3D11Device* device, ID3D11DeviceConte
 /// @return S_OK if we were able to compile the shaders
 HRESULT GraphicsDX11::LoadAndCompileShaders()
 {
-    m_texturedShader.Compile(m_D3DDevice, L"vsTexturedShader.hlsl", L"psTexturedShader.hlsl", IALayout_VertexColorNormalUV);
-    m_simpleLit.Compile(m_D3DDevice, L"SimpleLit.hlsl", IALayout_VertexColorNormal);
+    m_texturedShader = std::make_shared<Shader>();
+    m_texturedShader->Compile(m_D3DDevice, L"vsTexturedShader.hlsl", L"psTexturedShader.hlsl", IALayout_VertexColorNormalUV);
+
+    m_simpleLit = std::make_shared<Shader>();
+    m_simpleLit->Compile(m_D3DDevice, L"SimpleLit.hlsl", IALayout_VertexColorNormal);
 
     m_lightGeometryShader = std::make_shared<Shader>();
     m_lightGeometryShader->Compile(m_D3DDevice, L"LightGeometry.hlsl", IALayout_VertexColor);
@@ -183,7 +186,10 @@ HRESULT GraphicsDX11::CreateVertexAndIndexBuffers()
     m_grid->Initialize(m_D3DDevice);
     m_plane->Initialize(m_D3DDevice);
     m_light->Initialize(m_D3DDevice, m_lightConstantBuffer);
-    m_sphere->Initialize(m_D3DDevice, 0.25f, 12, 6);
+    m_sphere->Initialize(m_D3DDevice, m_lightConstantBuffer, 0.25f, 12, 6);
+    m_gizmoXYZ01->Initialize(m_D3DDevice, m_lightConstantBuffer);
+    m_gizmoXYZ02->Initialize(m_D3DDevice, m_lightConstantBuffer);
+    m_texturedMesh->Initialize(m_D3DDevice, m_lightConstantBuffer);
     m_gizmoXYZ01->LoadFromFile(m_D3DContext, "gizmoxyz.fbx");
     m_gizmoXYZ02->LoadFromFile(m_D3DContext, "gizmoxyz.fbx");
     m_texturedMesh->LoadFromFile(m_D3DContext, "brickCube.fbx");
@@ -207,6 +213,26 @@ HRESULT GraphicsDX11::CreateVertexAndIndexBuffers()
     lightNode->SetRenderable(m_light, m_lightGeometryShader);
     lightNode->SetLocalTransform(DirectX::XMMatrixTranslation(1.5f, 2.0f, 1.0f));
     m_SceneRoot->AddChild(lightNode);
+
+    auto sphereNode = std::make_shared<SceneNode>();
+    sphereNode->SetRenderable(m_sphere, m_lightGeometryShader);
+    sphereNode->SetLocalTransform(DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f));
+    lightNode->AddChild(sphereNode);
+
+    auto gizmo01Node = std::make_shared<SceneNode>();
+    gizmo01Node->SetRenderable(m_gizmoXYZ01, m_simpleLit);
+    gizmo01Node->SetLocalTransform(DirectX::XMMatrixTranslation(0.0f, 1.0f, 0.0f));
+    m_SceneRoot->AddChild(gizmo01Node);
+
+    auto gizmo02Node = std::make_shared<SceneNode>();
+    gizmo02Node->SetRenderable(m_gizmoXYZ02, m_simpleLit);
+    gizmo02Node->SetLocalTransform(DirectX::XMMatrixTranslation(0.0f, -1.0f, 0.0f));
+    m_SceneRoot->AddChild(gizmo02Node);
+
+    auto texturedMeshNode = std::make_shared<SceneNode>();
+    texturedMeshNode->SetRenderable(m_texturedMesh, m_texturedShader);
+    texturedMeshNode->SetLocalTransform(DirectX::XMMatrixTranslation(-1.0f, 0.0f, 0.0f));
+    m_SceneRoot->AddChild(texturedMeshNode);
 
     return S_OK;
 }
@@ -328,10 +354,6 @@ void GraphicsDX11::Render(HWND hWnd, RECT winRect, GameData& data, double increm
 
     m_D3DContext->VSSetConstantBuffers(0, 1, &m_viewProjectionConstantBuffer);
 
-
-//    m_light->Render(m_D3DContext, m_lightGeometryShader, m_viewProjectionConstantBuffer, m_lightConstantBuffer);
-//    m_sphere->Render(m_D3DContext, m_lightGeometryShader, m_viewProjectionConstantBuffer, m_lightConstantBuffer);
-
     data.m_matrix01 =
             DirectX::XMMatrixRotationY(degreesToRadians(data.m_cubeRotation1[1])) *
             DirectX::XMMatrixRotationX(degreesToRadians(data.m_cubeRotation1[0])) *
@@ -451,10 +473,10 @@ void GraphicsDX11::Cleanup()
     PLOG_INFO << "Cleaning up the resources for the Graphics DX11 class";
 
     // Release all our resources
-    m_simpleLit.Cleanup();
+    m_simpleLit->Cleanup();
     m_shader->Cleanup();
     m_lightGeometryShader->Cleanup();
-    m_texturedShader.Cleanup();
+    m_texturedShader->Cleanup();
     m_cube->Cleanup();
     m_grid->Cleanup();
     m_plane->Cleanup();
