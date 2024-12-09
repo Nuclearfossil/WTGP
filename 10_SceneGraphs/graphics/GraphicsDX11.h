@@ -4,6 +4,7 @@
 #include <directxmath.h>
 #include <vector>
 
+#include "ConstantBuffers.h"
 #include "SceneNode.h"
 #include "GameData.h"
 #include "Shader.h"
@@ -20,18 +21,6 @@
 #include <windef.h>
 #include <winnt.h>
 
-/// @brief Structure defining the Constant buffer. This buffer will be used to pass data into the shader
-struct MatrixConstantBuffer
-{
-    DirectX::XMMATRIX mWorld;
-    DirectX::XMMATRIX mModelViewProjection;
-};
-
-struct LightConstantBuffer
-{
-    DirectX::XMFLOAT4 mLightPosition;
-    DirectX::XMFLOAT4 mDiffuse;
-};
 
 enum class FillMode
 {
@@ -64,12 +53,13 @@ public:
     HRESULT CreateVertexAndIndexBuffers();
     HRESULT CreateDepthStencilAndRasterizerState();
 
-    void SetWorld(DirectX::XMMATRIX const& mv) { m_World = mv; }
     void SetWorldViewProjection(DirectX::XMMATRIX const& mvp) { m_MVP = mvp; }
 
-    void SetViewProjection(DirectX::XMMATRIX const& vp) { m_VP = vp; }
+    //void SetViewProjection(DirectX::XMMATRIX const& vp) { m_VP = vp; }
 
     void SetViewport(D3D11_VIEWPORT viewport) { m_viewport = viewport; }
+
+    void Update(double deltaTime);
 
     void Render(HWND hWnd, RECT winRect, GameData& data, double increment);
 
@@ -83,9 +73,9 @@ private:
 
     IDXGISwapChain* m_SwapChain = nullptr; // DXGI swapchain for double/triple buffering
 
-    Shader m_shader;
+    std::shared_ptr<Shader> m_shader;
+    std::shared_ptr<Shader> m_lightGeometryShader;
     Shader m_simpleLit;
-    Shader m_lightGeometryShader;
     Shader m_texturedShader;
 
     std::shared_ptr<SceneNode> m_SceneRoot;
@@ -98,16 +88,17 @@ private:
     std::shared_ptr<Light> m_light;
     std::shared_ptr<Sphere> m_sphere;
 
-    ID3D11Buffer* m_mvpConstantBuffer = nullptr;            // The constant buffer for the WVP matrices
+    ID3D11Buffer* m_viewProjectionConstantBuffer = nullptr; // The constant buffer for the View Projection matrix
+//    ID3D11Buffer* m_localToWorldConstantBuffer = nullptr;   // The constant buffer for the local to world matrix
     ID3D11Buffer* m_lightConstantBuffer = nullptr;          // The constant buffer for lighting
     ID3D11DepthStencilView* m_depthBufferView = nullptr;    // The Depth/Stencil view buffer
     ID3D11DepthStencilState* m_depthStencilState = nullptr; // The Depth/Stencil State
     ID3D11RasterizerState* m_rasterizerState;               // The Rasterizer State
 
     D3D11_VIEWPORT m_viewport;
-    DirectX::XMMATRIX m_World;
+    //DirectX::XMMATRIX m_World;
     DirectX::XMMATRIX m_MVP;
-    DirectX::XMMATRIX m_VP;
+    //DirectX::XMMATRIX m_VP;
 
     const std::vector<float> g_clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 

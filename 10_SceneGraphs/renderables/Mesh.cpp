@@ -137,10 +137,15 @@ void Mesh::Cleanup()
     mRenderables.clear();
 }
 
-void Mesh::Render(ID3D11DeviceContext* pD3D11DeviceContext, Shader& shader, ID3D11Buffer* mvp, ID3D11Buffer* light) const
+void Mesh::Draw(ID3D11DeviceContext* pD3DContext, std::shared_ptr<Shader> shader,DirectX::XMMATRIX world)
+{
+    Render(pD3DContext, shader, worldConstantBuffer);
+}
+
+void Mesh::Render(ID3D11DeviceContext* pD3D11DeviceContext, std::shared_ptr<Shader> shader, ID3D11Buffer* light) const
 {
     for (auto* renderable : mRenderables)
     {
-        renderable->Render(pD3D11DeviceContext, shader, mvp, light);
+        renderable->Render(pD3D11DeviceContext, shader, light);
     }
 }

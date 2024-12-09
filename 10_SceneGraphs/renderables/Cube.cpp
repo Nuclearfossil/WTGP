@@ -1,6 +1,7 @@
 #include <vector>
 
 #include "framework.h"
+#include "ConstantBuffers.h"
 #include "Cube.h"
 
 // Debug names for some of the D3D11 resources we'll be creating
@@ -106,17 +107,42 @@ HRESULT Cube::Initialize(ID3D11Device* pD3D11Device)
     m_cubeIndexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(c_indexBufferID) - 1, c_indexBufferID);
 #endif // DEBUG
 
+    D3D11_BUFFER_DESC localToWorldConstantBufferDesc = {};
+    localToWorldConstantBufferDesc.ByteWidth = sizeof(LocalToWorldConstantBuffer);
+    localToWorldConstantBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    localToWorldConstantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    localToWorldConstantBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+    if (FAILED(pD3D11Device->CreateBuffer(&localToWorldConstantBufferDesc, nullptr, &m_worldConstantBuffer)))
+    {
+        PLOG_ERROR << "Failed to create a new constant buffer.";
+        return S_FALSE;
+    }
+
     return S_OK;
 }
 
-void Cube::Render(ID3D11DeviceContext* pD3D11Context, Shader& shader, ID3D11Buffer* mvpConstants)
+void Cube::Draw(ID3D11DeviceContext* pD3DContext,std::shared_ptr<Shader> shader,DirectX::XMMATRIX world)
 {
-    pD3D11Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    pD3D11Context->IASetInputLayout(shader.GetLayout());
+    Render(pD3DContext, shader, world);
+}
 
-    pD3D11Context->VSSetShader(shader.GetVertexShader(), nullptr, 0);
-    pD3D11Context->PSSetShader(shader.GetPixelShader(), nullptr, 0);
-    pD3D11Context->VSSetConstantBuffers(0, 1, &mvpConstants);
+void Cube::Render(ID3D11DeviceContext* pD3D11Context, std::shared_ptr<Shader> shader, DirectX::XMMATRIX world)
+{
+    {
+        D3D11_MAPPED_SUBRESOURCE mappedSubresource;
+        pD3D11Context->Map(m_worldConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
+        LocalToWorldConstantBuffer* constants = (LocalToWorldConstantBuffer*)(mappedSubresource.pData);
+        constants->mLocalToWorld = world;
+        pD3D11Context->Unmap(m_worldConstantBuffer, 0);
+    }
+
+    pD3D11Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    pD3D11Context->IASetInputLayout(shader->GetLayout());
+
+    pD3D11Context->VSSetShader(shader->GetVertexShader(), nullptr, 0);
+    pD3D11Context->PSSetShader(shader->GetPixelShader(), nullptr, 0);
+    pD3D11Context->VSSetConstantBuffers(1, 1, &m_worldConstantBuffer);
 
     pD3D11Context->IASetVertexBuffers(0, 1, &m_cubeVertexBuffer, &stride, &offset);
     pD3D11Context->IASetIndexBuffer(m_cubeIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
@@ -136,5 +162,11 @@ void Cube::Cleanup()
     {
         m_cubeIndexBuffer->Release();
         m_cubeIndexBuffer = nullptr;
+    }
+
+    if (m_worldConstantBuffer != nullptr)
+    {
+        m_worldConstantBuffer->Release();
+        m_worldConstantBuffer = nullptr;
     }
 }

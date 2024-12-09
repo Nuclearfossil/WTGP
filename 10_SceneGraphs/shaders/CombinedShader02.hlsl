@@ -1,7 +1,11 @@
-cbuffer ConstantBuffer : register(b0)
+cbuffer ViewProjectionBuffer : register(b0)
 {
-    matrix ModelView;
-	matrix ModelViewProjection;
+	row_major matrix ViewProjection;
+}
+
+cbuffer LocalToWorldBuffer : register(b1)
+{
+    row_major matrix localToWorld;
 }
 
 struct VS_Input
@@ -19,7 +23,9 @@ struct VS_Output
 VS_Output vs_main(VS_Input input)
 {
     VS_Output output = (VS_Output)0;
-    output.position = mul(float4(input.position,1.0f), ModelViewProjection);
+
+    matrix modelViewProjection = mul(localToWorld, ViewProjection);
+    output.position = mul(float4(input.position,1.0f), modelViewProjection);
 	output.color = input.color;
 
 	return output;

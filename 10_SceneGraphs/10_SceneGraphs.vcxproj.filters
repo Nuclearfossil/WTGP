@@ -129,6 +129,9 @@
     <ClInclude Include="renderables\RenderPrimitive.h">
       <Filter>renderables</Filter>
     </ClInclude>
+    <ClInclude Include="graphics\ConstantBuffers.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\01_WindowsApp.ico">

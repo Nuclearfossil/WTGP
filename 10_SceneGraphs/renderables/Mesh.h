@@ -14,7 +14,9 @@ public:
     bool LoadFromFile(ID3D11DeviceContext* pD3D11DeviceContext, std::string path);
     void Cleanup() override;
 
-    void Render(ID3D11DeviceContext* pD3D11DeviceContext, Shader& shader, ID3D11Buffer* mvp, ID3D11Buffer* light) const;
+    void Render(ID3D11DeviceContext* pD3D11DeviceContext, std::shared_ptr<Shader> shader, ID3D11Buffer* light) const;
+
+    virtual void Draw(ID3D11DeviceContext* pD3DContext, std::shared_ptr<Shader> shader, DirectX::XMMATRIX world) override;
 
 private:
     std::vector<Renderable*> mRenderables;

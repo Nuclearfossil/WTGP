@@ -155,12 +155,17 @@ bool TexturedMesh::LoadFromFile(ID3D11DeviceContext* pDeviceContext, std::string
     return true;
 }
 
-void TexturedMesh::Render(ID3D11DeviceContext* pD3D11DeviceContext, Shader& shader, ID3D11Buffer* mvpConstants, ID3D11Buffer* light)
+void TexturedMesh::Draw(ID3D11DeviceContext* pD3DContext, std::shared_ptr<Shader> shader,DirectX::XMMATRIX world)
+{
+    Render(pD3DContext, shader, worldConstantBuffer);
+}
+
+void TexturedMesh::Render(ID3D11DeviceContext* pD3D11DeviceContext, std::shared_ptr<Shader> shader, ID3D11Buffer* light)
 {
     m_Material.UseMaterial(pD3D11DeviceContext);
     for (auto* renderable : mRenderables)
     {
-        renderable->Render(pD3D11DeviceContext, shader, mvpConstants, light);
+        renderable->Render(pD3D11DeviceContext, shader, light);
     }
 }
 

@@ -1,10 +1,14 @@
-cbuffer ConstantBuffer : register(b0)
+cbuffer ViewProjectionBuffer : register(b0)
 {
-    matrix ModelView;
-    matrix ModelViewProjection;
+    row_major matrix ViewProjection;
 }
 
-cbuffer LightConstants : register(b1)
+cbuffer LocalToWorldBuffer : register(b1)
+{
+    row_major matrix localToWorld;
+}
+
+cbuffer LightConstants : register(b2)
 {
     float4 position;
     float4 diffuse;
@@ -27,7 +31,7 @@ VS_Output vs_main(VS_Input input)
     VS_Output output = (VS_Output) 0;
 
     float4 lightPositionWS = float4(input.position + position.xyz, 1.0f);
-    output.position = mul(lightPositionWS, ModelViewProjection);
+    output.position = mul(lightPositionWS, ViewProjection);
     output.color = diffuse;
 	return output;
 }

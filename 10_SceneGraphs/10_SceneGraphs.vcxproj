@@ -183,6 +183,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="data\GameData.h" />
+    <ClInclude Include="graphics\ConstantBuffers.h" />
     <ClInclude Include="graphics\GraphicsDX11.h" />
     <ClInclude Include="camera\OrbitCamera.h" />
     <ClInclude Include="graphics\Material.h" />

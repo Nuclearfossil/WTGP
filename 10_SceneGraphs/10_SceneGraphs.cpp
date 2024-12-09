@@ -158,6 +158,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 		camera.SetInvertY(data.m_InvertYAxis);
 
+        graphicsDX11.Update(deltaSeconds);
 		graphicsDX11.Render(g_hWnd, g_winRect, data, deltaSeconds);
 		lastStart = current;
 	}
@@ -377,9 +378,7 @@ void Update(double deltaInSeconds, GraphicsDX11& graphics, OrbitCamera& camera, 
 	camera.Update(deltaInSeconds);
 
 	graphics.SetViewport(viewport);
-    graphics.SetWorld(camera.GetMV());
     graphics.SetWorldViewProjection(camera.GetMVP());
-    graphics.SetViewProjection(camera.GetVP());
 
 	data.m_wheelDelta = 0.f;
 }

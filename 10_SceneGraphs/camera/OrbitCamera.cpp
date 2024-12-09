@@ -72,7 +72,7 @@ void OrbitCamera::Update(double deltaTime)
 {
     m_ModelView = m_World * m_View;
     m_ViewProjection = m_View * m_Projection;
-    m_ModelViewProjection = m_ModelView * m_Projection;
+    m_ModelViewProjection = m_World * m_View * m_Projection;
 }
 
 DirectX::XMMATRIX& OrbitCamera::GetMV()
