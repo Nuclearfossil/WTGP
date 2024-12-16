@@ -105,9 +105,11 @@
     <ClInclude Include="renderables\Sphere.h">
       <Filter>renderables</Filter>
     </ClInclude>
-    <ClInclude Include="renderables\TexturedMesh.h" />
     <ClInclude Include="graphics\Material.h">
       <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="renderables\TexturedMesh.h">
+      <Filter>renderables</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -176,6 +178,9 @@
     </CopyFileToFolders>
     <CopyFileToFolders Include="shaders\vsTexturedShader.hlsl">
       <Filter>shaders</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="..\raw\texture\Brick.jpg">
+      <Filter>assets</Filter>
     </CopyFileToFolders>
   </ItemGroup>
 </Project>

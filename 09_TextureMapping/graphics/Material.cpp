@@ -3,6 +3,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+#include <filesystem> // Forces us to be C++ 17
+
 #include "utils.h"
 #include "framework.h"
 
@@ -22,7 +24,10 @@ bool Material::LoadImageFromFile(ID3D11Device* pDevice, ID3D11DeviceContext* pDe
     int imgWidth;
     int imgHeight;
     int imgChannels;
-    unsigned char* data = stbi_load(filepath.c_str(), &imgWidth, &imgHeight, &imgChannels, STBI_rgb_alpha);
+
+    auto currentpath = std::filesystem::current_path();
+    auto filename = currentpath / std::filesystem::path(filepath).filename().string();
+    unsigned char* data = stbi_load(filename.string().c_str(), &imgWidth, &imgHeight, &imgChannels, STBI_rgb_alpha);
 
     D3D11_TEXTURE2D_DESC texture_desc = {};
     texture_desc.Width = imgWidth;

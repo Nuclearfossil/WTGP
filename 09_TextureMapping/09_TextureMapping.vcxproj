@@ -232,6 +232,10 @@
     <ResourceCompile Include="resources\01_WindowsApp.rc" />
   </ItemGroup>
   <ItemGroup>
+    <CopyFileToFolders Include="..\raw\texture\Brick.jpg">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+    </CopyFileToFolders>
     <Image Include="resources\01_WindowsApp.ico" />
     <Image Include="resources\small.ico" />
   </ItemGroup>
