@@ -177,5 +177,8 @@
     <CopyFileToFolders Include="shaders\vsTexturedShader.hlsl">
       <Filter>shaders</Filter>
     </CopyFileToFolders>
+    <CopyFileToFolders Include="..\raw\texture\Brick.jpg">
+      <Filter>assets</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>
