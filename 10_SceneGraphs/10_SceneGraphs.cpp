@@ -154,7 +154,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		// Let's throttle the application so that we render at a constant speed, regardless of processor speed.
         Update(deltaSeconds, graphicsDX11, camera, data);
 
-		DrawUI(data);
+		DrawUI(data, GraphicsDX11::GetSceneRoot());
 
 		camera.SetInvertY(data.m_InvertYAxis);
 

@@ -1,8 +1,5 @@
-#include <windowsx.h>
-
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
-#include <stdio.h>
 
 #include "framework.h"
 #include "GraphicsDX11.h"
@@ -18,9 +15,7 @@
 // Forward declare message handler from imgui_impl_win32.cpp
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-void DrawMatrix(const char* tableName, DirectX::XMMATRIX& matrix, bool enhanceMatrix);
-
-    /// @brief Passthrough to allow ImGui to do it's own windows message pump handling
+/// @brief Passthrough to allow ImGui to do it's own windows message pump handling
 /// @param hWnd Handle to window
 /// @param msg Windows Message
 /// @param wParam WPARAM
@@ -130,6 +125,9 @@ static void DrawTransform(float (&position)[3], float (&rotation)[3], TreeNodeDa
     ImGui::TreePop();
 }
 
+/// @brief Render off the light information
+/// @param name The name to display in the window
+/// @param light The light information
 void DrawLight(const char* name, LightData& light)
 {
     ImGui::BeginTable("LightPosition", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable);
@@ -161,8 +159,49 @@ void DrawLight(const char* name, LightData& light)
 
 }
 
+void DrawSceneGraph(std::shared_ptr<SceneNode> node)
+{
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
+    bool nodeOpen = ImGui::TreeNodeEx(node->name.c_str(), flags);
+
+    if(ImGui::IsItemClicked())
+    {
+        // do something
+    }
+
+    if(nodeOpen)
+    {
+        // Render Exposed properties
+        // Rotation
+        auto localRotation = node->GetLocalRotation();
+        float rotation[3] = { localRotation[0], localRotation[1], localRotation[2] };
+        ImGui::DragFloat3("Rotation", rotation, 0.1f, -360.f, 360.f);
+
+        // Translation
+        auto localTranslation = node->GetLocalTranslation();
+        float translation[3] = { localTranslation[0], localTranslation[1], localTranslation[2] };
+        ImGui::DragFloat3("Translation", translation, 0.1f);
+
+        // Scale
+        auto localScale = node->GetLocalScale();
+        float scale[3] = { localScale[0], localScale[1], localScale[2] };
+        ImGui::DragFloat3("Scale", scale, 0.01f, 0.01f, 100.0f);
+
+        for (auto& child : node->GetChildren())
+        {
+            DrawSceneGraph(child);
+        }
+
+        node->SetLocalRotation(rotation[0], rotation[1], rotation[2]);
+        node->SetLocalTranslation(translation[0], translation[1], translation[2]);
+        node->SetLocalScale(scale[0], scale[1], scale[2]);
+
+        ImGui::TreePop();
+    }
+}
+
 /// @brief Draw our UI
-void DrawUI(GameData& data)
+void DrawUI(GameData& data, std::shared_ptr<SceneNode> sceneRoot)
 {
     // Start the Dear ImGui frame
     ImGui_ImplDX11_NewFrame();
@@ -170,63 +209,9 @@ void DrawUI(GameData& data)
 
     ImGui::NewFrame();
 
-    ImGui::Begin("App Settings");
+    ImGui::Begin("Scene Graph");
 
-    static bool enhanceMatrix = false;
-    static bool expandTransform01 = true;
-    static bool expandTransform02 = true;
-    static bool expandTransform03 = true;
-    static TreeNodeData transform01TreeNode;
-    static TreeNodeData transform02TreeNode;
-    static TreeNodeData transform03TreeNode;
-
-    ImGui::Checkbox("Invert Y Axis", &data.m_InvertYAxis); // Edit if we want to invert the Y axis
-    ImGui::Checkbox("Enhance Matrix", &enhanceMatrix);
-
-    ImGui::BeginTable("nested_table01", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable);
-    ImGui::TableSetupColumn("Transform 01");
-    ImGui::TableSetupColumn("Transform 02");
-    ImGui::TableHeadersRow();
-
-    ImGui::TableNextColumn();
-    ImGui::Checkbox("Render Transform 01", &data.m_showTransform01);
-    ImGui::SetNextItemOpen(expandTransform01);
-    expandTransform01 = ImGui::TreeNode("Transform 01");
-    if (expandTransform01)
-    {
-        DrawTransform(data.m_cubePosition1, data.m_cubeRotation1, transform01TreeNode);
-        DrawMatrix("TF01_mat", data.m_matrix01, enhanceMatrix);
-    }
-
-    ImGui::TableNextColumn();
-    ImGui::Checkbox("Render Transform 02", &data.m_showTransform02);
-    ImGui::SetNextItemOpen(expandTransform02);
-    expandTransform02 = ImGui::TreeNode("Transform 02");
-    if (expandTransform02)
-    {
-        DrawTransform(data.m_cubePosition2, data.m_cubeRotation2, transform02TreeNode);
-        DrawMatrix("TF02_mat", data.m_matrix02, enhanceMatrix);
-    }
-    ImGui::EndTable();
-
-    ImGui::BeginTable("nested_table02", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable);
-    ImGui::TableSetupColumn("Textured Mesh");
-    ImGui::TableSetupColumn("Camera Matrix");
-    ImGui::TableHeadersRow();
-
-    ImGui::TableNextColumn();
-    ImGui::SetNextItemOpen(expandTransform03);
-    expandTransform03 = ImGui::TreeNode("Textured Mesh");
-    if (expandTransform03)
-        DrawTransform(data.m_texturedMeshPosition, data.m_texturedMeshRotation, transform03TreeNode);
-
-    ImGui::TableNextColumn();
-    ImGui::Text("Camera View Matrix");
-    DrawMatrix("Camera", data.m_Camera->GetVP(), false);
-    ImGui::EndTable();
-
-    ImGui::Text("Light Information");
-    DrawLight("Light01", data.m_Light);
+    DrawSceneGraph(sceneRoot);
 
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
@@ -236,6 +221,10 @@ void DrawUI(GameData& data)
     ImGui::Render();
 }
 
+/// @brief Render off a matrix
+/// @param tableName The name of the matrix
+/// @param matrix The actual matrix to render
+/// @param enhanceMatrix Do we render it in enhanced mode?
 void DrawMatrix(const char* tableName, DirectX::XMMATRIX& matrix, bool enhanceMatrix)
 {
     ImU32 backgroundColors[4] = {
@@ -297,7 +286,8 @@ void DrawMatrix(const char* tableName, DirectX::XMMATRIX& matrix, bool enhanceMa
     ImGui::EndTable();
     ImGui::EndGroup();
 }
-    /// @brief Clean up IMGui
+
+/// @brief Clean up IMGui
 void DestroyIMGUI()
 {
     // Cleanup

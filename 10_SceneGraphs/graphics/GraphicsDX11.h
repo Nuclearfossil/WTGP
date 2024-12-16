@@ -53,10 +53,12 @@ public:
     HRESULT CreateVertexAndIndexBuffers();
     HRESULT CreateDepthStencilAndRasterizerState();
 
+    static std::shared_ptr<SceneNode> GetSceneRoot()
+    {
+        return m_SceneRoot;
+    }
+
     void SetWorldViewProjection(DirectX::XMMATRIX const& mvp) { m_MVP = mvp; }
-
-    //void SetViewProjection(DirectX::XMMATRIX const& vp) { m_VP = vp; }
-
     void SetViewport(D3D11_VIEWPORT viewport) { m_viewport = viewport; }
 
     void Update(double deltaTime);
@@ -78,7 +80,8 @@ private:
     std::shared_ptr<Shader> m_simpleLit;
     std::shared_ptr<Shader> m_texturedShader;
 
-    std::shared_ptr<SceneNode> m_SceneRoot;
+    static std::shared_ptr<SceneNode> m_SceneRoot;
+
     std::shared_ptr<Grid> m_grid;
     std::shared_ptr<Mesh> m_gizmoXYZ01;
     std::shared_ptr<Mesh> m_gizmoXYZ02;
@@ -87,6 +90,8 @@ private:
     std::shared_ptr<TexturedMesh> m_texturedMesh;
     std::shared_ptr<Light> m_light;
     std::shared_ptr<Sphere> m_sphere;
+
+    std::shared_ptr<SceneNode> m_lightSceneNode;
 
     ID3D11Buffer* m_viewProjectionConstantBuffer = nullptr; // The constant buffer for the View Projection matrix
 //    ID3D11Buffer* m_localToWorldConstantBuffer = nullptr;   // The constant buffer for the local to world matrix
