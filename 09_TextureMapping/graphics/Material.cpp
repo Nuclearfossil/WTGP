@@ -3,7 +3,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-#include <filesystem> // Forces us to be C++ 17
+#include <filesystem> // for getting at current working directory and path operations. Forces us to C++17
 
 #include "utils.h"
 #include "framework.h"
